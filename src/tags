@@ -1,0 +1,83 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Append	Fifo.c	/^void Append(void *obj, Fifo f){$/;"	f	signature:(void *obj, Fifo f)
+Append	Fifo.h	/^void Append(void *, Fifo);$/;"	p	signature:(void *, Fifo)
+BasicBroadcast	Main.c	/^void BasicBroadcast(int Id, Message_t m, Fifo events){$/;"	f	signature:(int Id, Message_t m, Fifo events)
+CC	Makefile	/^CC=gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS=-Wall -Werror -g$/;"	m
+CreateFifo	Fifo.c	/^Fifo CreateFifo(void)$/;"	f	signature:(void)
+CreateFifo	Fifo.h	/^Fifo CreateFifo(void);$/;"	p	signature:(void)
+Delete	Fifo.c	/^void Delete (Fifo f){$/;"	f	signature:(Fifo f)
+Delete	Fifo.h	/^void Delete(Fifo);$/;"	p	signature:(Fifo)
+Fifo	Fifo.h	/^}*Fifo;$/;"	t	typeref:struct:_Fifo
+IPBroadcast	Main.c	/^void IPBroadcast(int Id, Message_t m, Fifo events){$/;"	f	signature:(int Id, Message_t m, Fifo events)
+LDFLAGS	Makefile	/^LDFLAGS=-lm$/;"	m
+LaunchSimulation	Simulator.c	/^void LaunchSimulation(int NbRounds, int NbProcess, NodesFct_t NodeFunc){$/;"	f	signature:(int NbRounds, int NbProcess, NodesFct_t NodeFunc)
+LaunchSimulation	Simulator.h	/^void LaunchSimulation(int NbRounds, int NbProcess, NodesFct_t f);$/;"	p	signature:(int NbRounds, int NbProcess, NodesFct_t f)
+Message_t	Simulator.h	/^}*Message_t;$/;"	t	typeref:struct:_Message
+NbNodes	Main.c	/^    LaunchSimulation(atoi(argv[1]),NbNodes,f);$/;"	l
+NbNodes	Main.c	/^int NbNodes;$/;"	v
+NbNodes	Simulator.c	/^int NbNodes;$/;"	v
+Node	Nodes.h	/^}*Node;$/;"	t	typeref:struct:_Node
+Nodes	Simulator.c	/^Node Nodes;$/;"	v
+NodesFct_t	Simulator.h	/^typedef void(*NodesFct_t)(int , Message_t,Fifo );$/;"	t
+RemoveHead	Fifo.c	/^void *RemoveHead(Fifo f){$/;"	f	signature:(Fifo f)
+RemoveHead	Fifo.h	/^void * RemoveHead(Fifo);$/;"	p	signature:(Fifo)
+Send	Simulator.c	/^int Send(Message_t m){$/;"	f	signature:(Message_t m)
+Send	Simulator.h	/^int Send(Message_t m);$/;"	p	signature:(Message_t m)
+TreeBroadcast	Main.c	/^void TreeBroadcast(int Id, Message_t m, Fifo events){$/;"	f	signature:(int Id, Message_t m, Fifo events)
+_Fifo	Fifo.h	/^typedef struct _Fifo{$/;"	s
+_Fifo::head	Fifo.h	/^    listElt head;$/;"	m	struct:_Fifo	access:public
+_Fifo::tail	Fifo.h	/^    listElt tail;$/;"	m	struct:_Fifo	access:public
+_Message	Simulator.h	/^typedef struct _Message{$/;"	s
+_Message::msg	Simulator.h	/^    char *msg;$/;"	m	struct:_Message	access:public
+_Message::receiv	Simulator.h	/^    int receiv; \/\/if -1 : ip multicast$/;"	m	struct:_Message	access:public
+_Message::sender	Simulator.h	/^    int sender; \/\/if -1, msg is an external event$/;"	m	struct:_Message	access:public
+_Node	Nodes.h	/^typedef struct _Node{$/;"	s
+_Node::eventsBuf	Nodes.h	/^    Fifo eventsBuf;$/;"	m	struct:_Node	access:public
+_Node::receivBuf	Nodes.h	/^    Fifo receivBuf;$/;"	m	struct:_Node	access:public
+_Node::sendBuf	Nodes.h	/^    Fifo sendBuf;$/;"	m	struct:_Node	access:public
+__Fifo_H__	Fifo.h	2;"	d
+__Node_H__	Nodes.h	2;"	d
+__SIMULATOR_H__	Simulator.h	2;"	d
+_listElt	Fifo.h	/^typedef struct _listElt{$/;"	s
+_listElt::elt	Fifo.h	/^    void *elt;$/;"	m	struct:_listElt	access:public
+_listElt::next	Fifo.h	/^    struct _listElt * next;$/;"	m	struct:_listElt	typeref:struct:_listElt::_listElt	access:public
+atoi	Main.c	/^    LaunchSimulation(atoi(argv[1]),NbNodes,f);$/;"	p	file:	signature:(argv[1])
+buf	Simulator.c	/^    char *buf;$/;"	l
+e	Fifo.c	/^    listElt e;$/;"	l
+elt	Fifo.h	/^    void *elt;$/;"	m	struct:_listElt	access:public
+event	Main.c	/^    Message_t event, msgOut;$/;"	l
+eventsBuf	Nodes.h	/^    Fifo eventsBuf;$/;"	m	struct:_Node	access:public
+f	Fifo.c	/^    Fifo f;$/;"	l
+f	Main.c	/^    LaunchSimulation(atoi(argv[1]),NbNodes,f);$/;"	l
+f	Main.c	/^    NodesFct_t f;$/;"	l
+head	Fifo.h	/^    listElt head;$/;"	m	struct:_Fifo	access:public
+i	Main.c	/^    int i;$/;"	l
+i	Simulator.c	/^    int i,j,k, receiver;$/;"	l
+i	Simulator.c	/^    int i=0, j=0;$/;"	l
+j	Simulator.c	/^    int i,j,k, receiver;$/;"	l
+j	Simulator.c	/^    int i=0, j=0;$/;"	l
+k	Simulator.c	/^    int i,j,k, receiver;$/;"	l
+listElt	Fifo.h	/^}*listElt;$/;"	t	typeref:struct:_listElt
+main	Main.c	/^int main (int argc, char **argv)$/;"	f	signature:(int argc, char **argv)
+msg	Simulator.c	/^    Message_t msg, msgBis;$/;"	l
+msg	Simulator.h	/^    char *msg;$/;"	m	struct:_Message	access:public
+msgBis	Simulator.c	/^    Message_t msg, msgBis;$/;"	l
+msgOut	Main.c	/^    Message_t event, msgOut;$/;"	l
+nTurn	Main.c	/^    int nTurn;$/;"	l
+next	Fifo.h	/^    struct _listElt * next;$/;"	m	struct:_listElt	typeref:struct:_listElt::_listElt	access:public
+o	Fifo.c	/^    void *o;$/;"	l
+receiv	Simulator.h	/^    int receiv; \/\/if -1 : ip multicast$/;"	m	struct:_Message	access:public
+receivBuf	Nodes.h	/^    Fifo receivBuf;$/;"	m	struct:_Node	access:public
+receiver	Simulator.c	/^    int i,j,k, receiver;$/;"	l
+ret	Fifo.c	/^    void * ret=NULL;$/;"	l
+sendBuf	Nodes.h	/^    Fifo sendBuf;$/;"	m	struct:_Node	access:public
+sender	Simulator.h	/^    int sender; \/\/if -1, msg is an external event$/;"	m	struct:_Message	access:public
+split	Simulator.c	/^int split(char buf[], int *num){$/;"	f	signature:(char buf[], int *num)
+tail	Fifo.h	/^    listElt tail;$/;"	m	struct:_Fifo	access:public
+temp	Fifo.c	/^    listElt temp;$/;"	l
