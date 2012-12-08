@@ -19,23 +19,11 @@ void TreeBroadcast(int Id, Message_t m, Fifo events){
         if(!strcmp(event->msg,"broadcast")){
             //start a tree broadcast:
             //Iniatialize the message
-            nTurn=0;
-            while(nTurn<log2(NbNodes)){
-                if((msgOut=malloc(sizeof(struct _Message)))==NULL){
-                    fprintf(stderr,"malloc fail TreeBroadcast.0\n");
-                    exit(1);
-                }
-                if((msgOut->msg=malloc(sizeof(char)*6))==NULL){
-                    fprintf(stderr,"malloc fail TreeBroadcast.1\n");
-                    exit(1);
-                }
-                strcpy(msgOut->msg,"Hello");
-                msgOut->sender=Id;
+	    for(nTurn = 0; nTurn < log2(NbNodes); nTurn++){
                 //at the first step of the tree broadcast, we send a message
                 //to our successor
-                msgOut->receiv=(int)(pow(2,nTurn)+Id)%NbNodes;
+                msgOut = initMessage("Hello\0", Id, (int)(pow(2,nTurn)+Id)%NbNodes);
                 Send(msgOut);
-                nTurn++;
             }
         }
         free(event->msg);
@@ -47,29 +35,15 @@ void TreeBroadcast(int Id, Message_t m, Fifo events){
         //at a step n, a message is sent at a distance 2^n
         //the distance is not exactly the difference between the sender and the
         //receiver id because of the mod N
-        if(m->sender<m->receiv){
+        if(m->sender < m->receiv)
             nTurn=log2(m->receiv-m->sender);
-        }else{
+        else
             nTurn=log2(NbNodes-m->sender+m->receiv);
-        }
         //this turn is done, let's do the others
-        nTurn++;
         //now we can send all the others messages
-        while(nTurn<log2(NbNodes)){
-            if((msgOut=malloc(sizeof(struct _Message)))==NULL){
-                fprintf(stderr,"malloc fail TreeBroadcast.2\n");
-                exit(1);
-            }
-            msgOut->sender=Id;
-            msgOut->receiv=((int)(pow(2,nTurn)+Id))%NbNodes;
-            //duplicate the message
-            if((msgOut->msg=malloc(sizeof(char *)*(strlen(m->msg)+1)))==NULL){
-                fprintf(stderr,"malloc fail TreeBroadcast.3\n");
-                exit(1);
-            }
-            msgOut->msg=strcpy(msgOut->msg,m->msg);
+        for(nTurn++; nTurn<log2(NbNodes); nTurn++){
+            msgOut = initMessage(m->msg, Id, ((int)(pow(2,nTurn)+Id))%NbNodes);
             Send(msgOut);
-            nTurn++;
         }
         free(m->msg);
         free(m);
@@ -87,17 +61,7 @@ void IPBroadcast(int Id, Message_t m, Fifo events){
             //start a basic broadcast:
             //send hello to every nodes
             //Iniatialize the message
-            if((msgOut=malloc(sizeof(struct _Message)))==NULL){
-                fprintf(stderr,"malloc fail BasicBroadcast.0\n");
-                exit(1);
-            }
-            if((msgOut->msg=malloc(sizeof(char)*6))==NULL){
-                fprintf(stderr,"malloc fail BasicBroadcast.1\n");
-                exit(1);
-            }
-            strcpy(msgOut->msg,"Hello");
-            msgOut->sender=Id;
-            msgOut->receiv=-1;
+	    msgOut = initMessage("Hello\0", Id, -1);
             Send(msgOut);
         }
         free(event->msg);
@@ -125,18 +89,7 @@ void BasicBroadcast(int Id, Message_t m, Fifo events){
             //send hello to every nodes
             for(i=0;i<NbNodes;i++){
                 if(i!=Id){
-                    //Iniatialize the message
-                    if((msgOut=malloc(sizeof(struct _Message)))==NULL){
-                        fprintf(stderr,"malloc fail IPBroadcast.0\n");
-                        exit(1);
-                    }
-                    if((msgOut->msg=malloc(sizeof(char)*6))==NULL){
-                        fprintf(stderr,"malloc fail IPBroadcast.1\n");
-                        exit(1);
-                    }
-                    strcpy(msgOut->msg,"Hello");
-                    msgOut->sender=Id;
-                    msgOut->receiv=i;
+		    msgOut = initMessage("Hello\0", Id, i);
                     Send(msgOut);
                 }
             }
@@ -151,6 +104,39 @@ void BasicBroadcast(int Id, Message_t m, Fifo events){
         free(m);
     }
 }
+
+// Pipeline broadcast: 1 turn to broadcast, the broadcasting node sends his
+// message to the next note, which in turn transmits the message to the next
+// node and so on.
+void PipelineBroadcast(int Id, Message_t m, Fifo events){
+    Message_t event, msg;
+    int i, sender;
+
+    // Event Rules
+    while(NULL != (event = RemoveHead(events))){
+        printf("event received %i %s\n",Id, event->msg); 
+
+        // Read the first event
+        if(0 == strcmp(event->msg, "broadcast"))
+            sender = Id;
+            for(i = 0; i < NbNodes - 1; i++){
+		msg = initMessage("Hello\0", sender, (sender + 1) % NbNodes);
+		Send(msg);
+		sender = (sender + 1) % NbNodes;
+	    }
+
+	free(event->msg);
+	free(event);
+    }
+
+    // Message Rules
+    if(NULL != m){
+        printf("%s received by %d from %d\n", m->msg, Id, m->sender);
+        free(m->msg);
+        free(m);
+    }
+}
+
 int main (int argc, char **argv)
 {
     NodesFct_t f;

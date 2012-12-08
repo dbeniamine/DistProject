@@ -154,3 +154,41 @@ int Send(Message_t m){
     return 1;
 }
 
+// Message initialization function.
+//   str : content of the message (null-terminated)
+//   snd : sender of the message
+//   rcv : receiver of the message
+// Failures are handled internaly.
+// Returns a Message_t object.
+Message_t initMessage(const char* str, int snd, int rcv){
+    Message_t msg = malloc(sizeof(struct _Message));
+    int len = strlen(str) + 1;
+
+    if(NULL == msg){
+        fprintf(stderr, "Failed malloc in initMessage.1...\n");
+	exit(1);
+    }
+
+    msg->msg = malloc(len * sizeof(char));
+    if(NULL == msg->msg){
+        fprintf(stderr, "Failed malloc in initMessage.2...\n");
+	exit(1);
+    }
+
+    strncpy(msg->msg, str, len);
+    msg->sender = snd;
+    msg->receiv = rcv;
+
+    return msg;
+}
+
+// Delete a message.
+//   msg : the message
+// Failures are handled internaly.
+void deleteMessage(Message_t msg){
+    if(NULL != msg){
+        if(NULL != msg->msg) free(msg->msg);
+	free(msg);
+    }
+}
+

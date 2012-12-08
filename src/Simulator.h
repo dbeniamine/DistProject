@@ -9,6 +9,19 @@ typedef struct _Message{
     char *msg;
 }*Message_t;
 
+// Message initialization function.
+//   str : content of the message
+//   snd : sender of the message
+//   rcv : receiver of the message
+// Failures are handled internaly.
+// Returns a Message_t object.
+Message_t initMessage(const char* str, int snd, int rcv);
+
+// Delete a message.
+//   msg : the message
+// Failures are handled internaly.
+void deleteMessage(Message_t msg);
+
 //Algorithm run by each process
 //the int is the unique id of the process in [0,NbProcess]
 //the Message_t is either NULL or the message received at the beginning of the turn
