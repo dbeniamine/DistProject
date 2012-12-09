@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<math.h>
+#include<unistd.h>
 
 int NbNodes;
 
@@ -137,24 +138,61 @@ void PipelineBroadcast(int Id, Message_t m, Fifo events){
     }
 }
 
-int main (int argc, char **argv)
-{
+void display_help(FILE* output, char* pname){
+    fprintf(output, "Usage: %s [-N n][-R n][-h][-b|t|i|p]\n", pname);
+    fprintf(output, "Possible arguments:\n");
+    fprintf(output, "\t-N n\tSpecify a number of nodes n, default is 4.\n");
+    fprintf(output, "\t-R n\tSpecify a number of rounds n, default is 20.\n");
+    fprintf(output, "\t-h\tDisplay this help message.\n");
+    fprintf(output, "Selection of broadcast mode:\n");
+    fprintf(output, "\t-b\tBasic broadcast.\n");
+    fprintf(output, "\t-t\tTree broadcast.\n");
+    fprintf(output, "\t-i\tIP broadcast (default).\n");
+    fprintf(output, "\t-p\tPipeline broadcast.\n");
+}
+
+int main (int argc, char **argv){
     NodesFct_t f;
-    if(argc!=4){
-        fprintf(stderr,"usage %s Nround Nodes function\n The available function are basic, tree, ip\n", argv[0]);
-        exit(1);
+    int opt, nb_nodes, nb_rounds;
+
+    // Default values
+    f = IPBroadcast;
+    nb_nodes = 4;
+    nb_rounds = 20;
+
+    // Parsing arguments
+    while(-1 != (opt = getopt(argc, argv, "N:R:hbtip"))){
+        switch(opt){
+        case 'N':
+	    nb_nodes = atoi(optarg);
+	    break;
+	case 'R':
+	    nb_rounds = atoi(optarg);
+	    break;
+	case 'h':
+	    display_help(stdout, argv[0]);
+	    return 0;
+	case 'b':
+	    f = BasicBroadcast;
+	    break;
+	case 't':
+	    f = TreeBroadcast;
+	    break;
+	case 'i':
+	    f = IPBroadcast;
+	    break;
+	case 'p':
+	    f = PipelineBroadcast;
+	    break;
+	default: /* WTF ? */
+	    fprintf(stderr, "Argument error...\n");
+	    display_help(stderr, argv[0]);
+	    exit(EXIT_FAILURE);
+	}
     }
-    if(!strcmp(argv[3],"basic")){
-        f=BasicBroadcast;
-    }else if(!strcmp(argv[3],"tree")){
-        f=TreeBroadcast;
-    }else if(!strcmp(argv[3],"ip")){
-        f=IPBroadcast;
-    }else{
-        fprintf(stderr,"unknown function %s\n", argv[3]);
-        exit(1);
-    }
-    NbNodes=atoi(argv[2]);
-    LaunchSimulation(atoi(argv[1]),NbNodes,f);
+
+    // Start a simulation
+    LaunchSimulation(nb_rounds, nb_nodes, f);
     return 0;
 }
+
