@@ -9,142 +9,105 @@
 int NbNodes;
 Node Nodes;
 
-/*precond:
- *buf contains a string on the format
- *integer text\0
- *post cond:
- *buf contains text \0
- *num contains the integer
- */
-
-int split(char buf[], int *num){
-    int i=0, j=0;
-    while(buf[i]!=' ' && buf[i]!='\n' && buf[i]!='\0'){
-        i++;
-    }
-    if(buf[i]=='\0'){
-        //error no space char
-        return -1;
-    }
-    buf[i]='\0';
-    *num=atoi(buf);
-    i++;
-    //move th string
-    while(buf[i]!='\0'){
-        buf[j]=buf[i];
-        j++;
-        i++;
-    }
-    buf[j]='\0';
-    return 0;
-}
-
-void LaunchSimulation(int NbRounds, int NbProcess, NodesFct_t NodeFunc){
-    int i,j,k, receiver;
+void LaunchSimulation(int NbRounds, int NbNodes, NodesFct_t NodeFunc){
+    int i, j, k, receiver;
     Message_t msg, msgBis;
     char *buf;
-    //initialization
-    NbNodes=NbProcess;
+    char* ex_event = NULL;
+    size_t bread, nbyte = 0;
+    int nb_match;
 
-    //Nodes creation
-    if((Nodes=(Node )malloc(NbNodes*sizeof(struct _Node)))==NULL){
+    // Buffer allocation
+    buf = malloc(20 * sizeof(char));
+    if(NULL == buf){
         fprintf(stderr,"malloc fail LaunchSimulation.0\n");
         exit(1);
     }
-    for(i=0;i<NbNodes;i++){
-        Nodes[i].sendBuf=CreateFifo();
-        Nodes[i].receivBuf=CreateFifo();
-        Nodes[i].eventsBuf=CreateFifo();
+
+    // Initialization of the nodes
+    Nodes = (Node) malloc(NbNodes * sizeof(struct _Node));
+    if(NULL == Nodes){
+        fprintf(stderr,"malloc fail LaunchSimulation.1\n");
+        exit(1);
+    }
+    for(i = 0; i < NbNodes; i++){
+        Nodes[i].sendBuf = CreateFifo();
+        Nodes[i].receivBuf = CreateFifo();
+        Nodes[i].eventsBuf = CreateFifo();
     }
 
-    //Do rounds
-    i=0;
-    while( i<NbRounds || NbRounds<0){
+    // Rounds loop
+    for(i = 0; i < NbRounds || NbRounds < 0; i++){
         //Read external events
-        printf("Enter the external event for the round %d, The event format is numProcess event\\n, or \"start\" to start the round\n", i);
-        if((buf=malloc(sizeof(char)*200))==NULL){
-            fprintf(stderr,"malloc fail LaunchSimulation.1\n");
-            exit(1);
-        }       
-        scanf("%[^\n]200", buf);
-        if(getchar()!='\n'){
-            fprintf(stderr,"internal error LaunchSimulation.0\n");
-            exit(1);
-        }
-        while(strcmp(buf,"start")){
-            //add external event
-            if(split(buf, &receiver)<0){
-                printf("error parsing event %s, retry\n", buf);
-            }else{
-                if((msg=malloc(sizeof(struct _Message)))==NULL){
-                    fprintf(stderr,"malloc fail LaunchSimulation.2\n");
-                    exit(1); 
-                }
-                msg->sender=-1;
-                msg->receiv=receiver;
-                msg->msg=buf;
-                Append(msg,Nodes[receiver].eventsBuf);
-            }
+        printf("Enter the external event for the round %i (format \"start\" or \"n event\")\n", i);
+	bread = getline(&ex_event, &nbyte, stdin);
+	if(-1 == bread){
+            fprintf(stderr, "EOF reached or read failure in getline.\n");
+            exit(EXIT_FAILURE);
+	}
+	// Remove '\n' is it is present at the end of the buffer.
+	if(ex_event[bread - 1] == '\n') ex_event[bread - 1] = '\0';
+	// Read external event until start is found.
+	while(strcmp(ex_event, "start")){
+            // Try to parse the input
+	    nb_match = sscanf(ex_event, "%i %19s\n", &receiver, buf);
+	    if(nb_match < 2){
+                fprintf(stderr, "No parse... format is \"n event\"...\n");
+		exit(EXIT_FAILURE);
+	    }
+
+	    // Creation of a message ??? why ???
+	    msg = initMessage(buf, -1, receiver);
+            Append(msg,Nodes[receiver].eventsBuf);
+
+	    // Reinit
             printf("Event added, enter an other event or \"start\"\n");
-            if((buf=malloc(sizeof(char)*200))==NULL){
-                fprintf(stderr,"malloc fail LaunchSimulation.3\n");
-                exit(1);
+	    bread = getline(&ex_event, &nbyte, stdin);
+            if(-1 == bread){
+                fprintf(stderr, "EOF reached or read failure in getline.\n");
+                exit(EXIT_FAILURE);
             }
-            scanf("%[^\n]200", buf);
-            if(getchar()!='\n'){
-                fprintf(stderr,"internal error LaunchSimulation.1\n");
-                exit(1);
-            }
-        } 
-        free(buf); 
-        for(j=0;j<NbNodes;j++){
-            //Apply NodeFunc for all Nodes
-            //With the Message received at the beginning of the round
-            //and all the external events
-            NodeFunc(j,RemoveHead(Nodes[j].receivBuf),Nodes[j].eventsBuf); 
-        }
-        for(j=0; j<NbNodes;j++){
+	    // Remove '\n' is it is present at the end of the buffer.
+	    if(ex_event[bread - 1] == '\n') ex_event[bread - 1] = '\0';
+	}
+
+        //Apply NodeFunc for all Nodes
+        //With the Message received at the beginning of the round
+        //and all the external events
+        for(j = 0; j < NbNodes; j++)
+            NodeFunc(j, RemoveHead(Nodes[j].receivBuf), Nodes[j].eventsBuf); 
+
+        for(j = 0; j < NbNodes; j++){
             //msg is the older message sended by j 
             //or NULL if no messages 
-            msg=RemoveHead(Nodes[j].sendBuf);
-            if(msg!=NULL){
-                if(msg->receiv!=-1){
+            msg = RemoveHead(Nodes[j].sendBuf);
+            if(NULL != msg){
+                if(-1 != msg->receiv){
                     //msg is destinated to one particular node
-                    if(msg->receiv>=NbNodes || msg->receiv<-1){
+                    if(msg->receiv >= NbNodes || msg->receiv < -1){
                         fprintf(stderr,"Message send to inexistant receiver ignored\n");
                         break;
                     }
                     Append(msg, Nodes[msg->receiv].receivBuf);
                 }else{
                     //msg is a multicast
-                    for(k=0;k<NbNodes;k++){
-                        if(k!=j){
-                            //duplicate the original message
-                            if((msgBis=malloc(sizeof(struct _Message)))==NULL){
-                                fprintf(stderr,"malloc fail LaunchSimulation.4\n");
-                                exit(1);
-                            }
-                            if((msgBis->msg=malloc(sizeof(char)*(strlen(msg->msg)+1)))==NULL){
-                                fprintf(stderr,"malloc fail LaunchSimulation.5\n");
-                                exit(1);
-                           }
-                            msgBis->msg=strcpy(msgBis->msg,msg->msg);
-                            msgBis->sender=msg->sender;
-                            msgBis->receiv=msg->receiv;
+                    for(k = 0; k < NbNodes; k++){
+                        if(k != j){
+		            msgBis = copyMessage(msg);
                             Append(msgBis, Nodes[k].receivBuf);
                         }
                     }
-                    free(msg->msg);
-                    free(msg);
+
+		    deleteMessage(msg);
                 }
             }
         }
-        i++;
     }
+
+    // Free
+    free(buf);
+    if(ex_event != NULL) free(ex_event);
 }
-
-
-
 
 int Send(Message_t m){
     if(m!=NULL){
@@ -190,5 +153,13 @@ void deleteMessage(Message_t msg){
         if(NULL != msg->msg) free(msg->msg);
 	free(msg);
     }
+}
+
+// Copy a message.
+//   msg : the message
+// Failures are handled internaly.
+// Returns a Message_t object.
+Message_t copyMessage(Message_t msg){
+    return initMessage(msg->msg, msg->sender, msg->receiv);
 }
 
