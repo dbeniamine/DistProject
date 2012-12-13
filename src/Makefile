@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Werror -g
 LDFLAGS=-lm
 
-all: Broadcast
+all: Broadcast clean
 
 Broadcast : Main.o Simulator.o Fifo.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
@@ -10,5 +10,8 @@ Broadcast : Main.o Simulator.o Fifo.o
 .PHONY : clean
 
 clean :
-	rm *.o Broadcast
+	rm -rf *.o *~
+
+cleanall: clean
+	rm -rf Broadcast
 

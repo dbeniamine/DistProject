@@ -24,5 +24,11 @@ void Append(void *, Fifo);
 //Return NULL if empty
 void * RemoveHead(Fifo);
 
+//Return the head of the list without removing it
+//Return NULL if empty
+void *GetHead(Fifo);
+
+//True if and only if the Fifo is empy
+int IsEmpty(Fifo); 
 
 #endif //__Fifo_H__

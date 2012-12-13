@@ -14,9 +14,13 @@ CreateFifo	Fifo.h	/^Fifo CreateFifo(void);$/;"	p	signature:(void)
 Delete	Fifo.c	/^void Delete (Fifo f){$/;"	f	signature:(Fifo f)
 Delete	Fifo.h	/^void Delete(Fifo);$/;"	p	signature:(Fifo)
 Fifo	Fifo.h	/^}*Fifo;$/;"	t	typeref:struct:_Fifo
+GetHead	Fifo.c	/^void *GetHead(Fifo f){$/;"	f	signature:(Fifo f)
+GetHead	Fifo.h	/^void *GetHead(Fifo);$/;"	p	signature:(Fifo)
 IPBroadcast	Main.c	/^void IPBroadcast(int Id, Message_t m, Fifo events){$/;"	f	signature:(int Id, Message_t m, Fifo events)
+IsEmpty	Fifo.c	/^int IsEmpty(Fifo f){$/;"	f	signature:(Fifo f)
+IsEmpty	Fifo.h	/^int IsEmpty(Fifo); $/;"	p	signature:(Fifo)
 LDFLAGS	Makefile	/^LDFLAGS=-lm$/;"	m
-LaunchSimulation	Simulator.c	/^void LaunchSimulation(int NbRounds, int NbProcess, NodesFct_t NodeFunc){$/;"	f	signature:(int NbRounds, int NbProcess, NodesFct_t NodeFunc)
+LaunchSimulation	Simulator.c	/^void LaunchSimulation(int NbRounds, int NbNodes, NodesFct_t NodeFunc){$/;"	f	signature:(int NbRounds, int NbNodes, NodesFct_t NodeFunc)
 LaunchSimulation	Simulator.h	/^void LaunchSimulation(int NbRounds, int NbProcess, NodesFct_t f);$/;"	p	signature:(int NbRounds, int NbProcess, NodesFct_t f)
 Message_t	Simulator.h	/^}*Message_t;$/;"	t	typeref:struct:_Message
 NbNodes	Main.c	/^int NbNodes;$/;"	v
@@ -47,49 +51,53 @@ __SIMULATOR_H__	Simulator.h	2;"	d
 _listElt	Fifo.h	/^typedef struct _listElt{$/;"	s
 _listElt::elt	Fifo.h	/^    void *elt;$/;"	m	struct:_listElt	access:public
 _listElt::next	Fifo.h	/^    struct _listElt * next;$/;"	m	struct:_listElt	typeref:struct:_listElt::_listElt	access:public
+bread	Simulator.c	/^    size_t bread, nbyte = 0;$/;"	l
+broadcaster	Main.c	/^    int neighbor, broadcaster;$/;"	l
 buf	Simulator.c	/^    char *buf;$/;"	l
+content	Main.c	/^    char* content;$/;"	l
+copyMessage	Simulator.c	/^Message_t copyMessage(Message_t msg){$/;"	f	signature:(Message_t msg)
+copyMessage	Simulator.h	/^Message_t copyMessage(Message_t msg);$/;"	p	signature:(Message_t msg)
 deleteMessage	Simulator.c	/^void deleteMessage(Message_t msg){$/;"	f	signature:(Message_t msg)
 deleteMessage	Simulator.h	/^void deleteMessage(Message_t msg);$/;"	p	signature:(Message_t msg)
 display_help	Main.c	/^void display_help(FILE* output, char* pname){$/;"	f	signature:(FILE* output, char* pname)
 e	Fifo.c	/^    listElt e;$/;"	l
 elt	Fifo.h	/^    void *elt;$/;"	m	struct:_listElt	access:public
-event	Main.c	/^    Message_t event, msg;$/;"	l
+event	Main.c	/^    Message_t event, msg, fwd;$/;"	l
 event	Main.c	/^    Message_t event, msgOut;$/;"	l
 eventsBuf	Nodes.h	/^    Fifo eventsBuf;$/;"	m	struct:_Node	access:public
+ex_event	Simulator.c	/^    char* ex_event = NULL;$/;"	l
 f	Fifo.c	/^    Fifo f;$/;"	l
 f	Main.c	/^    NodesFct_t f;$/;"	l
+fwd	Main.c	/^    Message_t event, msg, fwd;$/;"	l
 head	Fifo.h	/^    listElt head;$/;"	m	struct:_Fifo	access:public
-i	Main.c	/^    int i, sender;$/;"	l
 i	Main.c	/^    int i;$/;"	l
-i	Simulator.c	/^    int i,j,k, receiver;$/;"	l
-i	Simulator.c	/^    int i=0, j=0;$/;"	l
+i	Simulator.c	/^    int i, j, k, receiver;$/;"	l
 initMessage	Simulator.c	/^Message_t initMessage(const char* str, int snd, int rcv){$/;"	f	signature:(const char* str, int snd, int rcv)
 initMessage	Simulator.h	/^Message_t initMessage(const char* str, int snd, int rcv);$/;"	p	signature:(const char* str, int snd, int rcv)
-j	Simulator.c	/^    int i,j,k, receiver;$/;"	l
-j	Simulator.c	/^    int i=0, j=0;$/;"	l
-k	Simulator.c	/^    int i,j,k, receiver;$/;"	l
+j	Simulator.c	/^    int i, j, k, receiver;$/;"	l
+k	Simulator.c	/^    int i, j, k, receiver;$/;"	l
 len	Simulator.c	/^    int len = strlen(str) + 1;$/;"	l
 listElt	Fifo.h	/^}*listElt;$/;"	t	typeref:struct:_listElt
 main	Main.c	/^int main (int argc, char **argv){$/;"	f	signature:(int argc, char **argv)
-msg	Main.c	/^    Message_t event, msg;$/;"	l
+msg	Main.c	/^    Message_t event, msg, fwd;$/;"	l
 msg	Simulator.c	/^    Message_t msg = malloc(sizeof(struct _Message));$/;"	l
 msg	Simulator.c	/^    Message_t msg, msgBis;$/;"	l
 msg	Simulator.h	/^    char *msg;$/;"	m	struct:_Message	access:public
 msgBis	Simulator.c	/^    Message_t msg, msgBis;$/;"	l
 msgOut	Main.c	/^    Message_t event, msgOut;$/;"	l
 nTurn	Main.c	/^    int nTurn;$/;"	l
-nb_nodes	Main.c	/^    int opt, nb_nodes, nb_rounds;$/;"	l
-nb_rounds	Main.c	/^    int opt, nb_nodes, nb_rounds;$/;"	l
+nb_match	Simulator.c	/^    int nb_match;$/;"	l
+nb_rounds	Main.c	/^    int opt, nb_rounds;$/;"	l
+nbyte	Simulator.c	/^    size_t bread, nbyte = 0;$/;"	l
+neighbor	Main.c	/^    int neighbor, broadcaster;$/;"	l
 next	Fifo.h	/^    struct _listElt * next;$/;"	m	struct:_listElt	typeref:struct:_listElt::_listElt	access:public
 o	Fifo.c	/^    void *o;$/;"	l
-opt	Main.c	/^    int opt, nb_nodes, nb_rounds;$/;"	l
+opt	Main.c	/^    int opt, nb_rounds;$/;"	l
 receiv	Simulator.h	/^    int receiv; \/\/if -1 : ip multicast$/;"	m	struct:_Message	access:public
 receivBuf	Nodes.h	/^    Fifo receivBuf;$/;"	m	struct:_Node	access:public
-receiver	Simulator.c	/^    int i,j,k, receiver;$/;"	l
+receiver	Simulator.c	/^    int i, j, k, receiver;$/;"	l
 ret	Fifo.c	/^    void * ret=NULL;$/;"	l
 sendBuf	Nodes.h	/^    Fifo sendBuf;$/;"	m	struct:_Node	access:public
-sender	Main.c	/^    int i, sender;$/;"	l
 sender	Simulator.h	/^    int sender; \/\/if -1, msg is an external event$/;"	m	struct:_Message	access:public
-split	Simulator.c	/^int split(char buf[], int *num){$/;"	f	signature:(char buf[], int *num)
 tail	Fifo.h	/^    listElt tail;$/;"	m	struct:_Fifo	access:public
 temp	Fifo.c	/^    listElt temp;$/;"	l
