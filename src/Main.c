@@ -20,7 +20,7 @@ void TreeBroadcast(int Id, Message_t m, Fifo events){
         if(!strcmp(event->msg,"broadcast")){
             //start a tree broadcast:
             //Iniatialize the message
-	    for(nTurn = 0; nTurn < log2(NbNodes); nTurn++){
+            for(nTurn = 0; nTurn < log2(NbNodes); nTurn++){
                 //at the first step of the tree broadcast, we send a message
                 //to our successor
                 msgOut = initMessage("Hello\0", Id, (int)(pow(2,nTurn)+Id)%NbNodes);
@@ -62,7 +62,7 @@ void IPBroadcast(int Id, Message_t m, Fifo events){
             //start a basic broadcast:
             //send hello to every nodes
             //Iniatialize the message
-	    msgOut = initMessage("Hello\0", Id, -1);
+            msgOut = initMessage("Hello\0", Id, -1);
             Send(msgOut);
         }
         free(event->msg);
@@ -90,7 +90,7 @@ void BasicBroadcast(int Id, Message_t m, Fifo events){
             //send hello to every nodes
             for(i=0;i<NbNodes;i++){
                 if(i!=Id){
-		    msgOut = initMessage("Hello\0", Id, i);
+                    msgOut = initMessage("Hello\0", Id, i);
                     Send(msgOut);
                 }
             }
@@ -117,7 +117,7 @@ void PipelineBroadcast(int Id, Message_t m, Fifo events){
     content = malloc(128 * sizeof(char));
     if(NULL == content){
         fprintf(stderr, "Failed malloc in PipelineBroadcast...\n");
-	exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     // Event Rules
@@ -130,31 +130,31 @@ void PipelineBroadcast(int Id, Message_t m, Fifo events){
             sprintf(content, "from %i : Hello", Id);
             msg = initMessage(content, Id, neighbor);
             Send(msg);
-	}
+        }
 
-	free(event->msg);
-	free(event);
+        free(event->msg);
+        free(event);
     }
 
     // Message Rules
-    if(NULL != m)
-        if(1 > sscanf(m->msg, "from %i : %s", &broadcaster, content)){
+    if(NULL != m){
+        if(1 < sscanf(m->msg, "from %i : %s", &broadcaster, content)){
             // Print content and data
             printf("%s received by %i from %i (broadcasted by %i)\n",
-	           content, Id, m->sender, broadcaster);
+                    content, Id, m->sender, broadcaster);
 
-	    // Forward the message if need be
-	    neighbor = (Id + 1) % NbNodes;
-	    if(neighbor != broadcaster){
+            // Forward the message if need be
+            neighbor = (Id + 1) % NbNodes;
+            if(neighbor != broadcaster){
                 fwd = initMessage(m->msg, Id, neighbor);
-		Send(fwd);
-	    }
+                Send(fwd);
+            }
 
-	    // Free the local message
+            // Free the local message
             free(m->msg);
             free(m);
-	}
-
+        }
+    }
     free(content);
 }
 
@@ -183,32 +183,32 @@ int main (int argc, char **argv){
     // Parsing arguments
     while(-1 != (opt = getopt(argc, argv, "N:R:hbtip"))){
         switch(opt){
-        case 'N':
-	    NbNodes = atoi(optarg);
-	    break;
-	case 'R':
-	    nb_rounds = atoi(optarg);
-	    break;
-	case 'h':
-	    display_help(stdout, argv[0]);
-	    return 0;
-	case 'b':
-	    f = BasicBroadcast;
-	    break;
-	case 't':
-	    f = TreeBroadcast;
-	    break;
-	case 'i':
-	    f = IPBroadcast;
-	    break;
-	case 'p':
-	    f = PipelineBroadcast;
-	    break;
-	default: /* WTF ? */
-	    fprintf(stderr, "Argument error...\n");
-	    display_help(stderr, argv[0]);
-	    exit(EXIT_FAILURE);
-	}
+            case 'N':
+                NbNodes = atoi(optarg);
+                break;
+            case 'R':
+                nb_rounds = atoi(optarg);
+                break;
+            case 'h':
+                display_help(stdout, argv[0]);
+                return 0;
+            case 'b':
+                f = BasicBroadcast;
+                break;
+            case 't':
+                f = TreeBroadcast;
+                break;
+            case 'i':
+                f = IPBroadcast;
+                break;
+            case 'p':
+                f = PipelineBroadcast;
+                break;
+            default: /* WTF ? */
+                fprintf(stderr, "Argument error...\n");
+                display_help(stderr, argv[0]);
+                exit(EXIT_FAILURE);
+        }
     }
 
     // Start a simulation

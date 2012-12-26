@@ -40,10 +40,6 @@ void *RemoveHead(Fifo f){
     return ret;
 }
 
-void *GetHead(Fifo f){
-        return f->head==NULL ? NULL : f->head->elt;
-}
-
 void Append(void *obj, Fifo f){
     listElt e;
     if((e=malloc(sizeof(struct _listElt)))==NULL){
