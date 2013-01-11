@@ -1,66 +1,101 @@
+/****************************************************************************
+ *                 Distributed Systems: Network simulator                   *
+ * Implementation of the fifo library (defined in file "Fifo.h").           *
+ * Author: David Beniamine                                                  *
+ ****************************************************************************/
 #include"Fifo.h"
 #include<stdlib.h>
 #include<stdio.h>
 
-//init a Fifo
-Fifo CreateFifo(void)
-{
-    Fifo f;
-    if((f=malloc(sizeof(struct _Fifo)))==NULL){
-        fprintf(stderr, "malloc fail CreateFifo.0\n");
-        exit(1);
-    }
-    f->head=NULL;
-    f->tail=NULL;
-    return f;
+/*
+ * Create a new empty Fifo.
+ * The allocation is managed by the function, however the memory need to be
+ * freed using the function DeleteFifo.
+ * The functions returns the new Fifo.
+ */
+Fifo CreateFifo(void){
+  Fifo f = malloc(sizeof(struct _Fifo));
+
+  if(NULL == f){
+     fprintf(stderr, "Malloc fail in CreateFifo...\n");
+     exit(EXIT_FAILURE);
+  }
+
+  f->head=NULL;
+  f->tail=NULL;
+
+  return f;
 }
 
-//Delete the Fifo, free all the elements
-void Delete (Fifo f){
-    void *o;
-    while((o=RemoveHead(f))!=NULL){
-        free(o);  
-    }
+/*
+ * Deletes a Fifo. The function handles the memory deallocation.
+ * f : The Fifo to delete.
+ */
+void DeleteFifo(Fifo f){
+  void *o;
+
+  // Empty the Fifo...
+  while(NULL != (o = RemoveHead(f))) free(o);  
+
+  // Free the Fifo.
+  free(f);
 }
 
-// Remove the Head of the list and return its element
-void *RemoveHead(Fifo f){
-    listElt temp;
-    void * ret=NULL;
-    temp=f->head;
-    if(temp!=NULL){
-        f->head=f->head->next;
-        if(f->head==NULL){
-            f->tail=NULL;
-        }
-        ret=temp->elt;
-        free(temp);
-    }
+/*
+ * Appends an element to a Fifo.
+ * The Fifo should have been initialized using CreateFifo previously.
+ * e : A pointer to the element to add.
+ * f : The Fifo.
+ */
+void Append(void* e, Fifo f){
+  List new = malloc(sizeof(struct _List));
 
-    return ret;
+  if(NULL == new){
+    fprintf(stderr, "Malloc fail in Append...\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Set up new element
+  new->elt = e;
+  new->next = NULL;
+
+  // Fifo empty is a special case
+  if(NULL == f->head){
+    f->head = new;
+    f->tail = new;
+  } else {
+    f->tail->next = new;
+    f->tail = new;
+  }
 }
 
-void Append(void *obj, Fifo f){
-    listElt e;
-    if((e=malloc(sizeof(struct _listElt)))==NULL){
-        fprintf(stderr,"malloc fail Fifo.Append.0\n");
-        exit(1);
-    }
-    //init
-    e->elt=obj;
-    e->next=NULL;
-    
-    if(f->head==NULL){
-        //First element on the list
-        f->head=e;
-        f->tail=e;
-    }else{
-        //General case
-        f->tail->next=e;
-        f->tail=e;
-    }
+/*
+ * Removes the element from a Fifo.
+ * f : the Fifo.
+ * Returns a pointer to the element or NULL if the Fifo is empty.
+ */
+void* RemoveHead(Fifo f){
+  List tmp = f->head;
+  void* elt;
+
+  if(NULL == tmp) return NULL;
+
+  // Remove firts element in the Fifo.
+  f->head = f->head->next;
+  if(NULL == f->head) f->tail = NULL;
+
+  elt = tmp->elt;
+  free(tmp);
+
+  return elt;
 }
 
-int IsEmpty(Fifo f){
-    return f->head==NULL;
+/*
+ * Check if a Fifo is empty.
+ * f : the Fifo.
+ * Returns 1 if the Fifo is empty.
+ * Returns O otherwise.
+ */
+int IsEmpty(Fifo f){ 
+  return NULL == f->head;
 }
