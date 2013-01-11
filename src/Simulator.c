@@ -11,7 +11,7 @@ Node Nodes;
 
 void LaunchSimulation(int NbRounds, int NbNodes, NodesFct_t NodeFunc){
     int i, j, k, receiver;
-    Message_t msg, msgBis;
+    Message msg, msgBis;
     char *buf;
     char* ex_event = NULL;
     size_t bread, nbyte = 0;
@@ -109,7 +109,7 @@ void LaunchSimulation(int NbRounds, int NbNodes, NodesFct_t NodeFunc){
     if(ex_event != NULL) free(ex_event);
 }
 
-int Send(Message_t m){
+int Send(Message m){
     if(m!=NULL){
         Append(m,Nodes[m->sender].sendBuf);
         return 0;
@@ -122,9 +122,9 @@ int Send(Message_t m){
 //   snd : sender of the message
 //   rcv : receiver of the message
 // Failures are handled internaly.
-// Returns a Message_t object.
-Message_t initMessage(const char* str, int snd, int rcv){
-    Message_t msg = malloc(sizeof(struct _Message));
+// Returns a Message object.
+Message initMessage(const char* str, int snd, int rcv){
+    Message msg = malloc(sizeof(struct _Message));
     int len = strlen(str) + 1;
 
     if(NULL == msg){
@@ -148,7 +148,7 @@ Message_t initMessage(const char* str, int snd, int rcv){
 // Delete a message.
 //   msg : the message
 // Failures are handled internaly.
-void deleteMessage(Message_t msg){
+void deleteMessage(Message msg){
     if(NULL != msg){
         if(NULL != msg->msg) free(msg->msg);
 	free(msg);
@@ -158,8 +158,8 @@ void deleteMessage(Message_t msg){
 // Copy a message.
 //   msg : the message
 // Failures are handled internaly.
-// Returns a Message_t object.
-Message_t copyMessage(Message_t msg){
+// Returns a Message object.
+Message copyMessage(Message msg){
     return initMessage(msg->msg, msg->sender, msg->receiv);
 }
 

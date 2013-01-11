@@ -10,8 +10,8 @@ int NbNodes;
 
 //Tree broadcast: log(NbNodes) turn to broadcast
 //every node send to its succesors
-void TreeBroadcast(int Id, Message_t m, Fifo events){
-    Message_t event, msgOut;
+void TreeBroadcast(int Id, Message m, Fifo events){
+    Message event, msgOut;
     int nTurn;
     //Events Rules
     while((event=RemoveHead(events))!=NULL){
@@ -52,8 +52,8 @@ void TreeBroadcast(int Id, Message_t m, Fifo events){
 }
 
 //Ip broadcast: one node send to everyone on one round
-void IPBroadcast(int Id, Message_t m, Fifo events){
-    Message_t event, msgOut;
+void IPBroadcast(int Id, Message m, Fifo events){
+    Message event, msgOut;
     //Events Rules
     while((event=RemoveHead(events))!=NULL){
         printf("event received %d %s\n",Id, event->msg); 
@@ -78,8 +78,8 @@ void IPBroadcast(int Id, Message_t m, Fifo events){
 
 //Basic broadcast: N turn to broadcast, all send are done by
 //the same node
-void BasicBroadcast(int Id, Message_t m, Fifo events){
-    Message_t event, msgOut;
+void BasicBroadcast(int Id, Message m, Fifo events){
+    Message event, msgOut;
     int i;
     //Events Rules
     while((event=RemoveHead(events))!=NULL){
@@ -109,8 +109,8 @@ void BasicBroadcast(int Id, Message_t m, Fifo events){
 // Pipeline broadcast: 1 turn to broadcast, the broadcasting node sends his
 // message to the next note, which in turn transmits the message to the next
 // node and so on.
-void PipelineBroadcast(int Id, Message_t m, Fifo events){
-    Message_t event, msg, fwd;
+void PipelineBroadcast(int Id, Message m, Fifo events){
+    Message event, msg, fwd;
     int neighbor, broadcaster;
     char* content;
 

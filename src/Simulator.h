@@ -1,54 +1,73 @@
+/****************************************************************************
+ *                 Distributed Systems: Network simulator                   *
+ * This file contains the core functions of the simulator.                  *
+ * Author: David Beniamine                                                  *
+ ****************************************************************************/
 #ifndef __SIMULATOR_H
 #define __SIMULATOR_H__
+
 #include"Fifo.h"
 
-//Message structur, each field have to be initialized before any send
+/*
+ * Structure implementing messages.
+ */
 typedef struct _Message{
-    int sender; //if -1, msg is an external event
-    int receiv; //if -1 : ip multicast
-    char *msg;
-}*Message_t;
+  int sender; // Identifier of the sender (external event if -1)
+  int receiv; // Destination address (-1 if ip multicast)
+  char *msg;  // Content of the message
+}*Message;
 
-// Message initialization function.
-//   str : content of the message
-//   snd : sender of the message
-//   rcv : receiver of the message
-// Failures are handled internaly.
-// Returns a Message_t object.
-Message_t initMessage(const char* str, int snd, int rcv);
+/*
+ * Message initialization function.
+ * str : content of the message.
+ * snd : sender of the message.
+ * rcv : receiver of the message.
+ * Failures are handled internally.
+ * Returns a the new created message.
+ */
+Message initMessage(const char* str, int snd, int rcv);
 
-// Delete a message.
-//   msg : the message
-// Failures are handled internaly.
-void deleteMessage(Message_t msg);
+/*
+ * Delete a message.
+ * msg : the message to delete.
+ * Failures are handled internally.
+ */
+void deleteMessage(Message msg);
 
-// Copy a message.
-//   msg : the message
-// Failures are handled internaly.
-// Returns a Message_t object.
-Message_t copyMessage(Message_t msg);
+/*
+ * Copy a message.
+ * msg : the message.
+ * Failures are handled internaly.
+ * Returns the copied message.
+ */
+Message copyMessage(Message msg);
 
-//  id    : the unique id of the process in [0,NbProcess]
-//  m     : either NULL or the message received at the beginning of the turn
-//  queue :  the list of external event which happens to the node at the
-//           beggining of the round
+/*
+ * Type of a function executed by the nodes in the simulator.
+ * Implements the policies (different broadcast protocols).
+ * id    : unique id of the process in [0,NbProcess].
+ * m     : either NULL or the message received at the beginning of the turn.
+ * queue : list of external event happening to the node at the beggining of
+ *         the round.
+ */
+typedef void(*NodesFct_t)(int id, Message m, Fifo queue);
 
-typedef void(*NodesFct_t)(int id , Message_t m,Fifo queue);
+/*
+ * Function used by a node to send a message m which must be correcly
+ * initialized.
+ * m : the message to send.
+ * Return 0 on success.
+ * Returns 1 on failure (m is NULL)
+ */
+int Send(Message m);
 
-//A node can use this method to send a message m which must be correcly
-//initialized with the method initMessage, return 0 on success
-
-//A node can use this method to send a message m which must be correcly
-//initialized, return 0 on success
-int Send(Message_t m);
-
-
-//Start a simulation 
-//  NbProcess   : the number of nodes
-//  NbRounds    : the number of rounds (if <=0 forever)
-//  f           : the function run by each node
-//The external events are read by the simulator on the standard input
+/*
+ * Core simulation function.
+ * The external events are read by the simulator on the standard input.
+ * NbRounds  : number of rounds to run (if <=0 run forever).
+ * NbProcess : number of nodes.
+ * f         : function to run by each node.
+ */
 void LaunchSimulation(int NbRounds, int NbProcess, NodesFct_t f);
 
 #endif //__SIMULATOR_H
-
