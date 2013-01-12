@@ -1,6 +1,5 @@
-// internal data struct
-#include "Nodes.h"
 #include "Simulator.h"
+#include "Message.h"
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -115,51 +114,5 @@ int Send(Message m){
         return 0;
     }
     return 1;
-}
-
-// Message initialization function.
-//   str : content of the message (null-terminated)
-//   snd : sender of the message
-//   rcv : receiver of the message
-// Failures are handled internaly.
-// Returns a Message object.
-Message initMessage(const char* str, int snd, int rcv){
-    Message msg = malloc(sizeof(struct _Message));
-    int len = strlen(str) + 1;
-
-    if(NULL == msg){
-        fprintf(stderr, "Failed malloc in initMessage.1...\n");
-	exit(1);
-    }
-
-    msg->msg = malloc(len * sizeof(char));
-    if(NULL == msg->msg){
-        fprintf(stderr, "Failed malloc in initMessage.2...\n");
-	exit(1);
-    }
-
-    strncpy(msg->msg, str, len);
-    msg->sender = snd;
-    msg->receiv = rcv;
-
-    return msg;
-}
-
-// Delete a message.
-//   msg : the message
-// Failures are handled internaly.
-void deleteMessage(Message msg){
-    if(NULL != msg){
-        if(NULL != msg->msg) free(msg->msg);
-	free(msg);
-    }
-}
-
-// Copy a message.
-//   msg : the message
-// Failures are handled internaly.
-// Returns a Message object.
-Message copyMessage(Message msg){
-    return initMessage(msg->msg, msg->sender, msg->receiv);
 }
 
