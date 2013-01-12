@@ -1,118 +1,199 @@
-#include "Simulator.h"
-#include "Message.h"
-
+/****************************************************************************
+ *                 Distributed Systems: Network simulator                   *
+ * This file contains the implementation of the core functions of the       *
+ * simulator.                                                               *
+ * Author: David Beniamine                                                  *
+ ****************************************************************************/
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 
-int NbNodes;
-Node Nodes;
+#include "Simulator.h"
+#include "Message.h"
+#include "Fifo.h"
 
-void LaunchSimulation(int NbRounds, int NbNodes, NodesFct_t NodeFunc){
-    int i, j, k, receiver;
-    Message msg, msgBis;
-    char *buf;
-    char* ex_event = NULL;
-    size_t bread, nbyte = 0;
-    int nb_match;
+/*
+ * Initializes a system.
+ * nb_nodes  : number of nodes to create.
+ * nb_rounds : number of rounds to run.
+ * fun       : function to execute by the nodes.
+ * Returns a pointer to the System.
+ */
+System initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
+  int i;
+  System sys;
+ 
+  sys = malloc(sizeof(struct _System));
+  if(NULL == sys){
+    fprintf(stderr,"Malloc error in initSystem...\n");
+    exit(1);
+  }
 
-    // Buffer allocation
-    buf = malloc(20 * sizeof(char));
-    if(NULL == buf){
-        fprintf(stderr,"malloc fail LaunchSimulation.0\n");
-        exit(1);
-    }
+  sys->nb_nodes = nb_nodes;
+  sys->nb_rounds = nb_rounds;
+  sys->fun = fun;
 
-    // Initialization of the nodes
-    Nodes = (Node) malloc(NbNodes * sizeof(struct _Node));
-    if(NULL == Nodes){
-        fprintf(stderr,"malloc fail LaunchSimulation.1\n");
-        exit(1);
-    }
-    for(i = 0; i < NbNodes; i++){
-        Nodes[i].sendBuf = CreateFifo();
-        Nodes[i].receivBuf = CreateFifo();
-        Nodes[i].eventsBuf = CreateFifo();
-    }
+  sys->nodes = (Node*) malloc(nb_nodes * sizeof(struct _Node));
 
-    // Rounds loop
-    for(i = 0; i < NbRounds || NbRounds < 0; i++){
-        //Read external events
-        printf("Enter the external event for the round %i (format \"start\" or \"n event\")\n", i);
-	bread = getline(&ex_event, &nbyte, stdin);
-	if(-1 == bread){
-            fprintf(stderr, "EOF reached or read failure in getline.\n");
-            exit(EXIT_FAILURE);
-	}
-	// Remove '\n' is it is present at the end of the buffer.
-	if(ex_event[bread - 1] == '\n') ex_event[bread - 1] = '\0';
-	// Read external event until start is found.
-	while(strcmp(ex_event, "start")){
-            // Try to parse the input
-	    nb_match = sscanf(ex_event, "%i %19s\n", &receiver, buf);
-	    if(nb_match < 2){
-                fprintf(stderr, "No parse... format is \"n event\"...\n");
-		exit(EXIT_FAILURE);
-	    }
+  for(i = 0; i < nb_nodes; i++){
+    sys->nodes[i].sendBuf = CreateFifo();
+    sys->nodes[i].receivBuf = CreateFifo();
+    sys->nodes[i].eventsBuf = CreateFifo();
+  }
 
-	    // Creation of a message ??? why ???
-	    msg = initMessage(buf, -1, receiver);
-            Append(msg,Nodes[receiver].eventsBuf);
-
-	    // Reinit
-            printf("Event added, enter an other event or \"start\"\n");
-	    bread = getline(&ex_event, &nbyte, stdin);
-            if(-1 == bread){
-                fprintf(stderr, "EOF reached or read failure in getline.\n");
-                exit(EXIT_FAILURE);
-            }
-	    // Remove '\n' is it is present at the end of the buffer.
-	    if(ex_event[bread - 1] == '\n') ex_event[bread - 1] = '\0';
-	}
-
-        //Apply NodeFunc for all Nodes
-        //With the Message received at the beginning of the round
-        //and all the external events
-        for(j = 0; j < NbNodes; j++)
-            NodeFunc(j, RemoveHead(Nodes[j].receivBuf), Nodes[j].eventsBuf); 
-
-        for(j = 0; j < NbNodes; j++){
-            //msg is the older message sended by j 
-            //or NULL if no messages 
-            msg = RemoveHead(Nodes[j].sendBuf);
-            if(NULL != msg){
-                if(-1 != msg->receiv){
-                    //msg is destinated to one particular node
-                    if(msg->receiv >= NbNodes || msg->receiv < -1){
-                        fprintf(stderr,"Message send to inexistant receiver ignored\n");
-                        break;
-                    }
-                    Append(msg, Nodes[msg->receiv].receivBuf);
-                }else{
-                    //msg is a multicast
-                    for(k = 0; k < NbNodes; k++){
-                        if(k != j){
-		            msgBis = copyMessage(msg);
-                            Append(msgBis, Nodes[k].receivBuf);
-                        }
-                    }
-
-		    deleteMessage(msg);
-                }
-            }
-        }
-    }
-
-    // Free
-    free(buf);
-    if(ex_event != NULL) free(ex_event);
+  return sys;
 }
 
-int Send(Message m){
-    if(m!=NULL){
-        Append(m,Nodes[m->sender].sendBuf);
-        return 0;
+/*
+ * Delete a system.
+ * sys : the system to delete.
+ */
+void deleteSystem(System sys){
+  int i;
+
+  if(NULL != sys){
+    if(NULL != sys->nodes){
+      for(i = 0; i < sys->nb_nodes; i++){
+        DeleteFifo(sys->nodes[i].sendBuf);
+        DeleteFifo(sys->nodes[i].receivBuf);
+        DeleteFifo(sys->nodes[i].eventsBuf);
+      }
+
+      free(sys->nodes);
     }
-    return 1;
+
+    free(sys);
+  }
+}
+
+/*
+ * Function used by a node to send a message m which must be correcly
+ * initialized.
+ * m   : the message to send.
+ * sys : the system.
+ * Returns 0 on success.
+ * Returns 1 on failure (m is NULL)
+ */
+int Send(Message m, System sys){
+  if(NULL != m){
+    Append(m,sys->nodes[m->sender].sendBuf);
+    return 0;
+  }
+
+  return 1;
+}
+
+/*
+ * Read external events on the standard input.
+ * Events are added directly to the nodes event Fifo in the system.
+ * sys : the system.
+ * External event format:
+ *   start
+ *   n event
+ */
+void readExternalEvents(System sys){
+  char* ex_event = NULL;
+  size_t bread, nbyte = 0;
+  char* msg;
+  int receiver;
+  int nb_match;
+  char *buf;
+
+  // Buffer allocation
+  buf = malloc(20 * sizeof(char));
+  if(NULL == buf){
+    fprintf(stderr,"Malloc error in readExternalEvents...\n");
+    exit(1);
+  }
+
+  // Read a line
+  printf("Enter an external events (format \"start\" or \"n event\")\n");
+  bread = getline(&ex_event, &nbyte, stdin);
+  if(-1 == bread){
+    fprintf(stderr, "EOF reached or read failure in readExternalEvents.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Remove '\n' is it is present at the end of the buffer.
+  if(ex_event[bread - 1] == '\n') ex_event[bread - 1] = '\0';
+
+  // Read external event until start is found.
+  while(strcmp(ex_event, "start")){
+    // Try to parse the input
+    nb_match = sscanf(ex_event, "%i %19s\n", &receiver, buf);
+    if(nb_match < 2){
+      fprintf(stderr, "No parse... format is \"n event\"...\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // Creation of a message ??? why ???
+    msg = malloc(strlen(buf) * sizeof(char));
+    if(NULL == msg){
+      fprintf(stderr, "Malloc error in readExternalEvents...\n");
+      exit(EXIT_FAILURE);
+    }
+
+    strncpy(msg, buf, strlen(buf));
+    Append(msg,sys->nodes[receiver].eventsBuf);
+
+    // Reinit
+    printf("Event added, enter an other event or \"start\"\n");
+    bread = getline(&ex_event, &nbyte, stdin);
+    if(-1 == bread){
+      fprintf(stderr, "EOF reached or read failure in readExternalEvents.\n");
+      exit(EXIT_FAILURE);
+    }
+    // Remove '\n' is it is present at the end of the buffer.
+    if(ex_event[bread - 1] == '\n') ex_event[bread - 1] = '\0';
+  }
+
+  free(buf);
+}
+
+/*
+ * Core simulation function.
+ * The external events are read before each round. They are handled later by
+ * the node function.
+ * sys : the system.
+ */
+void LaunchSimulation(System sys){
+  int i, j, k;
+  Message msg, msgBis;
+
+  // Rounds loop
+  for(i = 0; i < sys->nb_rounds || sys->nb_rounds < 0; i++){
+    printf("Starting round %i\n", i);
+    readExternalEvents(sys);
+
+    // Apply node function to all nodes.
+    for(j = 0; j < sys->nb_nodes; j++)
+      (sys->fun)(j, RemoveHead(sys->nodes[j].receivBuf), sys); 
+
+    for(j = 0; j < sys->nb_nodes; j++){
+      //msg is the older message sended by j 
+      //or NULL if no messages 
+      msg = RemoveHead(sys->nodes[j].sendBuf);
+      if(NULL != msg){
+        if(-1 != msg->receiv){
+          //msg is destinated to one particular node
+          if(msg->receiv >= sys->nb_nodes || msg->receiv < -1){
+            fprintf(stderr,"Message send to inexistant receiver ignored\n");
+            break;
+          }
+          Append(msg, sys->nodes[msg->receiv].receivBuf);
+        }else{
+          //msg is a multicast
+          for(k = 0; k < sys->nb_nodes; k++){
+            if(k != j){
+	      msgBis = copyMessage(msg);
+              Append(msgBis, sys->nodes[k].receivBuf);
+            }
+          }
+
+          deleteMessage(msg);
+        }
+      }
+    }
+  }
 }
 
