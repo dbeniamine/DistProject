@@ -34,7 +34,6 @@ void display_help(FILE* output, char* pname){
  */
 int main (int argc, char **argv){
   int opt;
-  System sys;
 
   // Default values
   NodesFct f = IPBroadcast;
@@ -79,8 +78,8 @@ int main (int argc, char **argv){
   }
 
   // Do the simulation
-  sys = initSystem(nb_nodes, nb_rounds, f);
-  LaunchSimulation(sys);
-  deleteSystem(sys);
+  initSystem(nb_nodes, nb_rounds, f);
+  LaunchSimulation();
+  deleteSystem();
   return 0;
 }

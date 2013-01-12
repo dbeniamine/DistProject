@@ -15,12 +15,12 @@
  * Ip broadcast. A node can send to every other node in one round.
  * Note that like every functions defined here, they have the type NodesFct.
  */
-void IPBroadcast(int id, Message m, System sys){
+void IPBroadcast(int id, Message m){
   char* event;
   Message msgOut;
 
   // Events Rules
-  while((event = RemoveHead(sys->nodes[id].eventsBuf)) != NULL){
+  while((event = getNextExternalEvent(id)) != NULL){
     printf("Event received %d %s\n", id, event); 
     //Read the first event
     if(!strcmp(event, "broadcast")){
@@ -28,7 +28,7 @@ void IPBroadcast(int id, Message m, System sys){
       //send hello to every nodes
       //Iniatialize the message
       msgOut = initMessage("Hello\0", id, -1);
-      Send(msgOut, sys);
+      Send(msgOut);
     }
     free(event);
   }
@@ -46,22 +46,22 @@ void IPBroadcast(int id, Message m, System sys){
  * same node (one at each turn).
  * Note that like every functions defined here, they have the type NodesFct.
  */
-void BasicBroadcast(int id, Message m, System sys){
+void BasicBroadcast(int id, Message m){
   char* event;
   Message msgOut;
   int i;
 
   //Events Rules
-  while((event = RemoveHead(sys->nodes[id].eventsBuf)) != NULL){
+  while((event = getNextExternalEvent(id)) != NULL){
     printf("event received %d %s\n", id, event); 
     //Read the first event
     if(!strcmp(event, "broadcast")){
       //start a basic broadcast:
       //send hello to every nodes
-      for(i = 0; i < sys->nb_nodes; i++){
+      for(i = 0; i < getNbNodes(); i++){
         if(i != id){
           msgOut = initMessage("Hello\0", id, i);
-          Send(msgOut, sys);
+          Send(msgOut);
         }
       }
     }
@@ -81,23 +81,23 @@ void BasicBroadcast(int id, Message m, System sys){
  * Every node sends to its succesors.
  * Note that like every functions defined here, they have the type NodesFct.
  */
-void TreeBroadcast(int id, Message m, System sys){
+void TreeBroadcast(int id, Message m){
   char* event;
   Message msgOut;
   int nTurn;
 
   //Events Rules
-  while((event = RemoveHead(sys->nodes[id].eventsBuf)) != NULL){
+  while((event = getNextExternalEvent(id)) != NULL){
     printf("Event received %d %s\n", id, event); 
     //Read the first event
     if(!strcmp(event, "broadcast")){
       //start a tree broadcast:
       //Iniatialize the message
-      for(nTurn = 0; nTurn < log2(sys->nb_nodes); nTurn++){
+      for(nTurn = 0; nTurn < log2(getNbNodes()); nTurn++){
         //at the first step of the tree broadcast, we send a message
         //to our successor
-        msgOut = initMessage("Hello\0", id, (int)(pow(2,nTurn)+id)%sys->nb_nodes);
-        Send(msgOut, sys);
+        msgOut = initMessage("Hello\0", id, (int)(pow(2,nTurn)+id)%getNbNodes());
+        Send(msgOut);
       }
     }
     free(event);
@@ -112,12 +112,12 @@ void TreeBroadcast(int id, Message m, System sys){
     if(m->sender < m->receiv)
       nTurn=log2(m->receiv-m->sender);
     else
-      nTurn=log2(sys->nb_nodes-m->sender+m->receiv);
+      nTurn=log2(getNbNodes()-m->sender+m->receiv);
     //this turn is done, let's do the others
     //now we can send all the others messages
-    for(nTurn++; nTurn<log2(sys->nb_nodes); nTurn++){
-      msgOut = initMessage(m->msg, id, ((int)(pow(2,nTurn)+id))%sys->nb_nodes);
-      Send(msgOut, sys);
+    for(nTurn++; nTurn<log2(getNbNodes()); nTurn++){
+      msgOut = initMessage(m->msg, id, ((int)(pow(2,nTurn)+id))%getNbNodes());
+      Send(msgOut);
     }
     free(m->msg);
     free(m);
@@ -130,7 +130,7 @@ void TreeBroadcast(int id, Message m, System sys){
  * transmits the message to its neighbour and so on.
  * Note that like every functions defined here, they have the type NodesFct.
  */
-void PipelineBroadcast(int id, Message m, System sys){
+void PipelineBroadcast(int id, Message m){
   char* event;
   Message msg, fwd;
   int neighbor, broadcaster;
@@ -143,14 +143,14 @@ void PipelineBroadcast(int id, Message m, System sys){
   }
 
   // Event Rules
-  while(NULL != (event = RemoveHead(sys->nodes[id].eventsBuf))){
+  while((event = getNextExternalEvent(id)) != NULL){
     printf("event received %i %s\n",id, event); 
     // Read the first event
     if(0 == strcmp(event, "broadcast")){
-      neighbor = (id + 1) % sys->nb_nodes;
+      neighbor = (id + 1) % getNbNodes();
       sprintf(content, "from %i : Hello", id);
       msg = initMessage(content, id, neighbor);
-      Send(msg, sys);
+      Send(msg);
     }
     free(event);
   }
@@ -163,10 +163,10 @@ void PipelineBroadcast(int id, Message m, System sys){
              content, id, m->sender, broadcaster);
 
       // Forward the message if need be
-      neighbor = (id + 1) % sys->nb_nodes;
+      neighbor = (id + 1) % getNbNodes();
       if(neighbor != broadcaster){
         fwd = initMessage(m->msg, id, neighbor);
-        Send(fwd, sys);
+        Send(fwd);
       }
  
       // Free the local message
@@ -182,7 +182,7 @@ void PipelineBroadcast(int id, Message m, System sys){
  * Total Order Broadcast with good latency.
  * Note that like every functions defined here, they have the type NodesFct.
  */
-void TOBLatencyBroadcast(int id, Message m, System sys){
+void TOBLatencyBroadcast(int id, Message m){
   // TODO
 }
 
@@ -190,6 +190,6 @@ void TOBLatencyBroadcast(int id, Message m, System sys){
  * Total Order Broadcast with good throughput.
  * Note that like every functions defined here, they have the type NodesFct.
  */
-void TOBThroughputBroadcast(int id, Message m, System sys){
+void TOBThroughputBroadcast(int id, Message m){
   // TODO
 }

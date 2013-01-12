@@ -19,6 +19,16 @@ typedef struct _Node{
 }Node;
 
 /*
+ * Type of the functions that run on the nodes and implement the different
+ * policies.
+ * id  : unique id of the process in [0,NbProcess].
+ * m   : either NULL or the message received at the beginning of the turn.
+ */
+typedef void(*NodesFct)(int id, Message m);
+
+
+
+/*
  * Structure representing the system.
  * The last field holds a function to be execuded by the nodes.
  */
@@ -26,33 +36,21 @@ typedef struct _System{
   Node* nodes;      // The nodes (process).
   int nb_nodes;     // Number of nodes.
   int nb_rounds;    // Number of rounds to simulate.
-  void(*fun)(int id, Message m, struct _System* sys); // Function
+  void(*fun)(int id, Message m); // Function
 }*System;
 
 /*
- * Type of the functions that run on the nodes and implement the different
- * policies.
- * id  : unique id of the process in [0,NbProcess].
- * m   : either NULL or the message received at the beginning of the turn.
- * sys : the system (contains all data like external events, number of
- *       nodes...).
- */
-typedef void(*NodesFct)(int id, Message m, System sys);
-
-/*
- * Initializes a system.
+ * Initializes the system.
  * nb_nodes  : number of nodes to create.
  * nb_rounds : number of rounds to run.
  * fun       : function to execute by the nodes.
- * Returns a pointer to the System.
  */
-System initSystem(int nb_nodes, int nb_rounds, NodesFct fun);
+void initSystem(int nb_nodes, int nb_rounds, NodesFct fun);
 
 /*
- * Delete a system.
- * sys : the system to delete.
+ * Delete the system.
  */
-void deleteSystem(System sys);
+void deleteSystem();
 
 /*
  * Function used by a node to send a message m which must be correcly
@@ -62,21 +60,31 @@ void deleteSystem(System sys);
  * Returns 0 on success.
  * Returns 1 on failure (m is NULL)
  */
-int Send(Message m, System sys);
+int Send(Message m);
+
+/*
+ * Function used by a node to get its next externel event
+ * id : the node id
+ * Returns the string correponding to the next event if any or NULL
+ */
+char *getNextExternalEvent(int id);
+ 
+/*
+ * Function used by a node to get the total number of nodes in the system
+ */
+int getNbNodes();
 
 /*
  * Read external events on the standard input.
  * Events are added directly to the nodes event Fifo in the system.
- * sys : the system.
  */
-void readExternalEvents(System sys);
+void readExternalEvents();
 
 /*
  * Core simulation function.
  * The external events are read before each round. They are handled later by
  * the node function.
- * sys : the system.
  */
-void LaunchSimulation(System sys);
+void LaunchSimulation();
 
 #endif //__SIMULATOR_H__

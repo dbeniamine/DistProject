@@ -12,6 +12,8 @@
 #include "Message.h"
 #include "Fifo.h"
 
+static System sys;
+
 /*
  * Initializes a system.
  * nb_nodes  : number of nodes to create.
@@ -19,9 +21,9 @@
  * fun       : function to execute by the nodes.
  * Returns a pointer to the System.
  */
-System initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
+void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
   int i;
-  System sys;
+ // System sys;
  
   sys = malloc(sizeof(struct _System));
   if(NULL == sys){
@@ -41,14 +43,14 @@ System initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
     sys->nodes[i].eventsBuf = CreateFifo();
   }
 
-  return sys;
+ // return sys;
 }
 
 /*
  * Delete a system.
  * sys : the system to delete.
  */
-void deleteSystem(System sys){
+void deleteSystem(void){
   int i;
 
   if(NULL != sys){
@@ -74,7 +76,7 @@ void deleteSystem(System sys){
  * Returns 0 on success.
  * Returns 1 on failure (m is NULL)
  */
-int Send(Message m, System sys){
+int Send(Message m){
   if(NULL != m){
     Append(m,sys->nodes[m->sender].sendBuf);
     return 0;
@@ -84,6 +86,24 @@ int Send(Message m, System sys){
 }
 
 /*
+ * Function used by a node to get its next externel event
+ * id : the node id
+ * Returns the string correponding to the next event if any or NULL
+ */
+char *getNextExternalEvent(int id){
+    return (RemoveHead(sys->nodes[id].eventsBuf));
+}
+ 
+/*
+ * Function used by a node to get the total number of nodes in the system
+ */
+int getNbNodes(){
+    return sys->nb_nodes;
+}
+
+
+
+/*
  * Read external events on the standard input.
  * Events are added directly to the nodes event Fifo in the system.
  * sys : the system.
@@ -91,7 +111,7 @@ int Send(Message m, System sys){
  *   start
  *   n event
  */
-void readExternalEvents(System sys){
+void readExternalEvents(){
   char* ex_event = NULL;
   size_t bread, nbyte = 0;
   char* msg;
@@ -156,7 +176,7 @@ void readExternalEvents(System sys){
  * the node function.
  * sys : the system.
  */
-void LaunchSimulation(System sys){
+void LaunchSimulation(){
   int i, j, k;
   Message msg, msgBis;
 
@@ -167,7 +187,7 @@ void LaunchSimulation(System sys){
 
     // Apply node function to all nodes.
     for(j = 0; j < sys->nb_nodes; j++)
-      (sys->fun)(j, RemoveHead(sys->nodes[j].receivBuf), sys); 
+      (sys->fun)(j, RemoveHead(sys->nodes[j].receivBuf)); 
 
     for(j = 0; j < sys->nb_nodes; j++){
       //msg is the older message sended by j 
