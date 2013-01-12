@@ -33,3 +33,15 @@ void TreeBroadcast(int id, Message m, System sys);
  * Note that like every functions defined here, they have the type NodesFct.
  */
 void PipelineBroadcast(int id, Message m, System sys);
+
+/*
+ * Total Order Broadcast with good latency.
+ * Note that like every functions defined here, they have the type NodesFct.
+ */
+void TOBLatencyBroadcast(int id, Message m, System sys);
+
+/*
+ * Total Order Broadcast with good throughput.
+ * Note that like every functions defined here, they have the type NodesFct.
+ */
+void TOBThroughputBroadcast(int id, Message m, System sys);

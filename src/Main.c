@@ -22,10 +22,11 @@ void display_help(FILE* output, char* pname){
   fprintf(output, "\t-R n\tSpecify a number of rounds n, default is 20.\n");
   fprintf(output, "\t-h\tDisplay this help message.\n");
   fprintf(output, "Selection of broadcast mode:\n");
+  fprintf(output, "\t-i\tIP broadcast (default).\n");
   fprintf(output, "\t-b\tBasic broadcast.\n");
   fprintf(output, "\t-t\tTree broadcast.\n");
-  fprintf(output, "\t-i\tIP broadcast (default).\n");
-  fprintf(output, "\t-p\tPipeline broadcast.\n");
+  fprintf(output, "\t-L\tTotal order broadcast with good latency.\n");
+  fprintf(output, "\t-T\tTotal order broadcast with good throughput.\n");
 }
 
 /*
@@ -41,7 +42,7 @@ int main (int argc, char **argv){
   int nb_rounds = 20;
 
   // Parsing arguments
-  while(-1 != (opt = getopt(argc, argv, "N:R:hbtip"))){
+  while(-1 != (opt = getopt(argc, argv, "N:R:hibtpLT"))){
     switch(opt){
       case 'N':
         nb_nodes = atoi(optarg);
@@ -52,17 +53,23 @@ int main (int argc, char **argv){
       case 'h':
         display_help(stdout, argv[0]);
         return 0;
+      case 'i':
+        f = IPBroadcast;
+        break;
       case 'b':
         f = BasicBroadcast;
         break;
       case 't':
         f = TreeBroadcast;
         break;
-      case 'i':
-        f = IPBroadcast;
-        break;
       case 'p':
         f = PipelineBroadcast;
+        break;
+      case 'L':
+        f = TOBLatencyBroadcast;
+        break;
+      case 'T':
+        f = TOBThroughputBroadcast;
         break;
       default: /* WTF ? */
         fprintf(stderr, "Argument error...\n");

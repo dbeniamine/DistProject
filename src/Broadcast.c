@@ -177,3 +177,19 @@ void PipelineBroadcast(int id, Message m, System sys){
 
   free(content);
 }
+
+/*
+ * Total Order Broadcast with good latency.
+ * Note that like every functions defined here, they have the type NodesFct.
+ */
+void TOBLatencyBroadcast(int id, Message m, System sys){
+  // TODO
+}
+
+/*
+ * Total Order Broadcast with good throughput.
+ * Note that like every functions defined here, they have the type NodesFct.
+ */
+void TOBThroughputBroadcast(int id, Message m, System sys){
+  // TODO
+}
