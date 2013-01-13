@@ -126,16 +126,16 @@ arbitrary string (with no line break).
 In order to better understand how the source code is organized, we give a
 brief description of the content of every source file.
 \begin{itemize}
-  \item \textbf{Fifo.h} contains a small library providing queues. These are
+  \item \textit{Fifo.h} contains a small library providing queues. These are
         used to store pending messages of external events for each process.
         It seems fair for messages (resp. external events) to be sent (resp.
         treated) in the order they arrived in the system (FIFO order: First
         In, First Out).
-  \item \textbf{Fifo.c} implements the functions defined in \textit{Fifo.h}.
-  \item \textbf{Message.h} defines what messages (a sender, a receiver and the
+  \item \textit{Fifo.c} implements the functions defined in \textit{Fifo.h}.
+  \item \textit{Message.h} defines what messages (a sender, a receiver and the
         content) and provides functions to initialize, delete and copy
         messages.
-  \item \textbf{Message.c} implements the functions defined in
+  \item \textit{Message.c} implements the functions defined in
         \textit{Message.h}.
   \item \textit{Broadcast.h} contains a definition of the different broadcast
         protocols.
