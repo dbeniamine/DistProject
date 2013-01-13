@@ -19,11 +19,9 @@ static System sys;
  * nb_nodes  : number of nodes to create.
  * nb_rounds : number of rounds to run.
  * fun       : function to execute by the nodes.
- * Returns a pointer to the System.
  */
 void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
   int i;
- // System sys;
  
   sys = malloc(sizeof(struct _System));
   if(NULL == sys){
@@ -42,15 +40,12 @@ void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
     sys->nodes[i].receivBuf = CreateFifo();
     sys->nodes[i].eventsBuf = CreateFifo();
   }
-
- // return sys;
 }
 
 /*
  * Delete a system.
- * sys : the system to delete.
  */
-void deleteSystem(void){
+void deleteSystem(){
   int i;
 
   if(NULL != sys){
@@ -72,7 +67,6 @@ void deleteSystem(void){
  * Function used by a node to send a message m which must be correcly
  * initialized.
  * m   : the message to send.
- * sys : the system.
  * Returns 0 on success.
  * Returns 1 on failure (m is NULL)
  */
@@ -86,27 +80,25 @@ int Send(Message m){
 }
 
 /*
- * Function used by a node to get its next externel event
- * id : the node id
- * Returns the string correponding to the next event if any or NULL
+ * Function used by a node to get its next externel event.
+ * id : the node id.
+ * Returns the string correponding to the next event if any or NULL.
  */
 char *getNextExternalEvent(int id){
-    return (RemoveHead(sys->nodes[id].eventsBuf));
+  return RemoveHead(sys->nodes[id].eventsBuf);
 }
  
 /*
  * Function used by a node to get the total number of nodes in the system
+ * Returns the number of nodes in the system.
  */
 int getNbNodes(){
-    return sys->nb_nodes;
+  return sys->nb_nodes;
 }
-
-
 
 /*
  * Read external events on the standard input.
  * Events are added directly to the nodes event Fifo in the system.
- * sys : the system.
  * External event format:
  *   start
  *   n event
@@ -174,7 +166,6 @@ void readExternalEvents(){
  * Core simulation function.
  * The external events are read before each round. They are handled later by
  * the node function.
- * sys : the system.
  */
 void LaunchSimulation(){
   int i, j, k;

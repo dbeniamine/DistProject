@@ -26,8 +26,6 @@ typedef struct _Node{
  */
 typedef void(*NodesFct)(int id, Message m);
 
-
-
 /*
  * Structure representing the system.
  * The last field holds a function to be execuded by the nodes.
@@ -56,7 +54,6 @@ void deleteSystem();
  * Function used by a node to send a message m which must be correcly
  * initialized.
  * m   : the message to send.
- * sys : the system.
  * Returns 0 on success.
  * Returns 1 on failure (m is NULL)
  */
@@ -70,7 +67,8 @@ int Send(Message m);
 char *getNextExternalEvent(int id);
  
 /*
- * Function used by a node to get the total number of nodes in the system
+ * Function used by a node to get the total number of nodes in the system.
+ * Returns the number of nodes in the system.
  */
 int getNbNodes();
 
