@@ -92,49 +92,107 @@
         This acknowledgement system ensure the total order property (see section
         \ref{sec:pipelineack-proof}).
         \subsubsection{Algorithm}
-        \begin{algorithm}[h]
+        \begin{algorithm}[H]
             \centering
-                 \begin{algorithmic}
-                     \Data
-                     \State int : clk
-                     \Comment{A logical clock}
-                     \State int : next
-                     \Comment{the id of the next process in the pipeline}
-                     \State int : prec
-                     \Comment{the id of the previous process in the pipeline}
-                     \State Pending : OrderedList
-                     \Comment{A list ordered by clock and id}
-                     \EndData
-                     \Init
-                     \State clk=0
-                     \State next=Id()+1\%NProcess
-                     \If{Id()==0}
-                     \State prec=NProcess
-                     \Else
-                     \State prec=Id()-1
-                     \EndIf
-                     \State Pending=EmptyQueue
-                     \EndInit
-                     \Event $< tob,Broadcast | m> $
-                     \State clk++;
-                     \State Pending$\rightarrow$add($<m,Id(), clk>$) 
-                     \State Send(next,$<m,Id(),clk>$)
-                     \EndEvent
-                 \end{algorithmic}
+            \begin{algorithmic}[5]
+                \Data
+                \State int : clk
+                \Comment{A logical clock}
+                \State int : next
+                \Comment{the id of the next process in the pipeline}
+                \State int : prec
+                \Comment{the id of the previous process in the pipeline}
+                \State Pending : OrderedList
+                \Comment{A list ordered by clock and id}
+                \EndData
+                \Init
+                \State clk$\gets$0
+                \State next$\gets$Id()+1\%NProcess
+                \If{Id()=0}
+                \State prec$\gets$NProcess
+                \Else
+                \State prec$\gets$Id()-1
+                \EndIf
+                \State Pending$\gets$EmptyQueue
+                \EndInit
+                \Event $< tob,Broadcast\ |\ m> $
+                \Comment{Start a broadcast}
+                \State clk++;
+                \State Pending$\rightarrow$add($<m,Id(), clk, false>$) 
+                \Comment{The message is added\\}
+                \Comment{to the list the false boolean\\}
+                \Comment{indicate that we have to wait for one ack}
+                \State Send(next,$<m,Id(),clk>$)
+                \EndEvent
+                \Event $<Receive\ | <m,sender, mclk>>$
+                \State clk$\gets$MAX(clk, mclk)+1
+                \If{next=sender}
+                \State Pending$\rightarrow$add($<m,sender,mclk,true>$)
+                \Comment{We are at the end of the pipeline}
+                \If{Pending$\rightarrow$IsHead(sender,mclk)}
+                \State Pending$\rightarrow$RemoveHead()
+                \State Send(prec,$<ack,sender,mclk>$)
+                \Comment{m is the first message of\\}
+                \Comment{the queue, we can acknowledge it}
+                \State Deliver(sender,m)
+                \Comment{And deliver it}
+                \EndIf
+                \Else
+                \State Pending$\rightarrow$add($<m,sender,mclk,false>$)
+                \State Send(next,$<m,sender,mclk>$)
+                \Comment{We forward m through the pipeline}
+                \EndIf
+                \EndEvent
+                \algstore{myalg}
+            \end{algorithmic}
             \caption{Pipeline based total ordered broadcast protocol}
         \end{algorithm}
-        \begin{itemize}
-            \item Optimized for throughput
-            \item Aller retour
-            \item pipeline
-            \item retour sur le pipeline inverse
-            \item chaque processus reordonne
-            \item delivre si 1 ack recu ET en tete de file
-            \item voir TO protocol cours Gruber
-            \item trois processus debit 4/3
-            \item On acquite la tête de file
-        \end{itemize}
+        \begin{algorithm}[H]
+            \centering
+            \begin{algorithmic}[5]
+                \algrestore{myalg}
+
+                \Event $<Receive\  | <ack,sender, mclk>>$
+                \State clk$\gets$ Max(clk,mlck)+1
+                \If{Pending$\rightarrow$IsHead(sender,mclk)}
+                \Comment{m is the head\\}
+                \Comment{we can deliver it}
+                \State m$gets$(Pending$\rightarrow$RemoveHead())
+                \State Deliver(sender,m)
+                \If{sender$\neq$ Id()}
+                \Comment{We have to forward the ack}
+                \State Send(prec,$<ack,sender,mclk>$
+                \EndIf
+                \State $<m,sender,mclk,b>\gets$Pending$\rightarrow$getHead()
+                \While{b}
+                \Comment{While we have receive an ack for\\}
+                \Comment{the message at the head of the queue\\}
+                \Comment{we can deliver it and forward the ack}
+                \State Pending$\rightarrow$RemoveHead()
+                \State Deliver(sender,m)
+                \If{sender$\neq$ Id()}
+                \Comment{We have to forward the ack}
+                \State Send(prec,$<ack,sender,mclk>$
+                \EndIf
+                \State $<m,sender,mclk,b>\gets$(Pending$\rightarrow$getHead())
+                \EndWhile
+                \Else
+                \Comment{m isn't the head we mark m as acknowledged\\}
+                \Comment{but we won't forward the ack and deliver it\\}
+                \Comment{until m is the head of the pending queue}
+                \State Pending$\rightarrow$Remove($<m,sender,mclk,false>$)
+                \State Pending$\rightarrow$Add($<m,sender,mclk,true>$)
+                \EndIf
+                \EndEvent
+            \end{algorithmic}
+        \end{algorithm}
         \subsubsection{Proof}
+        \begin{itemize}
+            \item Validity : As there  is no crashes, if a process P broadcast a
+                message m, m will be received by every process. If the last
+                process haven't any message in it's queue, he will acknowledge
+                and deliver m. 
+        \end{itemize}
         \label{sec:pipelineack-proof}
         \subsubsection{Latency}
         % TODO
