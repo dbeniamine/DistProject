@@ -189,9 +189,33 @@
         \subsubsection{Proof}
         \begin{itemize}
             \item Validity : As there  is no crashes, if a process P broadcast a
-                message m, m will be received by every process. If the last
-                process haven't any message in it's queue, he will acknowledge
-                and deliver m. 
+                message m, m will be received and put in the pending by every
+                process. Either all he process will be able acknowledge immediately m 
+                or there will be (at least) a process P' which is waiting for another message's ack.
+                As soon as P' will receive an ack for the other message, he will remove it from it's
+                pending queue, and at one moment he will be able to ackowledge m. 
+                So if P broadcast a message m, he will eventually receive an ack
+                for m and deliver it.
+            \item No creation : No rules of the algorithm allow a process to
+                create a message m without reveiving a broadcast request for m.
+            \item Agreement : We have prooved that if P broadcast a message m
+                than P will eventually receive an ack for m and deliver m, as
+                the pipeline go throuh all the nodes and as a node deliver a
+                message as soon as it acknowledge it, if P delivers m every node
+                have delivered m.
+            \item Total order : When a process p1 receive a message m1 with
+                clock clk1, he knows
+                that none of the process which are between the sender of m1 and p1
+                in the pipeline can start a broadcast with a clock $clk<clk1$
+                because we have perfect FIFO links.\\
+                But a process p2 which is not in this set of node can start a
+                broadcast of m2, with a clock $clk2<clk1$. This process will not send
+                any acknowledgment for m1 while he haven't received one for m2.
+                At the end of the sending phases of m2, every process will have
+                m2 as the head of it's pending queue, and m2 will be acknowledge
+                and delivered by every process. Than p2 ill be able to
+                acknowledge m1 and finally every process will acknowledged and
+                deliver m1. So the total order property is ensured.
         \end{itemize}
         \label{sec:pipelineack-proof}
         \subsubsection{Latency}
