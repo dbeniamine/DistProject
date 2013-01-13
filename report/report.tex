@@ -155,6 +155,14 @@
         In order to better understand how the source code is organized, we give a
         brief description of the content of every source file.
         \begin{itemize}
+            \item \textit{List.h} define the structure List used by
+                \textit{Fifo.$<$c/h$>$} and
+                \textit{SortedList.$<$c/h$>$}
+            \item \textit{SortedList.h} contains a small library providing sorted list of
+                objects. This library can be used by the nodes to store and sort
+                their messages.
+            \item \textit{SortedList.c} implements the functions defined in
+                \textit{SortedList.h}
             \item \textit{Fifo.h} contains a small library providing queues. These are
                 used to store pending messages of external events for each process.
                 It seems fair for messages (resp. external events) to be sent (resp.
@@ -170,17 +178,47 @@
                 protocols.
             \item \textit{Broadcast.c} implements all the different broadcast protocols.
             \item \textit{Simulator.h} defines the core functions and data structures
-                of the simulator. In particular the function \textit{LaunchSimulation}
+                of the simulator accessible by the nodes or the main function. In particular the function \textit{LaunchSimulation}
                 is the core function of the simulator and contains the main loop which
                 will do the rounds, read external events and apply the broadcast
                 policies defined in \textit{Broadcast.h}.
-            \item \textit{Simulator.c} implement the functions defined in
+            \item \textit{Simulator.c} defines the internal structure of the
+                simulator and implements the functions defined in
                 \textit{Simulator.h}.
             \item \textit{Main.c} contains the main function of the program. It takes
                 care of the command line arguments, initialize the system and call
                 the \textit{LaunchSimulation} function.
         \end{itemize}
         % TODO Explain how node functions work and detail what LaunchSimulation does
+        \subsection{How to write a program using the simulator}
+        Writing a node using our simulator is quite easy, you just have to 
+        include the file Simulator.h and write a function :\\
+        \textit{void myProtocol(int id, Message m)}
+
+        This function will be run by each node at each round of the execution.\\
+        id is the unique identifier of the Node, and m is either NULL or the
+        message received by the node id at the beginning of the round.\\
+        A node can interact with the systems using the functions defined in
+        \textit{Simulator.h} and \textit{Message.h}. For instance to get an external event
+        (if there is any) one can use the function \textit{readExternalEvents},
+        nodes can also send messages to the others and get the total number of
+        nodes in the system. Least but not last, if your nodes needs some
+        persistent data, you just have to define a data structure like this:\\
+        \begin{verbatim}
+        typedef struct _NodesData{
+                int clock;
+                SortedList pending;
+         }*NodesData;
+        \end{verbatim}
+        During the first round, you will have to tell the simulator that you
+        have some data to store for your nodes using the function \textit{void *setData(int id,
+        void *data)}.Than you can retrieve these data at anytime using the function
+        \textit{void *getData(int id)}.
+
+        Once your protocol is ready, the only thing you have to do is to create
+        a Main and call the function \textit{initSystem(int nb\_nodes, int
+        nb\_rounds, NodesFct fun)}, then you can finally start the simulation
+        with \textit{LaunchSimulation()}. 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         \section{A regular total-order broadcast protocols with good latency}
@@ -329,7 +367,7 @@
             \item No creation : No rules of the algorithm allow a process to
                 create a message m without reveiving a broadcast request for m.
             \item Agreement : We have prooved that if P broadcast a message m
-                than P will eventually receive an ack for m and deliver m, as
+                then P will eventually receive an ack for m and deliver m, as
                 the pipeline go throuh all the nodes and as a node deliver a
                 message as soon as it acknowledge it, if P delivers m every node
                 have delivered m.

@@ -12,6 +12,18 @@
 #include "Message.h"
 #include "Fifo.h"
 
+/*
+ * Internal structure representing the system.
+ * The last field holds a function to be execuded by the nodes.
+ */
+typedef struct _System{
+  Node* nodes;      // The nodes (process).
+  int nb_nodes;     // Number of nodes.
+  int nb_rounds;    // Number of rounds to simulate.
+  void(*fun)(int id, Message m); // Function
+}*System;
+
+
 static System sys;
 
 /*
@@ -39,6 +51,7 @@ void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
     sys->nodes[i].sendBuf = CreateFifo();
     sys->nodes[i].receivBuf = CreateFifo();
     sys->nodes[i].eventsBuf = CreateFifo();
+    sys->nodes[i].data=NULL;
   }
 }
 
@@ -163,6 +176,31 @@ void readExternalEvents(){
 }
 
 /*
+ * Function used by a node to create its own 
+ * persistent data set
+ * id : the node id
+ * data : the new data set
+ * Returns the previous data set, or NULL
+ */
+void *setData(int id, void *data){
+    void *old=sys->nodes[id].data;
+    sys->nodes[id].data=data;
+    return old;
+}
+
+/*
+ * Function used by a node to acces its own
+ * persistent data set
+ * id : the node id
+ * Returns the data set, or NULL
+ */
+void *getData(int id){
+    return sys->nodes[id].data;
+}
+
+
+
+/*
  * Core simulation function.
  * The external events are read before each round. They are handled later by
  * the node function.
@@ -174,7 +212,7 @@ void LaunchSimulation(){
   // Rounds loop
   for(i = 0; i < sys->nb_rounds || sys->nb_rounds < 0; i++){
     printf("Starting round %i\n", i);
-    readExternalEvents(sys);
+    readExternalEvents();
 
     // Apply node function to all nodes.
     for(j = 0; j < sys->nb_nodes; j++)
