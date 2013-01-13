@@ -25,6 +25,7 @@ void display_help(FILE* output, char* pname){
   fprintf(output, "\t-i\tIP broadcast (default).\n");
   fprintf(output, "\t-b\tBasic broadcast.\n");
   fprintf(output, "\t-t\tTree broadcast.\n");
+  fprintf(output, "\t-p\tPipeline broadcast.\n");
   fprintf(output, "\t-L\tTotal order broadcast with good latency.\n");
   fprintf(output, "\t-T\tTotal order broadcast with good throughput.\n");
 }

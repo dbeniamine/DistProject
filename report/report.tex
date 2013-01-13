@@ -5,12 +5,15 @@
 \usepackage{graphicx}
 \usepackage{latexsym}
 \usepackage{amssymb}
+\usepackage{listings}
+
+\lstset{basicstyle=\footnotesize,breaklines=true}
 
 %% New commands
 \newcommand{\eqdef}{\;\stackrel{\text{def}}{=}\;}
 
 \begin{document}
-\title{Distributed Systems: Programming Assignment}
+\title{Distributed Systems: Network Simulator}
 \author{David Benamine \& Rodolphe Lepigre\\
         MOSIG - Parallel, Distributed and Embedded Systems}
 \date{\today}
@@ -18,28 +21,227 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
+As part of our Distributed Network class, we had to build a network simulator
+tool and use it to implement and experiment with various broadcast protocols.
+In particular we paid much attention to the latency and throughput offered by
+the considered protocols.
+
+This report and the source files of the project are both part of our answer to
+the problem. The source files should be globally well documented, but reading
+this report should help the reader to better understand the structure of the
+program.\\
+
+\noindent\textbf{Structure of the report:} In the first section we present the
+architecture and functionalities of our simulator. We also present the results
+of some tests that we performed to check the behaviour of the system using the
+broadcast protocols seen in class (Basic, Tree and Pipe-line broadcast).
+
+In the second and third sections we present two regular total-order broadcast
+protocols. The first one achieves a good latency (time for a broadcast to be
+achieved with only one process sending), and the second one has a good
+throughput when all process are sending at the same time. We also give a
+detailed theoretical analysis of the two protocols.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The network simulator}
+In this section we describe the architecture of the network simulator that we
+programmed using the C programming language. The simulator follows a round
+based approach and makes use of only one thread, as was part of its
+specification.
+
+\subsection{Basic principle and usage}
+Before diving into a detailed description of the architecture of the program,
+we will start by giving some hints on how to use the simulator, and also try
+to provide some intuition to the reader on its basic working principles.
+
+Let us first outline some useful terminology that we will use throughout this
+report. In our simulator, a single machine capable of sending a message to
+other machines will be called a \textit{process}, a \textit{node}, or simply
+a \textit{machine}. The term \textit{external event} will refer to any action
+taken by the user of the simulator. For example, at some point the user might
+decide that a node should initiate a broadcast. This information will be
+passed using an external event.
+
+Before being able to use the simulator, the user should first compile it. A
+\textit{makefile} is provided in the source directory \textit{src/}. It is
+considered that the user is runing a \textit{POSIX}-friendly operating system
+and that the regular building tools are present on his machine (\textit{gcc},
+\textit{make},...).
+\begin{lstlisting}
+> cd src/
+> make
+\end{lstlisting}
+
+Once the program has been (successfully) compiled, an executable file should
+have appeared in the source directory. The program contains a ``help'' section
+which can be accessed in a standard manner.
+\begin{lstlisting}
+> ./Broadcast -h
+Usage: ../src/Broadcast [-N n][-R n][-h][-b|t|i|p]
+Possible arguments:
+	-N n	Specify a number of nodes n, default is 4.
+	-R n	Specify a number of rounds n, default is 20.
+	-h	Display this help message.
+Selection of broadcast mode:
+	-i	IP broadcast (default).
+	-b	Basic broadcast.
+	-t	Tree broadcast.
+	-p	Pipeline broadcast.
+	-L	Total order broadcast with good latency.
+	-T	Total order broadcast with good throughput.
+\end{lstlisting}
+
+The behaviour of the program can be changed using the command line arguments
+as hinted by the ``help'' section content. In particular, the number of nodes
+used during the simulation can be set. Also the number of rounds to run can be
+set, and if it is set to $0$ the system will run forever.
+
+The broadcast protocol that is going to be used can be selected as well from
+the command line. The available options are the following.
+\begin{itemize}
+  \item IP broadcast: use multicast.
+  \item Basic broadcast: the broadcaster sends to every other node in turn
+        (one per round).
+  \item Pipeline broadcast: the broadcaster sends the message to its neighbour
+        which sends it to its neighbour and so on.
+  \item Total order broadcast with good latency (described latter).
+  \item Total order broadcast with good throughput (described latter).
+\end{itemize}
+
+Once the program is run, the simulation starts right away. At each turn, the
+user will be prompted to enter external events for the system. Any number of
+external event can be entered at the begining of each round. External read on
+the standard input (on by line). And when the user is done sending events, he
+simply types ``start'' for the simulator to do a round. THe format for the
+external events is
+\begin{lstlisting}
+id event
+\end{lstlisting}
+where ``id'' is an integer which is the identifier of the node to which the
+event is destinated. ``event'' is the content of the event which can be an
+arbitrary string (with no line break).
+% TODO Give the events that are built-in
+
+\subsection{Architecture of the system}
+In order to better understand how the source code is organized, we give a
+brief description of the content of every source file.
+\begin{itemize}
+  \item \textbf{Fifo.h} contains a small library providing queues. These are
+        used to store pending messages of external events for each process.
+        It seems fair for messages (resp. external events) to be sent (resp.
+        treated) in the order they arrived in the system (FIFO order: First
+        In, First Out).
+  \item \textbf{Fifo.c} implements the functions defined in \textit{Fifo.h}.
+  \item \textbf{Message.h} defines what messages (a sender, a receiver and the
+        content) and provides functions to initialize, delete and copy
+        messages.
+  \item \textbf{Message.c} implements the functions defined in
+        \textit{Message.h}.
+  \item \textit{Broadcast.h} contains a definition of the different broadcast
+        protocols.
+  \item \textit{Broadcast.c} implements all the different broadcast protocols.
+  \item \textit{Simulator.h} defines the core functions and data structures
+        of the simulator. In particular the function \textit{LaunchSimulation}
+        is the core function of the simulator and contains the main loop which
+        will do the rounds, read external events and apply the broadcast
+        policies defined in \textit{Broadcast.h}.
+  \item \textit{Simulator.c} implement the functions defined in
+        \textit{Simulator.h}.
+  \item \textit{Main.c} contains the main function of the program. It takes
+        care of the command line arguments, initialize the system and call
+        the \textit{LaunchSimulation} function.
+\end{itemize}
+% TODO Explain how node functions work and detail what LaunchSimulation does
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A regular total-order broadcast protocols with good latency}
+% TODO
+
+\subsection{Description of the protocol}
+% TODO
+
+\subsection{Theoretical analysis}
+% TODO
+
+\subsubsection*{Latency}
+% TODO
+
+\subsubsection*{Throughput}
+% TODO
+
+\subsection{Empirical analysis}
+% TODO
+
+\subsubsection*{Latency}
+% TODO
+
+\subsubsection*{Throughput}
 % TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Simulator architecture}
+\section{A regular total-order broadcast protocols with good throughput}
+% TODO
+
+\subsection{Description of the protocol}
+% TODO
+
+\subsection{Theoretical analysis}
+% TODO
+
+\subsubsection*{Latency}
+% TODO
+
+\subsubsection*{Throughput}
+% TODO
+
+\subsection{Empirical analysis}
+% TODO
+
+\subsubsection*{Latency}
+% TODO
+
+\subsubsection*{Throughput}
 % TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Two regular total-order broadcast protocols}
+\section*{Conclusion}
 % TODO
 
-\subsection*{First protocol}
-% TODO (good latency)
+\end{document}
 
-\subsection*{Second protocol}
-% TODO (good throughput with N senders)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Theoretical analysis}
-% TODO
+%%%% Tasks
+% Task 1: Design a network simulator
+%   * Single thread
+%   * Round based
+%   * Any programming language
+%   * N processes (machines)
+%   * No crash
+%   * Each machine sends (up to) one message at the begining of a round
+%   * Each machine can receive (up to) one message at the end of a round
+%
+% Task 2: Check the behaviour of the simulator using the broadcast protocols
+%         from the lectures.
+%   * Basic (Latency = 3, Throughput = 1/3)
+%   * Trees (Latency = 2, Throughput = 1/2)
+%   * Pipe-line (Latency = 3, Throughput = 1)
+%
+% Tack 3: Design / Implement two regular total-order broadcast protocols
+%   * Assumptions: No crash, perfect link, infinite memory, perfect failure
+%                  detector
+%   * First protocol: good latency
+%   * Second protocol: good throughput (with N senders)
+%
+% Task 4: Write a report (10 to 15 pages)
+%   * Description of simulator architecture
+%   * Description of the two protocols
+%   * Theoretical analysis of the two protocols (latency, throughput)
+%   * Empirical evaluation of the two protocols (using the simulator)
 
-\subsection*{First protocol}
-% TODO
+
+%%%% Some ideas for the protocols
+
+\section*{Protocol for good latency}
 \begin{itemize}
     \item Optimized for latency
     \item Bad throughput
@@ -52,13 +254,7 @@
 \end{itemize}
 \includegraphics[width=0.5\textwidth]{latencyTO.png}
 
-\subsubsection*{Latency}
-
-\subsubsection*{Throughput}
-% TODO
-
-\subsection*{Second protocol}
-% TODO
+\section*{Protocol for good throughput}
 \begin{itemize}
     \item Optimized for throughput
     \item Aller retour
@@ -70,19 +266,4 @@
     \item trois processus debit 4/3
     \item On acquite la tête de file
 \end{itemize}
-\subsubsection*{Latency}
-% TODO
-
-\subsubsection*{Throughput}
-% TODO
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Empirical evaluation}
-% TODO
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Conclusion}
-% TODO
-
-\end{document}
 
