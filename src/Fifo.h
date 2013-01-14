@@ -5,14 +5,7 @@
  ****************************************************************************/
 #ifndef __Fifo_H__
 #define __Fifo_H__
-
-/*
- * Structure implementing linked lists.
- */
-typedef struct _List{
-  void* elt;          // Element of the current link
-  struct _List* next; // Pointer to the next link
-}*List;
+#include"List.h"
 
 /*
  * Structure implementing fifos.

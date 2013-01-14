@@ -4,8 +4,11 @@ LDFLAGS=-lm
 
 all: Broadcast clean
 
-Broadcast : Main.o Simulator.o Fifo.o Message.o Broadcast.o
+Broadcast : Main.o Simulator.o Fifo.o SortedList.o Message.o Broadcast.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 .PHONY : clean
 
