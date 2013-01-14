@@ -224,7 +224,23 @@
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         \section{A regular total-order broadcast protocols with good latency}
         \label{sec:latencyTO}
-        % TODO
+
+        This first protocol makes use or the tree broadcast protocol since it achieves
+        an optimal latency of $log(n)$. In order to obtain a total-order, i.e.
+        guarantee that any two process will deliver messages in the exact same order,
+        we use one of the nodes as a relay. More precisely, when a node wishes to
+        perform a broadcast, it sends the message to the relay node which will
+        broadcast the message on its behalf.
+
+        Intuitively, any node in the tree will receive the messages in the same order
+        since the same tree traversal scheme will be used for each message. When a
+        node of the tree receives a broadcasted message, it can deliver it immediatly
+        before forwarding it.
+
+	Since the messages to be broadcasted need to be sent to the relay node, the
+        achieved latency should be equal to the latency of the tree broadcast plus
+        the time required to unicast a message (which is $1$ round). Hence, the
+        latency of this protocol should be $log(n) + 1$ rounds.
 
         \subsection{Algorithm}
         % TODO
