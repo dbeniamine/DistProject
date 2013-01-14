@@ -183,7 +183,44 @@ void PipelineBroadcast(int id, Message m){
  * Note that like every functions defined here, they have the type NodesFct.
  */
 void TOBLatencyBroadcast(int id, Message m){
-  // TODO
+  char* event;
+  Message msgOut;
+  int i;
+
+  //Events Rules
+  while((event = getNextExternalEvent(id)) != NULL){
+    printf("Event received %d %s\n", id, event); 
+    //Read the first event
+    if(!strcmp(event, "broadcast")){
+      if(0 == id){
+        // The broadcast is your own, deliver
+        printf("Hello received by 0 (it is its own broadcast message)\n");
+	// Pass the message to your childs
+        for(i = 1; i < getNbNodes(); i *= 2){
+          msgOut = initMessage("Hello\0", id, i);
+          Send(msgOut);
+	}
+      } else {
+        // Send the message to process 0
+        msgOut = initMessage("Hello\0", id, 0);
+        Send(msgOut);
+      }
+    }
+    free(event);
+  }
+
+  // Message Rules
+  if(NULL != m){
+    printf("%s received by %d from %d\n", m->msg, id, m->sender);
+
+    for(i = 2 * id + 1; i < getNbNodes(); i *= 2){
+      msgOut = initMessage(m->msg, id, i);
+      Send(msgOut);
+    }
+
+    free(m->msg);
+    free(m);
+  }
 }
 
 /*
