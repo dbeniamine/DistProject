@@ -58,6 +58,12 @@ void* Remove(void *e,SortedList l);
 void* RemoveFirst(SortedList l);
 
 /*
+ * Returns the first element of the list or
+ *  NULL if l is empty
+ */
+void * getFirst(SortedList l);
+
+/*
  * Returns the size of a SortedList. 
  * l : the SortedList.
  */

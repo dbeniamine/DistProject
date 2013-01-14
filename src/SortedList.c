@@ -146,6 +146,14 @@ void* RemoveFirst(SortedList l){
     return NULL;
 }
 
+/*
+ * Returns the first element of the list or null
+ * if l is empty
+ */
+void * getFirst(SortedList l){
+    return l->head==NULL ? NULL :l->head->elt;
+}
+
 
 /*
  * Returns the size of a SortedList. 

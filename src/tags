@@ -28,10 +28,11 @@ LDFLAGS	Makefile	/^LDFLAGS=-lm$/;"	m
 LaunchSimulation	Simulator.c	/^void LaunchSimulation(){$/;"	f
 LaunchSimulation	Simulator.h	/^void LaunchSimulation(void);$/;"	p	signature:(void)
 List	List.h	/^}*List;$/;"	t	typeref:struct:_List
+MAX	Broadcast.c	15;"	d	file:
 Message	Message.h	/^}*Message;$/;"	t	typeref:struct:_Message
 Node	Simulator.h	/^}Node;$/;"	t	typeref:struct:_Node
 NodesFct	Simulator.h	/^typedef void(*NodesFct)(int id, Message m);$/;"	t
-NumMsg	Broadcast.c	/^    NumberedMessage NumMsg;$/;"	l
+NumMsg	Broadcast.c	/^    NumberedMessage NumMsg, temp;$/;"	l
 NumberedMessage	Broadcast.c	/^}*NumberedMessage;$/;"	t	typeref:struct:_NumberedMessage	file:
 NumberedMsgComp	Broadcast.c	/^int NumberedMsgComp(void *e1, void *e2){$/;"	f	signature:(void *e1, void *e2)
 PipelineAckData_t	Broadcast.c	/^}*PipelineAckData_t;$/;"	t	typeref:struct:_PipleineAckData_t	file:
@@ -115,17 +116,20 @@ deleteSystem	Simulator.h	/^void deleteSystem(void);$/;"	p	signature:(void)
 display_help	Main.c	/^void display_help(FILE* output, char* pname){$/;"	f	signature:(FILE* output, char* pname)
 elt	Fifo.c	/^  void* elt;$/;"	l
 elt	List.h	/^  void* elt;          \/\/ Element of the current link$/;"	m	struct:_List	access:public
-event	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+event	Broadcast.c	/^    char *event, *eventArg, *msgTxt;$/;"	l
 event	Broadcast.c	/^    char* event;$/;"	l
-eventArg	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+eventArg	Broadcast.c	/^    char *event, *eventArg, *msgTxt;$/;"	l
 eventsBuf	Simulator.h	/^    Fifo eventsBuf; \/\/ Event buffer (contains char*).$/;"	m	struct:_Node	access:public
 ex_event	Simulator.c	/^  char* ex_event = NULL;$/;"	l
+extractTwoInts	Broadcast.c	/^void extractTwoInts(char * str, int *i1, int *i2){$/;"	f	signature:(char * str, int *i1, int *i2)
 f	Fifo.c	/^  Fifo f = malloc(sizeof(struct _Fifo));$/;"	l
 f	Main.c	/^  NodesFct f = IPBroadcast;$/;"	l
 fun	Simulator.c	/^  void(*fun)(int id, Message m); \/\/ Function$/;"	m	struct:_System	file:	access:public
 fwd	Broadcast.c	/^    Message msg, fwd;$/;"	l
 getData	Simulator.c	/^void *getData(int id){$/;"	f	signature:(int id)
 getData	Simulator.h	/^void *getData(int id);$/;"	p	signature:(int id)
+getFirst	SortedList.c	/^void * getFirst(SortedList l){$/;"	f	signature:(SortedList l)
+getFirst	SortedList.h	/^void * getFirst(SortedList l);$/;"	p	signature:(SortedList l)
 getNbNodes	Simulator.c	/^int getNbNodes(){$/;"	f
 getNbNodes	Simulator.h	/^int getNbNodes(void);$/;"	p	signature:(void)
 getNextExternalEvent	Simulator.c	/^char *getNextExternalEvent(int id){$/;"	f	signature:(int id)
@@ -139,14 +143,18 @@ initMessage	Message.c	/^Message initMessage(const char* str, int snd, int rcv){$
 initMessage	Message.h	/^Message initMessage(const char* str, int snd, int rcv);$/;"	p	signature:(const char* str, int snd, int rcv)
 initSystem	Simulator.c	/^void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){$/;"	f	signature:(int nb_nodes, int nb_rounds, NodesFct fun)
 initSystem	Simulator.h	/^void initSystem(int nb_nodes, int nb_rounds, NodesFct fun);$/;"	p	signature:(int nb_nodes, int nb_rounds, NodesFct fun)
+intToStringSize	Broadcast.c	/^int intToStringSize=11; \/\/2^32 = 4294967296 =10 char +1 for '\\0' => 11 char to convert one int to string$/;"	v
 j	Simulator.c	/^  int i, j, k;$/;"	l
 k	Simulator.c	/^  int i, j, k;$/;"	l
 l	SortedList.c	/^    SortedList l=malloc(sizeof(struct _SortedList));$/;"	l
 len	Message.c	/^  int len = strlen(str) + 1;$/;"	l
 m	Broadcast.c	/^    Message m;          \/\/the message$/;"	m	struct:_NumberedMessage	file:	access:public
+m	Broadcast.c	/^    Message m;$/;"	l
 m1	Broadcast.c	/^    NumberedMessage m1=(NumberedMessage)e1, m2=(NumberedMessage)e2;$/;"	l
 m2	Broadcast.c	/^    NumberedMessage m1=(NumberedMessage)e1, m2=(NumberedMessage)e2;$/;"	l
+mOut	Broadcast.c	/^    Message mOut;$/;"	l
 main	Main.c	/^int main (int argc, char **argv){$/;"	f	signature:(int argc, char **argv)
+maxArgSize	Broadcast.c	/^int maxArgSize=200;     \/\/arbitratry maximum size for a broadcast argument$/;"	v
 msg	Broadcast.c	/^    Message msg, fwd;$/;"	l
 msg	Message.c	/^  Message msg = malloc(sizeof(struct _Message));$/;"	l
 msg	Message.h	/^  char *msg;  \/\/ Content of the message$/;"	m	struct:_Message	access:public
@@ -154,7 +162,8 @@ msg	Simulator.c	/^  Message msg, msgBis;$/;"	l
 msg	Simulator.c	/^  char* msg;$/;"	l
 msgBis	Simulator.c	/^  Message msg, msgBis;$/;"	l
 msgOut	Broadcast.c	/^    Message msgOut;$/;"	l
-msgTxt	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+msgTxt	Broadcast.c	/^    char *event, *eventArg, *msgTxt;$/;"	l
+msgTxt	Broadcast.c	/^    char *msgTxt;$/;"	l
 nTurn	Broadcast.c	/^    int nTurn;$/;"	l
 nb_match	Simulator.c	/^  int nb_match;$/;"	l
 nb_nodes	Main.c	/^  int nb_nodes = 4;$/;"	l
@@ -186,17 +195,20 @@ receivBuf	Simulator.h	/^    Fifo receivBuf; \/\/ Reception buffer (contains Mess
 receiver	Simulator.c	/^  int receiver;$/;"	l
 ret	SortedList.c	/^    void * ret;$/;"	l
 ret	SortedList.c	/^    void *ret;$/;"	l
+sendAck	Broadcast.c	/^void sendAck(int clk, int init, int sender, int receiver){$/;"	f	signature:(int clk, int init, int sender, int receiver)
 sendBuf	Simulator.h	/^    Fifo sendBuf;   \/\/ Send buffer (contains Message).$/;"	m	struct:_Node	access:public
 sender	Message.h	/^  int sender; \/\/ Identifier of the sender (external event if -1)$/;"	m	struct:_Message	access:public
 setData	Simulator.c	/^void *setData(int id, void *data){$/;"	f	signature:(int id, void *data)
 setData	Simulator.h	/^void *setData(int id,void *data);$/;"	p	signature:(int id,void *data)
 size	SortedList.h	/^    int size;               \/\/size of the list$/;"	m	struct:_SortedList	access:public
+strclone	Broadcast.c	/^    char *strclone, *tmp, *tmp1;$/;"	l
 sys	Simulator.c	/^static System sys;$/;"	v	file:
 tail	Fifo.h	/^  List tail;          \/\/ Tail of the fifo$/;"	m	struct:_Fifo	access:public
+temp	Broadcast.c	/^    NumberedMessage NumMsg, temp;$/;"	l
 temp	SortedList.c	/^    List temp,prec=pred(e,l);$/;"	l
-tmp	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+tmp	Broadcast.c	/^    char *strclone, *tmp, *tmp1;$/;"	l
 tmp	Fifo.c	/^  List tmp = f->head;$/;"	l
 tmp	SortedList.c	/^    List tmp=l->head;$/;"	l
 tmp	SortedList.c	/^    void *tmp;$/;"	l
-tmp1	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+tmp1	Broadcast.c	/^    char *strclone, *tmp, *tmp1;$/;"	l
 waitForNbAck	Broadcast.c	/^    int waitForNbAck;   \/\/number of ack that we are stil waiting for$/;"	m	struct:_NumberedMessage	file:	access:public

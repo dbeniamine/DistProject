@@ -378,9 +378,9 @@ This acknowledgement system ensure the total order property (see section
         \If{Pending$\rightarrow$IsHead(sender,mclk)}
         \Comment{m is the head\\}
         \Comment{we can deliver it}
-        \State m$gets$(Pending$\rightarrow$RemoveHead())
+        \State m$\gets$(Pending$\rightarrow$RemoveHead())
         \State Deliver(sender,m)
-        \If{sender$\neq$ Id()}
+        \If{sender$\neq$Id()}
         \Comment{We have to forward the ack}
         \State Send(prec,$<ack,sender,mclk>$
         \EndIf
@@ -391,7 +391,7 @@ This acknowledgement system ensure the total order property (see section
         \Comment{we can deliver it and forward the ack}
         \State Pending$\rightarrow$RemoveHead()
         \State Deliver(sender,m)
-        \If{sender$\neq$ Id()}
+        \If{sender$\neq$Id()}
         \Comment{We have to forward the ack}
         \State Send(prec,$<ack,sender,mclk>$
         \EndIf
