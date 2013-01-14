@@ -251,8 +251,8 @@
 		\Comment{List of the childrens of each nodes}
                 \EndData
                 \Init
-		\For{i in AllNodes()}
-		\State Children[i]$\gets$??
+		\For{n in AllNodes()}
+		\State Children[n]$\gets\{(2n + 1)2^i | i \in \mathbb{N}\} \cap \text{AllNodes()}$
 		\EndFor
                 \EndInit
                 \Event $< tob,Broadcast\ |\ m> $
