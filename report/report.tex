@@ -247,12 +247,13 @@
             \centering
             \begin{algorithmic}[5]
                 \Data
-		\State List[] Children
-		\Comment{List of the childrens of each nodes}
+		\State int[][] Children
+		\Comment{Ordered list of the childrens of each nodes}
                 \EndData
                 \Init
 		\For{n in AllNodes()}
 		\State Children[n]$\gets\{(2n + 1)2^i | i \in \mathbb{N}\} \cap \text{AllNodes()}$
+		\Comment{Children[n] is sorted in increasing order}
 		\EndFor
                 \EndInit
                 \Event $< tob,Broadcast\ |\ m> $
@@ -279,26 +280,8 @@
                 \State Send(c,$<m,broadcaster>$)
 		\EndFor
                 \EndEvent
-                %\State clk$\gets$MAX(clk, mclk)+1
-                %\If{next=sender}
-                %\State Pending$\rightarrow$add($<m,sender,mclk,true>$)
-                %\Comment{We are at the end of the pipeline}
-                %\If{Pending$\rightarrow$IsHead(sender,mclk)}
-                %\State Pending$\rightarrow$RemoveHead()
-                %\State Send(prec,$<ack,sender,mclk>$)
-                %\Comment{m is the first message of\\}
-                %\Comment{the queue, we can acknowledge it}
-                %\State Deliver(sender,m)
-                %\Comment{And deliver it}
-                %\EndIf
-                %\Else
-                %\State Pending$\rightarrow$add($<m,sender,mclk,false>$)
-                %\State Send(next,$<m,sender,mclk>$)
-                %\Comment{We forward m through the pipeline}
-                %\EndIf
-                %\algstore{myalg}
             \end{algorithmic}
-            \caption{Pipeline based total ordered broadcast protocol}
+            \caption{Tree-based total ordered broadcast protocol}
         \end{algorithm}
         % TODO
 
