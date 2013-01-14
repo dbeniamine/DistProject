@@ -31,6 +31,10 @@ List	List.h	/^}*List;$/;"	t	typeref:struct:_List
 Message	Message.h	/^}*Message;$/;"	t	typeref:struct:_Message
 Node	Simulator.h	/^}Node;$/;"	t	typeref:struct:_Node
 NodesFct	Simulator.h	/^typedef void(*NodesFct)(int id, Message m);$/;"	t
+NumMsg	Broadcast.c	/^    NumberedMessage NumMsg;$/;"	l
+NumberedMessage	Broadcast.c	/^}*NumberedMessage;$/;"	t	typeref:struct:_NumberedMessage	file:
+NumberedMsgComp	Broadcast.c	/^int NumberedMsgComp(void *e1, void *e2){$/;"	f	signature:(void *e1, void *e2)
+PipelineAckData_t	Broadcast.c	/^}*PipelineAckData_t;$/;"	t	typeref:struct:_PipleineAckData_t	file:
 PipelineBroadcast	Broadcast.c	/^void PipelineBroadcast(int id, Message m){$/;"	f	signature:(int id, Message m)
 PipelineBroadcast	Broadcast.h	/^void  PipelineBroadcast(int id, Message m);$/;"	p	signature:(int id, Message m)
 Remove	SortedList.c	/^void* Remove(void *e,SortedList l){$/;"	f	signature:(void *e,SortedList l)
@@ -66,6 +70,16 @@ _Node::data	Simulator.h	/^    void * data; \/* This structure is usefull if the 
 _Node::eventsBuf	Simulator.h	/^    Fifo eventsBuf; \/\/ Event buffer (contains char*).$/;"	m	struct:_Node	access:public
 _Node::receivBuf	Simulator.h	/^    Fifo receivBuf; \/\/ Reception buffer (contains Message).$/;"	m	struct:_Node	access:public
 _Node::sendBuf	Simulator.h	/^    Fifo sendBuf;   \/\/ Send buffer (contains Message).$/;"	m	struct:_Node	access:public
+_NumberedMessage	Broadcast.c	/^typedef struct _NumberedMessage{$/;"	s	file:
+_NumberedMessage::clk	Broadcast.c	/^    int clk;            \/\/timestamp of the message$/;"	m	struct:_NumberedMessage	file:	access:public
+_NumberedMessage::creator	Broadcast.c	/^    int creator;        \/\/Creator of the message$/;"	m	struct:_NumberedMessage	file:	access:public
+_NumberedMessage::m	Broadcast.c	/^    Message m;          \/\/the message$/;"	m	struct:_NumberedMessage	file:	access:public
+_NumberedMessage::waitForNbAck	Broadcast.c	/^    int waitForNbAck;   \/\/number of ack that we are stil waiting for$/;"	m	struct:_NumberedMessage	file:	access:public
+_PipleineAckData_t	Broadcast.c	/^typedef struct _PipleineAckData_t{$/;"	s	file:
+_PipleineAckData_t::clock	Broadcast.c	/^    int clock;          \/\/Logical clock$/;"	m	struct:_PipleineAckData_t	file:	access:public
+_PipleineAckData_t::next	Broadcast.c	/^    int next;           \/\/Next node in the pipeline$/;"	m	struct:_PipleineAckData_t	file:	access:public
+_PipleineAckData_t::pending	Broadcast.c	/^    SortedList pending; \/\/Sorted list of pending messages$/;"	m	struct:_PipleineAckData_t	file:	access:public
+_PipleineAckData_t::pred	Broadcast.c	/^    int pred;           \/\/Previous node in the pipeline$/;"	m	struct:_PipleineAckData_t	file:	access:public
 _SortedList	SortedList.h	/^typedef struct _SortedList{$/;"	s
 _SortedList::comp	SortedList.h	/^    ComparatorFct comp;$/;"	m	struct:_SortedList	access:public
 _SortedList::head	SortedList.h	/^    struct _List* head;  \/\/head of the list$/;"	m	struct:_SortedList	typeref:struct:_SortedList::_List	access:public
@@ -80,17 +94,19 @@ __List_H__	List.h	7;"	d
 __MESSAGE_H__	Message.h	8;"	d
 __SIMULATOR_H__	Simulator.h	7;"	d
 __SortedList_H__	SortedList.h	7;"	d
-aff	testlist.c	/^void aff(SortedList l){$/;"	f	signature:(SortedList l)
+argSize	Broadcast.c	/^    int argSize;$/;"	l
 bread	Simulator.c	/^  size_t bread, nbyte = 0;$/;"	l
-broadcaster	Broadcast.c	/^  int neighbor, broadcaster;$/;"	l
+broadcaster	Broadcast.c	/^    int neighbor, broadcaster;$/;"	l
 buf	Simulator.c	/^  char *buf;$/;"	l
+clk	Broadcast.c	/^    int clk;            \/\/timestamp of the message$/;"	m	struct:_NumberedMessage	file:	access:public
+clock	Broadcast.c	/^    int clock;          \/\/Logical clock$/;"	m	struct:_PipleineAckData_t	file:	access:public
 comp	SortedList.h	/^    ComparatorFct comp;$/;"	m	struct:_SortedList	access:public
-comp	testlist.c	/^int comp(void *e1, void *e2){$/;"	f	signature:(void *e1, void *e2)
-content	Broadcast.c	/^  char* content;$/;"	l
+content	Broadcast.c	/^    char* content;$/;"	l
 copyMessage	Message.c	/^Message copyMessage(Message msg){$/;"	f	signature:(Message msg)
 copyMessage	Message.h	/^Message copyMessage(Message msg);$/;"	p	signature:(Message msg)
-cur	testlist.c	/^    List cur;$/;"	l
+creator	Broadcast.c	/^    int creator;        \/\/Creator of the message$/;"	m	struct:_NumberedMessage	file:	access:public
 current	SortedList.c	/^    List current, prec;$/;"	l
+data	Broadcast.c	/^    PipelineAckData_t data;$/;"	l
 data	Simulator.h	/^    void * data; \/* This structure is usefull if the $/;"	m	struct:_Node	access:public
 deleteMessage	Message.c	/^void deleteMessage(Message msg){$/;"	f	signature:(Message msg)
 deleteMessage	Message.h	/^void deleteMessage(Message msg);$/;"	p	signature:(Message msg)
@@ -99,14 +115,15 @@ deleteSystem	Simulator.h	/^void deleteSystem(void);$/;"	p	signature:(void)
 display_help	Main.c	/^void display_help(FILE* output, char* pname){$/;"	f	signature:(FILE* output, char* pname)
 elt	Fifo.c	/^  void* elt;$/;"	l
 elt	List.h	/^  void* elt;          \/\/ Element of the current link$/;"	m	struct:_List	access:public
-elts	testlist.c	/^    int i, elts[20];$/;"	l
-event	Broadcast.c	/^  char* event;$/;"	l
+event	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+event	Broadcast.c	/^    char* event;$/;"	l
+eventArg	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
 eventsBuf	Simulator.h	/^    Fifo eventsBuf; \/\/ Event buffer (contains char*).$/;"	m	struct:_Node	access:public
 ex_event	Simulator.c	/^  char* ex_event = NULL;$/;"	l
 f	Fifo.c	/^  Fifo f = malloc(sizeof(struct _Fifo));$/;"	l
 f	Main.c	/^  NodesFct f = IPBroadcast;$/;"	l
 fun	Simulator.c	/^  void(*fun)(int id, Message m); \/\/ Function$/;"	m	struct:_System	file:	access:public
-fwd	Broadcast.c	/^  Message msg, fwd;$/;"	l
+fwd	Broadcast.c	/^    Message msg, fwd;$/;"	l
 getData	Simulator.c	/^void *getData(int id){$/;"	f	signature:(int id)
 getData	Simulator.h	/^void *getData(int id);$/;"	p	signature:(int id)
 getNbNodes	Simulator.c	/^int getNbNodes(){$/;"	f
@@ -115,13 +132,9 @@ getNextExternalEvent	Simulator.c	/^char *getNextExternalEvent(int id){$/;"	f	sig
 getNextExternalEvent	Simulator.h	/^char *getNextExternalEvent(int id);$/;"	p	signature:(int id)
 head	Fifo.h	/^  List head;          \/\/ Head of the fifo$/;"	m	struct:_Fifo	access:public
 head	SortedList.h	/^    struct _List* head;  \/\/head of the list$/;"	m	struct:_SortedList	typeref:struct:_SortedList::_List	access:public
-i	Broadcast.c	/^  int i;$/;"	l
+i	Broadcast.c	/^    int i;$/;"	l
 i	Simulator.c	/^  int i, j, k;$/;"	l
 i	Simulator.c	/^  int i;$/;"	l
-i	testlist.c	/^    int i, elts[20];$/;"	l
-i	testlist.c	/^    int i=0;$/;"	l
-i1	testlist.c	/^    int i1=*((int *)e1),i2=*((int *)e2);$/;"	l
-i2	testlist.c	/^    int i1=*((int *)e1),i2=*((int *)e2);$/;"	l
 initMessage	Message.c	/^Message initMessage(const char* str, int snd, int rcv){$/;"	f	signature:(const char* str, int snd, int rcv)
 initMessage	Message.h	/^Message initMessage(const char* str, int snd, int rcv);$/;"	p	signature:(const char* str, int snd, int rcv)
 initSystem	Simulator.c	/^void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){$/;"	f	signature:(int nb_nodes, int nb_rounds, NodesFct fun)
@@ -129,37 +142,42 @@ initSystem	Simulator.h	/^void initSystem(int nb_nodes, int nb_rounds, NodesFct f
 j	Simulator.c	/^  int i, j, k;$/;"	l
 k	Simulator.c	/^  int i, j, k;$/;"	l
 l	SortedList.c	/^    SortedList l=malloc(sizeof(struct _SortedList));$/;"	l
-l	testlist.c	/^    SortedList l=newSortedList(comp);$/;"	l
 len	Message.c	/^  int len = strlen(str) + 1;$/;"	l
+m	Broadcast.c	/^    Message m;          \/\/the message$/;"	m	struct:_NumberedMessage	file:	access:public
+m1	Broadcast.c	/^    NumberedMessage m1=(NumberedMessage)e1, m2=(NumberedMessage)e2;$/;"	l
+m2	Broadcast.c	/^    NumberedMessage m1=(NumberedMessage)e1, m2=(NumberedMessage)e2;$/;"	l
 main	Main.c	/^int main (int argc, char **argv){$/;"	f	signature:(int argc, char **argv)
-main	testlist.c	/^int main(){$/;"	f
-msg	Broadcast.c	/^  Message msg, fwd;$/;"	l
+msg	Broadcast.c	/^    Message msg, fwd;$/;"	l
 msg	Message.c	/^  Message msg = malloc(sizeof(struct _Message));$/;"	l
 msg	Message.h	/^  char *msg;  \/\/ Content of the message$/;"	m	struct:_Message	access:public
 msg	Simulator.c	/^  Message msg, msgBis;$/;"	l
 msg	Simulator.c	/^  char* msg;$/;"	l
 msgBis	Simulator.c	/^  Message msg, msgBis;$/;"	l
-msgOut	Broadcast.c	/^  Message msgOut;$/;"	l
-nTurn	Broadcast.c	/^  int nTurn;$/;"	l
+msgOut	Broadcast.c	/^    Message msgOut;$/;"	l
+msgTxt	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+nTurn	Broadcast.c	/^    int nTurn;$/;"	l
 nb_match	Simulator.c	/^  int nb_match;$/;"	l
 nb_nodes	Main.c	/^  int nb_nodes = 4;$/;"	l
 nb_nodes	Simulator.c	/^  int nb_nodes;     \/\/ Number of nodes.$/;"	m	struct:_System	file:	access:public
 nb_rounds	Main.c	/^  int nb_rounds = 20;$/;"	l
 nb_rounds	Simulator.c	/^  int nb_rounds;    \/\/ Number of rounds to simulate.$/;"	m	struct:_System	file:	access:public
 nbyte	Simulator.c	/^  size_t bread, nbyte = 0;$/;"	l
-neighbor	Broadcast.c	/^  int neighbor, broadcaster;$/;"	l
+neighbor	Broadcast.c	/^    int neighbor, broadcaster;$/;"	l
 new	Fifo.c	/^  List new = malloc(sizeof(struct _List));$/;"	l
 new	SortedList.c	/^    List new=malloc(sizeof(struct _List));$/;"	l
 newSortedList	SortedList.c	/^SortedList newSortedList(ComparatorFct comp){$/;"	f	signature:(ComparatorFct comp)
 newSortedList	SortedList.h	/^SortedList newSortedList(ComparatorFct comp);$/;"	p	signature:(ComparatorFct comp)
+next	Broadcast.c	/^    int next;           \/\/Next node in the pipeline$/;"	m	struct:_PipleineAckData_t	file:	access:public
 next	List.h	/^  struct _List* next; \/\/ Pointer to the next link$/;"	m	struct:_List	typeref:struct:_List::_List	access:public
 nodes	Simulator.c	/^  Node* nodes;      \/\/ The nodes (process).$/;"	m	struct:_System	file:	access:public
 o	Fifo.c	/^  void *o;$/;"	l
 old	Simulator.c	/^    void *old=sys->nodes[id].data;$/;"	l
 opt	Main.c	/^  int opt;$/;"	l
+pending	Broadcast.c	/^    SortedList pending; \/\/Sorted list of pending messages$/;"	m	struct:_PipleineAckData_t	file:	access:public
 prec	SortedList.c	/^    List current, prec;$/;"	l
 prec	SortedList.c	/^    List prec;$/;"	l
 prec	SortedList.c	/^    List temp,prec=pred(e,l);$/;"	l
+pred	Broadcast.c	/^    int pred;           \/\/Previous node in the pipeline$/;"	m	struct:_PipleineAckData_t	file:	access:public
 pred	SortedList.c	/^List pred(void *e, SortedList l){$/;"	f	signature:(void *e, SortedList l)
 readExternalEvents	Simulator.c	/^void readExternalEvents(){$/;"	f
 readExternalEvents	Simulator.h	/^void readExternalEvents(void);$/;"	p	signature:(void)
@@ -176,7 +194,9 @@ size	SortedList.h	/^    int size;               \/\/size of the list$/;"	m	struc
 sys	Simulator.c	/^static System sys;$/;"	v	file:
 tail	Fifo.h	/^  List tail;          \/\/ Tail of the fifo$/;"	m	struct:_Fifo	access:public
 temp	SortedList.c	/^    List temp,prec=pred(e,l);$/;"	l
-temp	testlist.c	/^    int * temp;$/;"	l
+tmp	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
 tmp	Fifo.c	/^  List tmp = f->head;$/;"	l
 tmp	SortedList.c	/^    List tmp=l->head;$/;"	l
 tmp	SortedList.c	/^    void *tmp;$/;"	l
+tmp1	Broadcast.c	/^    char *event, *eventArg, *msgTxt, *tmp, tmp1;$/;"	l
+waitForNbAck	Broadcast.c	/^    int waitForNbAck;   \/\/number of ack that we are stil waiting for$/;"	m	struct:_NumberedMessage	file:	access:public
