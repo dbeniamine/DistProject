@@ -161,6 +161,7 @@ msg	Message.h	/^  char *msg;  \/\/ Content of the message$/;"	m	struct:_Message	
 msg	Simulator.c	/^  Message msg, msgBis;$/;"	l
 msg	Simulator.c	/^  char* msg;$/;"	l
 msgBis	Simulator.c	/^  Message msg, msgBis;$/;"	l
+msgContent	Broadcast.c	/^    char* msgContent;$/;"	l
 msgOut	Broadcast.c	/^    Message msgOut;$/;"	l
 msgTxt	Broadcast.c	/^    char *event, *eventArg, *msgTxt;$/;"	l
 msgTxt	Broadcast.c	/^    char *msgTxt;$/;"	l
