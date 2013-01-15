@@ -567,7 +567,7 @@ In this report we presented our implementation of a single-threaded,
 round-based network simulator. We later used it to implement and reason about
 two total-order broadcast protocols that we designed.
 
-One of them achieved a latency of $\lceil\log_2(N)\rlceil + 1$ which is close
+One of them achieved a latency of $\lceil\log_2(N)\rceil + 1$ which is close
 to the optimal latency that one can achieve with a broadcast protocol where no
 total-order is required.
 
@@ -576,9 +576,9 @@ optimal, but still quite good if we consider that we gained a total ordering
 in the process.
 
 An interesting future work would be to try to determine if there exists a
-total-order broadcast protocol that achives an optimal latency of $\log_2(N)$,
-or a protocol that achieve a better throughput than the second protocol
-presented in this report.
+total-order broadcast protocol that achives an optimal latency of
+$\lceil\log_2(N)\rceil$, or a protocol that achieve a better throughput than
+the second protocol presented in this report.
 
 \end{document}
 
