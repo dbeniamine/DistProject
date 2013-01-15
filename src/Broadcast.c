@@ -18,6 +18,16 @@ int maxArgSize=200;     //arbitratry maximum size for a broadcast argument
 int intToStringSize=11; //2^32 = 4294967296 =10 char +1 for '\0' => 11 char to convert one int to string
 
 /*
+ * Standardized deliver function for all
+ * broadcasts
+ * m    : the message delivered
+ * id   : the node which delivers the message
+ */
+void deliver(Message m, int id){
+    printf("message delivered : %s sender : %d on node %d\n", m->msg,m->sender ,id);
+}
+
+/*
  * Ip broadcast. A node can send to every other node in one round.
  * Note that like every functions defined here, they have the type NodesFct.
  */
@@ -41,7 +51,7 @@ void IPBroadcast(int id, Message m){
 
     //Message Rules
     if(NULL != m){
-        printf("%s received by %d from %d\n", m->msg, id, m->sender);
+        deliver(m,id);
         free(m->msg);
         free(m);
     }
@@ -76,7 +86,7 @@ void BasicBroadcast(int id, Message m){
 
     //Message Rules
     if(NULL != m){
-        printf("%s received by %d from %d\n", m->msg, id, m->sender);
+        deliver(m,id);
         free(m->msg);
         free(m);
     }
@@ -111,7 +121,7 @@ void TreeBroadcast(int id, Message m){
 
     //Message Rules
     if(NULL != m){
-        printf("%s received by %d from %d\n", m->msg, id, m->sender);
+        deliver(m,id);
         //at a step n, a message is sent at a distance 2^n
         //the distance is not exactly the difference between the sender and the
         //receiver id because of the mod N
@@ -404,7 +414,7 @@ void TOBThroughputBroadcast(int id, Message m){
         if(strstr(m->msg,"ack")==NULL){
             printf("%s received by %d from %d but not delivered yet\n", m->msg, id, m->sender);
             //m is an actual message
-            NumMsg->m=copyMessage(m);
+            NumMsg->m=m;
             if(NumMsg->creator!=data->next){
                 //We need to forward the message
                 mOut=initMessage(m->msg,id,data->next);
@@ -421,7 +431,7 @@ void TOBThroughputBroadcast(int id, Message m){
                     //don't forget to remove the message from the pending list
                     RemoveFirst(data->pending);
                     //And we delivers it message !
-                    printf("message delivered : %s on node %d\n", NumMsg->m->msg, id);
+                    deliver(NumMsg->m,id);
                     free(NumMsg->m->msg);
                     free(NumMsg->m);
                     free(NumMsg);
@@ -445,7 +455,7 @@ void TOBThroughputBroadcast(int id, Message m){
                     //we remove the message from the pending list
                     RemoveFirst(data->pending);
                     //deliver
-                    printf("message delivered : %s on node %d\n", NumMsg->m->msg, id);
+                    deliver(NumMsg->m,id);
                     //we can free the message
                     free(NumMsg->m->msg);
                     free(NumMsg->m);
@@ -469,10 +479,10 @@ void TOBThroughputBroadcast(int id, Message m){
                     }
                 }
             }
+            // Free the local message
+            free(m->msg);
+            free(m);
         }
-        // Free the local message
-        free(m->msg);
-        free(m);
     }
 
 }

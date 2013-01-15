@@ -113,6 +113,7 @@ deleteMessage	Message.c	/^void deleteMessage(Message msg){$/;"	f	signature:(Mess
 deleteMessage	Message.h	/^void deleteMessage(Message msg);$/;"	p	signature:(Message msg)
 deleteSystem	Simulator.c	/^void deleteSystem(){$/;"	f
 deleteSystem	Simulator.h	/^void deleteSystem(void);$/;"	p	signature:(void)
+deliver	Broadcast.c	/^void deliver(Message m, int id){$/;"	f	signature:(Message m, int id)
 display_help	Main.c	/^void display_help(FILE* output, char* pname){$/;"	f	signature:(FILE* output, char* pname)
 elt	Fifo.c	/^  void* elt;$/;"	l
 elt	List.h	/^  void* elt;          \/\/ Element of the current link$/;"	m	struct:_List	access:public

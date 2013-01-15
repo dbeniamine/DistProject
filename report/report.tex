@@ -287,64 +287,64 @@ latency of this protocol should intuitively be $log(n) + 1$ rounds.
 \subsubsection*{Correctness}
 \begin{itemize}
     \item Validity: we assume that there are no crashes, so if a process $p$
-	broadcasts a message $p$, then $p$ eventually delivers $m$. If $p = 0$
-	($p$ is the relay node) the proof is trivial (by definition of the
-	\textit{Broadcast} event).
+        broadcasts a message $p$, then $p$ eventually delivers $m$. If $p = 0$
+        ($p$ is the relay node) the proof is trivial (by definition of the
+        \textit{Broadcast} event).
 
-	If $p$ is not the relay, the message $m$ will be forwarded to the
-	relay for it do perform the broadcast. Since the broadcast is
-	propagated on a tree which root is the relay, any node in the tree
-	will eventually deliver the message (by definition of the
-	\textit{Receive} event). In particular $p$ will eventually deliver it.
+        If $p$ is not the relay, the message $m$ will be forwarded to the
+        relay for it do perform the broadcast. Since the broadcast is
+        propagated on a tree which root is the relay, any node in the tree
+        will eventually deliver the message (by definition of the
+        \textit{Receive} event). In particular $p$ will eventually deliver it.
     \item No duplication: when a message is broadcasted by a node $p$ it is not
-	delivered right away by $p$ (except if $p = 0$). A node $p$ only
-	delivers a message $m$ when it receives it from its parent node (by
-	definition of the \textit{Receive} event). By the property that no
-	node in a tree can have more than one parent, a message can only be
-	delivered once.
+        delivered right away by $p$ (except if $p = 0$). A node $p$ only
+        delivers a message $m$ when it receives it from its parent node (by
+        definition of the \textit{Receive} event). By the property that no
+        node in a tree can have more than one parent, a message can only be
+        delivered once.
     \item No creation: delivery of messages $m$ by a process $p$ happen in two
-	cases. Either during a \textit{Broadcast} event if $p=0$, or during a
-	\textit{Receive} event.
+        cases. Either during a \textit{Broadcast} event if $p=0$, or during a
+        \textit{Receive} event.
 
-	In the first case, the message $m$ is delivered by process $p=0$, which
-	initiated itself a broadcast (the message $m$ was previously
-	broadcasted by process $p=0$).
+        In the first case, the message $m$ is delivered by process $p=0$, which
+        initiated itself a broadcast (the message $m$ was previously
+        broadcasted by process $p=0$).
 
-	In the second case, the message $m$ is deliverd by $p$ in response of
-	a \textit{Receive} event. As we are using a perfect point-to-point
-	link (with in particular no creation), the message was sent by the
-	parent of the node, which received it before by its parent and so on
-	up to the root of the tree, which is process $0$. There are two
-	possibilities: either $0$ is the broadcaster, or not. In the first
-	case $0$ previously initiated the broadcast. In the second case, some
-	other process $s$ initiated the broadcast and sent its message to the
-	relay (by definition of the \textit{Broadcast} event).
+        In the second case, the message $m$ is deliverd by $p$ in response of
+        a \textit{Receive} event. As we are using a perfect point-to-point
+        link (with in particular no creation), the message was sent by the
+        parent of the node, which received it before by its parent and so on
+        up to the root of the tree, which is process $0$. There are two
+        possibilities: either $0$ is the broadcaster, or not. In the first
+        case $0$ previously initiated the broadcast. In the second case, some
+        other process $s$ initiated the broadcast and sent its message to the
+        relay (by definition of the \textit{Broadcast} event).
     \item Agreement: since all process are correct (no crashes) we need to
-	show that when a message $m$ is delivered by a process $p$ then it is
-	eventually delivered by every other process. Processes are organized
-	in a tree which root is process $0$, so process $p$ has related nodes
-	in the tree: a parent if $p \neq O$, siblings and childrens.
+        show that when a message $m$ is delivered by a process $p$ then it is
+        eventually delivered by every other process. Processes are organized
+        in a tree which root is process $0$, so process $p$ has related nodes
+        in the tree: a parent if $p \neq O$, siblings and childrens.
 
-	If $p \neq 0$, his parent should have delivered message $m$ before
-	$p$ since the message was forwarded to $p$ by its parent.
+        If $p \neq 0$, his parent should have delivered message $m$ before
+        $p$ since the message was forwarded to $p$ by its parent.
 
-	If $p$ has siblings (nodes that share the same parent as $p$), the
-	parent should take care of forwarding the message to them, and the
-	message will be properly delivered in the sibling branches of the
-	tree independently of whan happen for $p$.
+        If $p$ has siblings (nodes that share the same parent as $p$), the
+        parent should take care of forwarding the message to them, and the
+        message will be properly delivered in the sibling branches of the
+        tree independently of whan happen for $p$.
 
-	If $p$ has children it will eventually forward message $m$ to them
-	(by definition of the \textit{Receive} event) so that they can
-	deliver it and forward it in turn to their children and so on.
+        If $p$ has children it will eventually forward message $m$ to them
+        (by definition of the \textit{Receive} event) so that they can
+        deliver it and forward it in turn to their children and so on.
     \item Total order: all the messages are effectively broadcasted by process
-	$0$ (the relay) since no delivery happens until process $0$ receives
-	the message to broadcast. Once process $0$ has chosen an order for the
-	messages to be delivered, the order of delivery is kept throughout the
-	tree. Since every node has only one parent and the link between this
-	node and its parent is fifo, there can be no inversion. Also when a
-	node forwards a message to its children it sends this message to all
-	of his children without interspering other messaging during the
-	process. This ensures a total order for the delivery of messages.
+        $0$ (the relay) since no delivery happens until process $0$ receives
+        the message to broadcast. Once process $0$ has chosen an order for the
+        messages to be delivered, the order of delivery is kept throughout the
+        tree. Since every node has only one parent and the link between this
+        node and its parent is fifo, there can be no inversion. Also when a
+        node forwards a message to its children it sends this message to all
+        of his children without interspering other messaging during the
+        process. This ensures a total order for the delivery of messages.
 \end{itemize}
 
 \subsubsection*{Latency}
@@ -366,8 +366,8 @@ We give two different results for the latency:
 \begin{itemize}
     \item \textbf{Worst case latency:} $\lceil\log_2(N)\rceil + 1$
     \item \textbf{Mean latency:} $\frac{1}{N} \lceil\log_2(N)\rceil +
-	                          \frac{N-1}{N} (\lceil\log_2(N)\rceil + 1)
-	                          = \lceil\log_2(N)\rceil + \frac{N-1}{N}$
+        \frac{N-1}{N} (\lceil\log_2(N)\rceil + 1)
+        = \lceil\log_2(N)\rceil + \frac{N-1}{N}$
 \end{itemize}
 
 Both the worst case and the mean latency tend to the optimal when $N$ is
@@ -424,7 +424,7 @@ This acknowledgement system ensure the total order property (see section
         \State int : prec
         \Comment{the id of the previous process in the pipeline}
         \State Pending : OrderedList
-        \Comment{A list ordered by clock and id}
+        \Comment{A list ordered by clock then id}
         \EndData
         \Init
         \State clk$\gets$0
@@ -449,12 +449,15 @@ This acknowledgement system ensure the total order property (see section
         \State clk$\gets$MAX(clk, mclk)+1
         \If{next=sender}
         \State Pending$\rightarrow$add($<m,sender,mclk,true>$)
-        \Comment{We are at the end of the pipeline}
+        \Comment{We are at the end\\}
+        \Comment{of the pipeline}
+        \State Send(prec,$<ack,sender,mclk>$)
+        \Comment{so we start the\\}
+        \Comment{broadcast of acks}
         \If{Pending$\rightarrow$IsHead(sender,mclk)}
         \State Pending$\rightarrow$RemoveHead()
-        \State Send(prec,$<ack,sender,mclk>$)
         \Comment{m is the first message of\\}
-        \Comment{the queue, we can acknowledge it}
+        \Comment{the queue, we can deliver it}
         \State Deliver(sender,m)
         \Comment{And deliver it}
         \EndIf
@@ -475,32 +478,28 @@ This acknowledgement system ensure the total order property (see section
 
         \Event $<Receive\  | <ack,sender, mclk>>$
         \State clk$\gets$ Max(clk,mlck)+1
+        \If{sender$\neq$Id()}
+        \Comment{We have to forward the ack}
+        \State Send(prec,$<ack,sender,mclk>$
+        \EndIf
         \If{Pending$\rightarrow$IsHead(sender,mclk)}
         \Comment{m is the head\\}
         \Comment{we can deliver it}
         \State m$\gets$(Pending$\rightarrow$RemoveHead())
         \State Deliver(sender,m)
-        \If{sender$\neq$Id()}
-        \Comment{We have to forward the ack}
-        \State Send(prec,$<ack,sender,mclk>$
-        \EndIf
         \State $<m,sender,mclk,b>\gets$Pending$\rightarrow$getHead()
         \While{b}
         \Comment{While we have receive an ack for\\}
         \Comment{the message at the head of the queue\\}
-        \Comment{we can deliver it and forward the ack}
+        \Comment{we can deliver it}
         \State Pending$\rightarrow$RemoveHead()
         \State Deliver(sender,m)
-        \If{sender$\neq$Id()}
-        \Comment{We have to forward the ack}
-        \State Send(prec,$<ack,sender,mclk>$
-        \EndIf
         \State $<m,sender,mclk,b>\gets$(Pending$\rightarrow$getHead())
         \EndWhile
         \Else
         \Comment{m isn't the head we mark m as acknowledged\\}
-        \Comment{but we won't forward the ack and deliver it\\}
-        \Comment{until m is the head of the pending queue}
+        \Comment{but deliver it until m is the head\\}
+        \Comment{of the pending queue}
         \State Pending$\rightarrow$Remove($<m,sender,mclk,false>$)
         \State Pending$\rightarrow$Add($<m,sender,mclk,true>$)
         \EndIf
@@ -513,14 +512,23 @@ This acknowledgement system ensure the total order property (see section
 \subsubsection{Correctness}
 \begin{itemize}
     \item Validity: As there  is no crashes, if a process P broadcast a
-        message m, m will be received and put in the pending by every
-        process. Either all he process will be able acknowledge immediately m 
-        or there will be (at least) a process P' which is waiting for another message's ack.
-        As soon as P' will receive an ack for the other message, he will remove it from it's
-        pending queue, and at one moment he will be able to ackowledge m. 
+        message m, m will be received, put in the pending queue and acknowledged 
+        by every process. When P will receive the ack for m, either m will be
+        the head of it's queue and he will be able to deliver it, or P will wait
+        for at least one other message ack. 
+        
+        As the queue is ordered by logical clock and as all nodes have been on
+        the pipeline forwarding m or it's ack, once P has received the
+        acknowledgment for m, no new message will be able to go before m in the
+        queue. Finally as all message will eventually be acknowledged, number of
+        message before m in the queue will decrease. And after the reception of
+        one ack, m will be the head of the queue and will be delivered.
+
         So if P broadcast a message m, he will eventually receive an ack
         for m and deliver it.
-    \item No duplication: ?? % TODO
+    \item No duplication: Each message are send and ack only once. As soon as a
+        message is delivered it's removed from the pending queue, so it cannot
+        be delivered again.
     \item No creation: No rules of the algorithm allow a process to
         create a message m without reveiving a broadcast request for m.
     \item Agreement: We have prooved that if P broadcast a message m
@@ -528,30 +536,54 @@ This acknowledgement system ensure the total order property (see section
         the pipeline go throuh all the nodes and as a node deliver a
         message as soon as it acknowledge it, if P delivers m every node
         have delivered m.
-    \item Total order: When a process p1 receive a message m1 with
-        clock clk1, he knows
-        that none of the process which are between the sender of m1 and p1
-        in the pipeline can start a broadcast with a clock $clk<clk1$
-        because we have perfect FIFO links.\\
-        But a process p2 which is not in this set of node can start a
-        broadcast of m2, with a clock $clk2<clk1$. This process will not send
-        any acknowledgment for m1 while he haven't received one for m2.
-        At the end of the sending phases of m2, every process will have
-        m2 as the head of it's pending queue, and m2 will be acknowledge
-        and delivered by every process. Than p2 ill be able to
-        acknowledge m1 and finally every process will acknowledged and
-        deliver m1. So the total order property is ensured.
+    \item Total order: Let's imagine that two process p1 have delivered a message m1 then a
+        message m2 and p2 have delivered m2 then m1. 
+        
+        As all the node's queues are sorted the same way we can consider that
+        the \textit{good} order is the order of the queue, and we (empirically)
+        state that this order is $m1<m2$.
+
+        So if p2 has delivered m2 before m1, that means p2 had receive m2,
+        delivered it, and then have received m1. Indeed if m1 have been received
+        before m2 or if m1 and m2 have been in the queue at the same time, p2
+        would have delivered m1 before m2.
+
+        Either p2 is the last node of the pipeline used by m1, or p2 has
+        received an ack for m1. In both cases, that mean when p2 is able to
+        deliver m1, all the process have seen m1 and do the operation 
+        \textit{clock=Max(clock(M1),MyClock)+1} before forwarding it or 
+        sending an ack. If a process had send
+        m2 with a clock smaller or equal to clock(m1), this message would have
+        used the same path than m1 (or m1's ack) and as the link are FIFO, p2
+        would have received m2 before m1. This contradict the hypothesis so two
+        process can't deliver two message in a different order.
+
+        The total order property is true !
+
 \end{itemize}
 \label{sec:pipelineack-proof}
 
 
 \subsubsection*{Latency}
 % TODO
-2*N
+The algorithm is based on the pipeline broadcast, if we have $N$ nodes, it takes
+$N$ round for one broadcast. But as the last node of the pipeline start a
+broadcast of acknowledgment, and as we wait for these ack to deliver the
+message, the message is delivered by all the nodes only after $2N$ rounds.
+
+As the pipeline is perfectly parallel, the latency will always be $2N$.
 \subsubsection*{Throughput}
-% TODO
-N messages in 2*N round : 1/2 \\
-Throughput doesn't depend on N !
+Let’s consider a system with N nodes that wishes to broadcast a message concurrently
+We wish to know how long this will take to all N broadcasts to
+complete.
+
+All the nodes will spread through different pipeline and in $2N$ rounds, all the
+nodes will have received all the messages and all the acks, so in $2N$ rounds,
+every node is able to deliver every message in it's queue.
+
+Finally, it take $2N$ rounds to broadcast $N$ messages, so we have a throughput
+of $\frac{N}{2N}=\frac{1}{2}$ which is totally independent of the number of
+messages !
 \subsection{Empirical analysis}
 % TODO
 
@@ -567,16 +599,17 @@ In this report we presented our implementation of a single-threaded,
 round-based network simulator. We later used it to implement and reason about
 two total-order broadcast protocols that we designed.
 
-One of them achieved a latency of $\lceil\log_2(N)\rlceil + 1$ which is close
+One of them achieved a latency of $\lceil\log_2(N)\rceil + 1$ which is close
 to the optimal latency that one can achieve with a broadcast protocol where no
 total-order is required.
 
-The second protocol achieves a throughput of $???$ which is quite far from the
-optimal, but still quite good if we consider that we gained a total ordering
-in the process.
+The second protocol achieves a throughput of $1/2$ which is only half the
+optimal for a broadcast protocol, but it's the price to pay to achieve a total
+order. Moreover this result is independent from the number of message which mean
+that performances won't decrease when we will want to send a lot of messages.
 
 An interesting future work would be to try to determine if there exists a
-total-order broadcast protocol that achives an optimal latency of $\log_2(N)$,
+total-order broadcast protocol that achieves an optimal latency of $\log_2(N)$,
 or a protocol that achieve a better throughput than the second protocol
 presented in this report.
 

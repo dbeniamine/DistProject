@@ -31,7 +31,7 @@ Message initMessage(const char* str, int snd, int rcv){
     exit(1);
   }
 
-  strncpy(msg->msg, str, len);
+  msg->msg=strncpy(msg->msg, str, len);
   msg->sender = snd;
   msg->receiv = rcv;
 
