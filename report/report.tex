@@ -239,7 +239,7 @@ before forwarding it.
 Since the messages to be broadcasted need to be sent to the relay node, the
 achieved latency should be equal to the latency of the tree broadcast plus
 the time required to unicast a message (which is $1$ round). Hence, the
-latency of this protocol should be $log(n) + 1$ rounds.
+latency of this protocol should intuitively be $log(n) + 1$ rounds.
 
 \subsection{Algorithm}
 \begin{algorithm}[H]
@@ -282,9 +282,25 @@ latency of this protocol should be $log(n) + 1$ rounds.
     \end{algorithmic}
     \caption{Tree-based total ordered broadcast protocol}
 \end{algorithm}
-% TODO
 
 \subsection{Theoretical analysis}
+\subsubsection*{Correctness}
+\begin{itemize}
+    \item Validity: we assume that there are no crashes, so if a process $p$
+	broadcasts a message $p$, then $p$ eventually delivers $m$. If $p = 0$
+	($p$ is the relay node) the proof is trivial (by definition of the
+	\textit{Broadcast} event).
+
+	If $p$ is not the relay, the message $m$ will be forwarded to the
+	relay for it do perform the broadcast. Since the broadcast is
+	propagated on a tree which root is the relay, any node in the tree
+	will eventually deliver the message (by definition of the
+	\textit{Receive} event). In particular $p$ will eventually deliver it.
+    \item No creation:
+    \item Agreement:
+    \item Total order:
+\end{itemize}
+
 % TODO
 
 \subsubsection*{Latency}
@@ -410,9 +426,9 @@ This acknowledgement system ensure the total order property (see section
 
 
 \subsection{Theoretical analysis}
-\subsubsection{Proof}
+\subsubsection{Correctness}
 \begin{itemize}
-    \item Validity : As there  is no crashes, if a process P broadcast a
+    \item Validity: As there  is no crashes, if a process P broadcast a
         message m, m will be received and put in the pending by every
         process. Either all he process will be able acknowledge immediately m 
         or there will be (at least) a process P' which is waiting for another message's ack.
@@ -420,14 +436,14 @@ This acknowledgement system ensure the total order property (see section
         pending queue, and at one moment he will be able to ackowledge m. 
         So if P broadcast a message m, he will eventually receive an ack
         for m and deliver it.
-    \item No creation : No rules of the algorithm allow a process to
+    \item No creation: No rules of the algorithm allow a process to
         create a message m without reveiving a broadcast request for m.
-    \item Agreement : We have prooved that if P broadcast a message m
+    \item Agreement: We have prooved that if P broadcast a message m
         then P will eventually receive an ack for m and deliver m, as
         the pipeline go throuh all the nodes and as a node deliver a
         message as soon as it acknowledge it, if P delivers m every node
         have delivered m.
-    \item Total order : When a process p1 receive a message m1 with
+    \item Total order: When a process p1 receive a message m1 with
         clock clk1, he knows
         that none of the process which are between the sender of m1 and p1
         in the pipeline can start a broadcast with a clock $clk<clk1$
@@ -494,31 +510,3 @@ This acknowledgement system ensure the total order property (see section
 %   * Theoretical analysis of the two protocols (latency, throughput)
 %   * Empirical evaluation of the two protocols (using the simulator)
 
-
-%%%% Some ideas for the protocols
-
-\section*{Protocol for good latency}
-\begin{itemize}
-    \item Optimized for latency
-    \item Bad throughput
-    \item Every broadcast go through the same tree
-    \item $P_0$ is always the broadcast initiator
-    \item $P_0$ is responsible for the order
-    \item if $P_i$ want to send a message, he sent it to 0 who do the broadcast
-    \item Latency : log(N) + 1 (send to 0)
-    \item Throughput : todo
-\end{itemize}
-\includegraphics[width=0.5\textwidth]{latencyTO.png}
-
-\section*{Protocol for good throughput}
-\begin{itemize}
-    \item Optimized for throughput
-    \item Aller retour
-    \item pipeline
-    \item retour sur le pipeline inverse
-    \item chaque processus reordonne
-    \item delivre si 1 ack recu ET en tete de file
-    \item voir TO protocol cours Gruber
-    \item trois processus debit 4/3
-    \item On acquite la tête de file
-\end{itemize}
