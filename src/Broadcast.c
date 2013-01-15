@@ -191,6 +191,7 @@ void PipelineBroadcast(int id, Message m){
 void TOBLatencyBroadcast(int id, Message m){
     char* event;
     Message msgOut;
+    char* msgContent;
     int i;
 
     //Events Rules
@@ -200,15 +201,17 @@ void TOBLatencyBroadcast(int id, Message m){
         if(!strcmp(event, "broadcast")){
             if(0 == id){
                 // The broadcast is your own, deliver
-                printf("Hello received by 0 (it is its own broadcast message)\n");
+                printf("Hello from 0! received by 0 from 0\n");
                 // Pass the message to your childs
                 for(i = 1; i < getNbNodes(); i *= 2){
-                    msgOut = initMessage("Hello\0", id, i);
+                    msgOut = initMessage("Hello from 0!\0", id, i);
                     Send(msgOut);
                 }
             } else {
                 // Send the message to process 0
-                msgOut = initMessage("Hello\0", id, 0);
+                msgContent = malloc(64 * sizeof(char));
+                snprintf(msgContent, 64, "Hello from %i!", id);
+                msgOut = initMessage(msgContent, id, 0);
                 Send(msgOut);
             }
         }
