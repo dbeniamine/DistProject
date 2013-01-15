@@ -265,7 +265,7 @@ typedef struct _NumberedMessage{
 int NumberedMsgComp(void *e1, void *e2){
     NumberedMessage m1=(NumberedMessage)e1, m2=(NumberedMessage)e2;
     if(m1->clk==m2->clk){
-        return m2->creator-m1->creator;
+        return m1->creator-m2->creator;
     }
     return m1->clk-m2->clk;
 }
