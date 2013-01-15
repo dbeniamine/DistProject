@@ -415,11 +415,12 @@ void TOBThroughputBroadcast(int id, Message m){
                 //we are the end of the pipeline 
                 NumMsg->waitForNbAck=0;
                 AddSorted(NumMsg, data->pending);
+                //we send an ack as soon as the message is received
                 sendAck(NumMsg->clk,NumMsg->creator,id,data->pred);
                 if(!NumberedMsgComp(getFirst(data->pending),NumMsg)){
                     //don't forget to remove the message from the pending list
                     RemoveFirst(data->pending);
-                    //And we delivers the message !
+                    //And we delivers it message !
                     printf("message delivered : %s on node %d\n", NumMsg->m->msg, id);
                     free(NumMsg->m->msg);
                     free(NumMsg->m);
@@ -431,18 +432,19 @@ void TOBThroughputBroadcast(int id, Message m){
         }else{
             //this is an ack
             if((temp=getFirst(data->pending))!=NULL && !NumberedMsgComp(NumMsg,temp)){
-            printf("%s received by %d from %d \n", m->msg, id, m->sender);
+                printf("%s received by %d from %d \n", m->msg, id, m->sender);
                 free(NumMsg);   //NumMsg was a temporary variable, we free it and we work
                 //with the messages on the pending
-                //
                 //we will try to deliver and ack as much message as possible
-                NumMsg=getFirst(data->pending);
+                NumMsg=temp;
+                if(NumMsg->creator!=id){
+                    sendAck(NumMsg->clk,NumMsg->creator,id,data->pred);
+                }
                 NumMsg->waitForNbAck=0;
                 while(NumMsg!=NULL && NumMsg->waitForNbAck==0){
                     //we remove the message from the pending list
                     RemoveFirst(data->pending);
                     //deliver
-                    sendAck(NumMsg->clk,NumMsg->creator,id,data->pred);
                     printf("message delivered : %s on node %d\n", NumMsg->m->msg, id);
                     //we can free the message
                     free(NumMsg->m->msg);
@@ -453,9 +455,10 @@ void TOBThroughputBroadcast(int id, Message m){
                 }
             }else{
                 //we can't deliver the message yet
-                //we just note that we have received the ack
+                //we just note that we have received the ack and we forward it
                 if((temp=Remove(NumMsg,data->pending))==NULL){
-                    //printf("ignored ack%s\n",  m->msg);
+                    fprintf(stderr,"duplicated ack %s on %d from %d \n",  m->msg, id, m->sender);
+                    exit(EXIT_FAILURE);
                 }else{
                     printf("%s received by %d from %d \n", m->msg, id, m->sender);
                     //free(NumMsg);
