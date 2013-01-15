@@ -296,18 +296,99 @@ latency of this protocol should intuitively be $log(n) + 1$ rounds.
 	propagated on a tree which root is the relay, any node in the tree
 	will eventually deliver the message (by definition of the
 	\textit{Receive} event). In particular $p$ will eventually deliver it.
-    \item No creation:
-    \item Agreement:
-    \item Total order:
+    \item No duplication: when a message is broadcasted by a node $p$ it is not
+	delivered right away by $p$ (except if $p = 0$). A node $p$ only
+	delivers a message $m$ when it receives it from its parent node (by
+	definition of the \textit{Receive} event). By the property that no
+	node in a tree can have more than one parent, a message can only be
+	delivered once.
+    \item No creation: delivery of messages $m$ by a process $p$ happen in two
+	cases. Either during a \textit{Broadcast} event if $p=0$, or during a
+	\textit{Receive} event.
+
+	In the first case, the message $m$ is delivered by process $p=0$, which
+	initiated itself a broadcast (the message $m$ was previously
+	broadcasted by process $p=0$).
+
+	In the second case, the message $m$ is deliverd by $p$ in response of
+	a \textit{Receive} event. As we are using a perfect point-to-point
+	link (with in particular no creation), the message was sent by the
+	parent of the node, which received it before by its parent and so on
+	up to the root of the tree, which is process $0$. There are two
+	possibilities: either $0$ is the broadcaster, or not. In the first
+	case $0$ previously initiated the broadcast. In the second case, some
+	other process $s$ initiated the broadcast and sent its message to the
+	relay (by definition of the \textit{Broadcast} event).
+    \item Agreement: since all process are correct (no crashes) we need to
+	show that when a message $m$ is delivered by a process $p$ then it is
+	eventually delivered by every other process. Processes are organized
+	in a tree which root is process $0$, so process $p$ has related nodes
+	in the tree: a parent if $p \neq O$, siblings and childrens.
+
+	If $p \neq 0$, his parent should have delivered message $m$ before
+	$p$ since the message was forwarded to $p$ by its parent.
+
+	If $p$ has siblings (nodes that share the same parent as $p$), the
+	parent should take care of forwarding the message to them, and the
+	message will be properly delivered in the sibling branches of the
+	tree independently of whan happen for $p$.
+
+	If $p$ has children it will eventually forward message $m$ to them
+	(by definition of the \textit{Receive} event) so that they can
+	deliver it and forward it in turn to their children and so on.
+    \item Total order: all the messages are effectively broadcasted by process
+	$0$ (the relay) since no delivery happens until process $0$ receives
+	the message to broadcast. Once process $0$ has chosen an order for the
+	messages to be delivered, the order of delivery is kept throughout the
+	tree. Since every node has only one parent and the link between this
+	node and its parent is fifo, there can be no inversion. Also when a
+	node forwards a message to its children it sends this message to all
+	of his children without interspering other messaging during the
+	process. This ensures a total order for the delivery of messages.
 \end{itemize}
 
-% TODO
-
 \subsubsection*{Latency}
-% TODO
+The algorithm is based on the tree-broadcast protocol seen in class. This
+protocol has a latency of $\log_2(N)$ where $N$ is the number of nodes.
+
+The protocol presented in this section makes use of the tree-broadcast
+protocol by having a node called the relay broadcast all the messages on
+behalf of all the nodes of the system (and in particular itself).
+
+When the relay originates a broadcast, the latency is that of the tree
+broadcast protocol, i.e $\log_2(N)$. However, when a node that is not the
+relay wished to broadcast a message, it first needs to unicast the message
+to the relay, which take one round. The latency is then $\log_2(N) + 1$.
+
+We give two different results for the latency:
+\begin{itemize}
+    \item \textbf{Worst case latency:} $\log_2(N) + 1$
+    \item \textbf{Mean latency:} $\frac{1}{N} \log_2(N) + \frac{N-1}{N} (\log_2(N) + 1)
+	                          = \log_2(N) + \frac{1}{N}$
+\end{itemize}
+
+Both the worst case and the mean latency tend to the optimal when $N$ is
+large.
 
 \subsubsection*{Throughput}
-% TODO
+Let's consider a system with $N$ nodes that wishes to broadcast a message
+concurently. We wish to know how long this will take to all $N$ broadcasts
+to complete.
+
+At the first stem, the relay only knows of the message it wishes to broadcast
+so it starts to broadcast it. After $\lceil\log_2(N)\rceil$ steps, the relay's
+broadcast is completed.
+
+In the mean time, the relay has been sending data but has had plenty of time
+to receive the data to broadcast from one of the other nodes. The second tree
+broadcast from $0$ can hence start right away, and is completed after
+$\lceil\log_2(N)\rceil$ steps.
+
+By reasoning in the same way we can see that it takes $N \lceil\log_2(N)\rceil$
+rounds to complete the $N$ broadcasts. This gives us the throughput of the
+system which is equal to $\frac{1}{\lceil\log_2(N)\rceil}$.
+
+The throughput tends slowly to $0$ when $N$ grows large, which is quite bad.
 
 \subsection{Empirical analysis}
 % TODO
@@ -436,6 +517,7 @@ This acknowledgement system ensure the total order property (see section
         pending queue, and at one moment he will be able to ackowledge m. 
         So if P broadcast a message m, he will eventually receive an ack
         for m and deliver it.
+    \item No duplication: ?? % TODO
     \item No creation: No rules of the algorithm allow a process to
         create a message m without reveiving a broadcast request for m.
     \item Agreement: We have prooved that if P broadcast a message m
