@@ -12,7 +12,7 @@
 #include "Broadcast.h"
 #include "SortedList.h"
 
-#define MAX(a,b) (a) > (b) ? (a) : (b)
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 int maxArgSize=200;     //arbitratry maximum size for a broadcast argument
 int intToStringSize=11; //2^32 = 4294967296 =10 char +1 for '\0' => 11 char to convert one int to string
@@ -24,7 +24,7 @@ int intToStringSize=11; //2^32 = 4294967296 =10 char +1 for '\0' => 11 char to c
  * id   : the node which delivers the message
  */
 void deliver(Message m, int id){
-    printf("message delivered : %s sender : %d on node %d\n", m->msg,m->sender ,id);
+    printf("message delivered : %s sender : %d on node %d\n", m->msg, m->sender ,id);
 }
 
 /*
