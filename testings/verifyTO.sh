@@ -8,8 +8,8 @@ round=50
 for i in `seq 0 $MAX`
 do
     ../src/Broadcast $proto  -N $nodes -R $round < $bench |\
-        grep "message delivered" | grep "node $i$" |\
-        sed "s/sender : [0-9]* on node [0-9]*//" > node.$i
+        grep "Delivered" | grep "by $i," |\
+        sed "s/ by [0-9]*, sender: [0-9]*//" > node.$i
 done
 ok=0
 for i in `seq 0 $MAX`
