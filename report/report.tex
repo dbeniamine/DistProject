@@ -408,9 +408,10 @@ relay, so we expect a latency of $L_{\text{relay}} = \lceil\log_2(N)\rceil$.
 The second experiment is the same, but the node that is broadcasting is not
 the relay. In this case the expected latency is
 $L_{\text{node}} = \lceil\log_2(N)\rceil + 1$. The results are displayed in
-the table bellow.
+the table \ref{table:la}.
 
-\begin{center}
+\begin{table}[H]
+\centering
 \begin{tabular}{|c|c|c|c|c|}
     \hline
     $N$  & $L_{\text{relay}}$ & $\lceil\log_2(N)\rceil$ & $L_{\text{node}}$ & $\lceil\log_2(N)\rceil + 1$ \\
@@ -430,7 +431,9 @@ the table bellow.
     10000 & 14   & 14   & 15   & 15   \\
     \hline
 \end{tabular}
-\end{center}
+\caption{protocols latency for different number of nodes}
+\label{table:la}
+\end{table}
 % TODO
 
 \subsubsection*{Throughput}
@@ -622,70 +625,65 @@ messages !
 % TODO
 
 \subsubsection*{Latency}
+As for the previous protocol, we have recorded the latency for the broadcast of
+one message for a various number of nodes. The results are shown in the table
+\ref{table:th}.
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+    \hline
+    $N$  & Experimental result & Theoretical result $2(N-1)$ \\
+    \hline
+    1     & 0   & 0    \\
+    2     & 2   & 2   \\
+    3     & 4   & 4   \\
+    4     & 6   & 6   \\
+    5     & 8   & 8   \\
+    6     & 10  & 10  \\
+    7     & 12  & 12  \\
+    8     & 14  & 14  \\
+    9     & 16  & 16  \\
+    10    & 18  & 18  \\
+    100   & 198 & 198  \\
+    1000  & 1998   & 1998  \\
+    10000 & 19998   & 19998  \\
+    \hline
+\end{tabular}
+\caption{Broadcast latency for different number of nodes}
+\label{table:th}
+\end{table}
+We can see that the results are exactly the same as the theoretical analysis.
+ \subsubsection*{Throughput}
 % TODO
-Test nb nodes variant always 2(N-1) rounds for one broadcast, example on 8
-nodes:
-\begin{verbatim}
-./Broadcast -R 20 -T -N 8 < ../testings/test-unic-broadcast 
-Starting round 0
-Enter an external events (format "start" or "n event")
-Event added, enter an other event or "start"
-event received 0 broadcast
-Starting round 1
-Enter an external events (format "start" or "n event")
-1 0 hello received by 1 from 0 but not delivered yet
-Starting round 2
-Enter an external events (format "start" or "n event")
-1 0 hello received by 2 from 1 but not delivered yet
-Starting round 3
-Enter an external events (format "start" or "n event")
-1 0 hello received by 3 from 2 but not delivered yet
-Starting round 4
-Enter an external events (format "start" or "n event")
-1 0 hello received by 4 from 3 but not delivered yet
-Starting round 5
-Enter an external events (format "start" or "n event")
-1 0 hello received by 5 from 4 but not delivered yet
-Starting round 6
-Enter an external events (format "start" or "n event")
-1 0 hello received by 6 from 5 but not delivered yet
-Starting round 7
-Enter an external events (format "start" or "n event")
-1 0 hello received by 7 from 6 but not delivered yet
-message delivered : 1 0 hello sender : 6 on node 7
-Starting round 8
-Enter an external events (format "start" or "n event")
-1 0 ack received by 6 from 7 
-message delivered : 1 0 hello sender : 5 on node 6
-Starting round 9
-Enter an external events (format "start" or "n event")
-1 0 ack received by 5 from 6 
-message delivered : 1 0 hello sender : 4 on node 5
-Starting round 10
-Enter an external events (format "start" or "n event")
-1 0 ack received by 4 from 5 
-message delivered : 1 0 hello sender : 3 on node 4
-Starting round 11
-Enter an external events (format "start" or "n event")
-1 0 ack received by 3 from 4 
-message delivered : 1 0 hello sender : 2 on node 3
-Starting round 12
-Enter an external events (format "start" or "n event")
-1 0 ack received by 2 from 3 
-message delivered : 1 0 hello sender : 1 on node 2
-Starting round 13
-Enter an external events (format "start" or "n event")
-1 0 ack received by 1 from 2 
-message delivered : 1 0 hello sender : 0 on node 1
-Starting round 14
-Enter an external events (format "start" or "n event")
-1 0 ack received by 0 from 1 
-message delivered : 1 0 hello sender : 0 on node 0
-Starting round 15
-Enter an external events (format "start" or "n event")
-\end{verbatim}
-\subsubsection*{Throughput}
-% TODO
+To evaluate the throughput of this protocol, we've launched an experiment with N
+nodes, each node start a broadcast at the first round, and we record the number
+of the rounds needed for the N broadcast to finish. Then we compute the
+throughput $T=\frac{Number of broadcast}{Number of rounds}$. The results are
+shown in the table \ref{table:thT}.
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+    \hline
+    $N$  & Experimental result & Theoretical result $2(N-1)$ \\
+    \hline
+    1     &   &   \\
+    2     &   &   \\
+    3     &   &   \\
+    4     &   &   \\
+    5     &   &   \\
+    6     &   &   \\
+    7     &   &   \\
+    8     &   &   \\
+    9     &   &   \\
+    10    &   &   \\
+    100   &   &   \\
+    1000  &   &   \\
+    10000 &   &   \\
+    \hline
+\end{tabular}
+\caption{Broadcast throughput for different number of nodes}
+\label{table:thT}
+\end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusion}
