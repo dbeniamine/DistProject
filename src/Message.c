@@ -11,12 +11,13 @@
 /*
  * Message initialization function.
  * str : content of the message.
+ * org : originator of the message.
  * snd : sender of the message.
  * rcv : receiver of the message.
  * Failures are handled internally.
  * Returns a the new created message.
  */
-Message initMessage(const char* str, int snd, int rcv){
+Message initMessage(const char* str, int org, int snd, int rcv){
   Message msg = malloc(sizeof(struct _Message));
   int len = strlen(str) + 1;
 
@@ -32,6 +33,7 @@ Message initMessage(const char* str, int snd, int rcv){
   }
 
   msg->msg=strncpy(msg->msg, str, len);
+  msg->origin = org;
   msg->sender = snd;
   msg->receiv = rcv;
 
@@ -58,5 +60,5 @@ void deleteMessage(Message msg){
  */
 Message copyMessage(Message msg){
   if(NULL == msg) return NULL;
-  return initMessage(msg->msg, msg->sender, msg->receiv);
+  return initMessage(msg->msg, msg->origin, msg->sender, msg->receiv);
 }

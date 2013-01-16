@@ -11,7 +11,8 @@
  * Structure implementing messages.
  */
 typedef struct _Message{
-  int sender; // Identifier of the sender (external event if -1)
+  int origin; // Idendifier of the original sender of the message
+  int sender; // Identifier of the sender (equal to origin or relay address)
   int receiv; // Destination address (-1 if ip multicast)
   char *msg;  // Content of the message
 }*Message;
@@ -19,12 +20,13 @@ typedef struct _Message{
 /*
  * Message initialization function.
  * str : content of the message.
+ * org : originator of the message.
  * snd : sender of the message.
  * rcv : receiver of the message.
  * Failures are handled internally.
  * Returns a the new created message.
  */
-Message initMessage(const char* str, int snd, int rcv);
+Message initMessage(const char* str, int org, int snd, int rcv);
 
 /*
  * Delete a message.
