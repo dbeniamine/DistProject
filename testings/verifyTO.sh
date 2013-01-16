@@ -2,7 +2,7 @@
 nodes=16
 let MAX=$nodes-1
 bench="testRand"
-proto="-T"
+proto="-l"
 round=50
 
 for i in `seq 0 $MAX`

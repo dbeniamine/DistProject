@@ -24,7 +24,7 @@ int intToStringSize=11; //2^32 = 4294967296 =10 char +1 for '\0' => 11 char to c
  */
 void deliver(Message m, int id){
     printf("Delivered: %s by %i, sender: %i, origin: %i\n", m->msg,
-               id, m->sender, m->origin);
+            id, m->sender, m->origin);
 }
 
 /*
@@ -45,6 +45,7 @@ void IPBroadcast(int id, Message m){
             //Iniatialize the message
             msgOut = initMessage("Hello\0", id, id, -1);
             Send(msgOut);
+            deliver(msgOut,id);
         }
         free(event);
     }
@@ -52,7 +53,7 @@ void IPBroadcast(int id, Message m){
     //Message Rules
     if(NULL != m){
         deliver(m,id);
-	deleteMessage(m);
+        deleteMessage(m);
     }
 }
 
@@ -77,9 +78,9 @@ void BasicBroadcast(int id, Message m){
                 if(i != id){
                     msgOut = initMessage("Hello\0", id, id, i);
                     Send(msgOut);
-                    deliver(msgOut,id);
                 }
             }
+            deliver(msgOut,id);
         }
         free(event);
     }
@@ -87,7 +88,7 @@ void BasicBroadcast(int id, Message m){
     //Message Rules
     if(NULL != m){
         deliver(m,id);
-	deleteMessage(m);
+        deleteMessage(m);
     }
 }
 
@@ -113,8 +114,8 @@ void TreeBroadcast(int id, Message m){
                 //to our successor
                 msgOut = initMessage("Hello\0", id, id, (int)(pow(2,nTurn)+id)%getNbNodes());
                 Send(msgOut);
-                deliver(msgOut,id);
             }
+            deliver(msgOut,id);
         }
         free(event);
     }
@@ -135,7 +136,7 @@ void TreeBroadcast(int id, Message m){
             msgOut = initMessage(m->msg, m->origin, id, ((int)(pow(2,nTurn)+id))%getNbNodes());
             Send(msgOut);
         }
-	deleteMessage(m);
+        deleteMessage(m);
     }
 }
 
@@ -165,9 +166,9 @@ void PipelineBroadcast(int id, Message m){
 
     // Message Rules
     if(NULL != m){
-	deliver(msg, id);
+        deliver(m, id);
 
-	// Forward the message if need be
+        // Forward the message if need be
         neighbor = (id + 1) % getNbNodes();
         if(neighbor != m->origin){
             fwd = initMessage(m->msg, m->origin, id, neighbor);
@@ -175,7 +176,7 @@ void PipelineBroadcast(int id, Message m){
         }
 
         // Free the local message
-	deleteMessage(m);
+        deleteMessage(m);
     }
 }
 
@@ -195,9 +196,9 @@ void TOBLatencyBroadcast(int id, Message m){
         if(!strcmp(event, "broadcast")){
             if(0 == id){
                 // The broadcast is your own, deliver
-		msgOut = initMessage("Hello\0", id, id, id);
-		deliver(msgOut, id);
-		deleteMessage(msgOut);
+                msgOut = initMessage("Hello\0", id, id, id);
+                deliver(msgOut, id);
+                deleteMessage(msgOut);
                 // Pass the message to your childs
                 for(i = 1; i < getNbNodes(); i *= 2){
                     msgOut = initMessage("Hello from 0!\0", id, id, i);
@@ -217,14 +218,14 @@ void TOBLatencyBroadcast(int id, Message m){
         if(0 == id)
             printf("0 receives a message to relay from %i\n", m->sender);
         else
-	    deliver(m, id);
+            deliver(m, id);
 
         for(i = 2 * id + 1; i < getNbNodes(); i *= 2){
             msgOut = initMessage(m->msg, m->origin, id, i);
             Send(msgOut);
         }
 
-	deleteMessage(m);
+        deleteMessage(m);
     }
 }
 
