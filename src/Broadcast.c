@@ -217,8 +217,8 @@ void TOBLatencyBroadcast(int id, Message m){
     if(NULL != m){
         if(0 == id)
             printf("0 receives a message to relay from %i\n", m->sender);
-        else
-            deliver(m, id);
+
+        deliver(m, id);
 
         for(i = 2 * id + 1; i < getNbNodes(); i *= 2){
             msgOut = initMessage(m->msg, m->origin, id, i);
