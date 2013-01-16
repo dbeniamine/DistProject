@@ -6,6 +6,7 @@
 \usepackage{latexsym}
 \usepackage{amssymb}
 \usepackage{listings}
+\usepackage{array}
 
 \lstset{basicstyle=\footnotesize,breaklines=true}
 
@@ -394,9 +395,42 @@ system which is equal to $\frac{1}{\lceil\log_2(N)\rceil}$.
 The throughput tends slowly to $0$ when $N$ grows large, which is quite bad.
 
 \subsection{Empirical analysis}
-% TODO
+The empirical evaluation of the protocol are done using the network simulator.
 
 \subsubsection*{Latency}
+In order evaluate the latency of the protocol with the network simulator, we
+run tests where a single node broadcasts a message and repeat the experiment
+with systems with differetn number of nodes. We then see how many rounds it
+takes for the broadcast to be completed in each system.
+
+We ran two different experiments. In the first one, the sender is always the
+relay, so we expect a latency of $L_{\text{relay}} = \lceil\log_2(N)\rceil$.
+The second experiment is the same, but the node that is broadcasting is not
+the relay. In this case the expected latency is
+$L_{\text{node}} = \lceil\log_2(N)\rceil + 1$. The results are displayed in
+the table bellow.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    $N$  & $L_{\text{relay}}$ & $\lceil\log_2(N)\rceil$ & $L_{\text{node}}$ & $\lceil\log_2(N)\rceil + 1$ \\
+    \hline
+    1     & 0    & 0    & -    & -    \\
+    2     & 1    & 1    & 2    & 2    \\
+    3     & 2    & 2    & 3    & 3    \\
+    4     & 2    & 2    & 3    & 3    \\
+    5     & 3    & 3    & 4    & 4    \\
+    6     & 3    & 3    & 4    & 4    \\
+    7     & 3    & 3    & 4    & 4    \\
+    8     & 3    & 3    & 4    & 4    \\
+    9     & 4    & 4    & 5    & 5    \\
+    10    & 4    & 4    & 5    & 5    \\
+    100   & 7    & 7    & 8    & 8    \\
+    1000  & 10   & 10   & 11   & 11   \\
+    10000 & 14   & 14   & 15   & 15   \\
+    \hline
+\end{tabular}
+\end{center}
 % TODO
 
 \subsubsection*{Throughput}
