@@ -567,29 +567,89 @@ This acknowledgement system ensure the total order property (see section
 \subsubsection*{Latency}
 % TODO
 The algorithm is based on the pipeline broadcast, if we have $N$ nodes, it takes
-$N$ round for one broadcast. But as the last node of the pipeline start a
+$N-1$ round for one broadcast. But as the last node of the pipeline start a
 broadcast of acknowledgment, and as we wait for these ack to deliver the
-message, the message is delivered by all the nodes only after $2N$ rounds.
+message, the message is delivered by all the nodes only after $2(N-1)$ rounds.
 
-As the pipeline is perfectly parallel, the latency will always be $2N$.
+As the pipeline is perfectly parallel, the latency will always be $2(N-1)$.
 \subsubsection*{Throughput}
 Let’s consider a system with N nodes that wishes to broadcast a message concurrently
 We wish to know how long this will take to all N broadcasts to
 complete.
 
-All the nodes will spread through different pipeline and in $2N$ rounds, all the
-nodes will have received all the messages and all the acks, so in $2N$ rounds,
+All the nodes will spread through different pipeline and in $2(N-1)$ rounds, all the
+nodes will have received all the messages and all the acks, so in $2(N-1)$ rounds,
 every node is able to deliver every message in it's queue.
 
-Finally, it take $2N$ rounds to broadcast $N$ messages, so we have a throughput
-of $\frac{N}{2N}=\frac{1}{2}$ which is totally independent of the number of
+Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
+of $\frac{N}{2(N-1)}\longrightarrow_{N \rightarrow \infty}\frac{1}{2}$ which is totally independent of the number of
 messages !
 \subsection{Empirical analysis}
 % TODO
 
 \subsubsection*{Latency}
 % TODO
-
+Test nb nodes variant always 2(N-1) rounds for one broadcast, example on 8
+nodes:
+\begin{verbatim}
+./Broadcast -R 20 -T -N 8 < ../testings/test-unic-broadcast 
+Starting round 0
+Enter an external events (format "start" or "n event")
+Event added, enter an other event or "start"
+event received 0 broadcast
+Starting round 1
+Enter an external events (format "start" or "n event")
+1 0 hello received by 1 from 0 but not delivered yet
+Starting round 2
+Enter an external events (format "start" or "n event")
+1 0 hello received by 2 from 1 but not delivered yet
+Starting round 3
+Enter an external events (format "start" or "n event")
+1 0 hello received by 3 from 2 but not delivered yet
+Starting round 4
+Enter an external events (format "start" or "n event")
+1 0 hello received by 4 from 3 but not delivered yet
+Starting round 5
+Enter an external events (format "start" or "n event")
+1 0 hello received by 5 from 4 but not delivered yet
+Starting round 6
+Enter an external events (format "start" or "n event")
+1 0 hello received by 6 from 5 but not delivered yet
+Starting round 7
+Enter an external events (format "start" or "n event")
+1 0 hello received by 7 from 6 but not delivered yet
+message delivered : 1 0 hello sender : 6 on node 7
+Starting round 8
+Enter an external events (format "start" or "n event")
+1 0 ack received by 6 from 7 
+message delivered : 1 0 hello sender : 5 on node 6
+Starting round 9
+Enter an external events (format "start" or "n event")
+1 0 ack received by 5 from 6 
+message delivered : 1 0 hello sender : 4 on node 5
+Starting round 10
+Enter an external events (format "start" or "n event")
+1 0 ack received by 4 from 5 
+message delivered : 1 0 hello sender : 3 on node 4
+Starting round 11
+Enter an external events (format "start" or "n event")
+1 0 ack received by 3 from 4 
+message delivered : 1 0 hello sender : 2 on node 3
+Starting round 12
+Enter an external events (format "start" or "n event")
+1 0 ack received by 2 from 3 
+message delivered : 1 0 hello sender : 1 on node 2
+Starting round 13
+Enter an external events (format "start" or "n event")
+1 0 ack received by 1 from 2 
+message delivered : 1 0 hello sender : 0 on node 1
+Starting round 14
+Enter an external events (format "start" or "n event")
+1 0 ack received by 0 from 1 
+message delivered : 1 0 hello sender : 0 on node 0
+Starting round 15
+Enter an external events (format "start" or "n event")
+\end{verbatim}
 \subsubsection*{Throughput}
 % TODO
 

@@ -77,6 +77,7 @@ void BasicBroadcast(int id, Message m){
                 if(i != id){
                     msgOut = initMessage("Hello\0", id, id, i);
                     Send(msgOut);
+                    deliver(msgOut,id);
                 }
             }
         }
@@ -112,6 +113,7 @@ void TreeBroadcast(int id, Message m){
                 //to our successor
                 msgOut = initMessage("Hello\0", id, id, (int)(pow(2,nTurn)+id)%getNbNodes());
                 Send(msgOut);
+                deliver(msgOut,id);
             }
         }
         free(event);
@@ -156,6 +158,7 @@ void PipelineBroadcast(int id, Message m){
             neighbor = (id + 1) % getNbNodes();
             msg = initMessage("Hello\0", id, id, neighbor);
             Send(msg);
+            deliver(msg,id);
         }
         free(event);
     }
@@ -243,7 +246,7 @@ typedef struct _PipleineAckData_t{
  */
 typedef struct _NumberedMessage{
     int clk;            //timestamp of the message
-    int creator;        //Creator of the message
+    int origin;        //the origin of the broadcast
     int waitForNbAck;   //number of ack that we are stil waiting for
     Message m;          //the message
 }*NumberedMessage;
@@ -258,21 +261,20 @@ typedef struct _NumberedMessage{
 int NumberedMsgComp(void *e1, void *e2){
     NumberedMessage m1=(NumberedMessage)e1, m2=(NumberedMessage)e2;
     if(m1->clk==m2->clk){
-        return m1->creator-m2->creator;
+        return m1->origin-m2->origin;
     }
     return m1->clk-m2->clk;
 }
 
 /*
- * Extract the two first int from a string at the format
- * int1 int2 string
+ * Extract the first int from a string at the format
+ * int1 string
  * i1 : the reference to the first int
- * i2 the reference to the second int
  */
-void extractTwoInts(char * str, int *i1, int *i2){
-    char *strclone, *tmp, *tmp1;
+void extractInt(char * str, int *i1){
+    char *strclone, *tmp;
     if((strclone=malloc((strlen(str)+1)))==NULL){
-        fprintf(stderr,"malloc fail at extractTwoInts\n");
+        fprintf(stderr,"malloc fail at extractInt\n");
         exit(EXIT_FAILURE);
     }
     //we work on a copy of thestring 
@@ -282,10 +284,7 @@ void extractTwoInts(char * str, int *i1, int *i2){
     *tmp='\0';
     tmp++;
     *i1=atoi(strclone);
-    //extraction of the second
-    tmp1=strchr(tmp,' ');
-    *tmp1='\0';
-    *i2=atoi(tmp);
+    //cleaning data
     free(strclone);
 }
 
@@ -299,12 +298,12 @@ void extractTwoInts(char * str, int *i1, int *i2){
 void sendAck(int clk, int init, int sender, int receiver){
     char *msgTxt;
     Message m;
-    if((msgTxt=malloc(sizeof(char)*(2*intToStringSize+3/*ack*/)))==NULL){
+    if((msgTxt=malloc(sizeof(char)*(intToStringSize+3/*ack*/)))==NULL){
         fprintf(stderr,"malloc fail at sendAck\n");
         exit(EXIT_FAILURE);
     }
-    sprintf(msgTxt, "%d %d ack", clk, init);
-    m=initMessage(msgTxt,42,sender,receiver); 
+    sprintf(msgTxt, "%d ack", clk);
+    m=initMessage(msgTxt,init,sender,receiver); 
     Send(m);
 }
 
@@ -352,14 +351,14 @@ void TOBThroughputBroadcast(int id, Message m){
             }
             //eventArg is either the string to broadcast, or "hello"
             argSize=strlen(eventArg);
-            if((msgTxt=malloc((2*intToStringSize+1+argSize)*sizeof(char)))==NULL){
+            if((msgTxt=malloc((intToStringSize+1+argSize)*sizeof(char)))==NULL){
                 fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
                 exit(EXIT_FAILURE);
             }
-            sprintf(msgTxt, "%d %d ",data->clock, id);
+            sprintf(msgTxt, "%d ",data->clock);
             strncat(msgTxt, eventArg, argSize); 
             free(eventArg); //not needed anymore
-            //Now the message text have the format: clk creator <arg>
+            //Now the message text have the format: clk <arg>
             if((NumMsg=malloc(sizeof(struct _NumberedMessage)))==NULL){
                 fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
                 exit(EXIT_FAILURE);
@@ -367,10 +366,9 @@ void TOBThroughputBroadcast(int id, Message m){
             NumMsg->clk=data->clock;
             //waiting for 1 ack
             NumMsg->waitForNbAck=1;
-            //we are the creator of this message
-            NumMsg->creator=id;
             //creating the actual message
-            NumMsg->m=initMessage(msgTxt,42,id,data->next);
+            NumMsg->m=initMessage(msgTxt,id,id,data->next);
+            NumMsg->origin=id;
             //and send it
             Send(copyMessage(NumMsg->m));
             //Finally store the numbered msg in the pending list
@@ -387,10 +385,11 @@ void TOBThroughputBroadcast(int id, Message m){
         }
 
         //this is a new message at the format:
-        //clock creator <text> where text is either ack or the text of the
+        //clock <text> where text is either ack or the text of the
         //message
-        //We have to parse the clock and the creator of the broadcast
-        extractTwoInts(m->msg, &(NumMsg->clk),&(NumMsg->creator));
+        //We have to parse the clock of the broadcast
+        extractInt(m->msg, &(NumMsg->clk));
+        NumMsg->origin=m->origin;
         //don't forget to update the clock
         data->clock=MAX(NumMsg->clk,data->clock)+1;
 
@@ -398,9 +397,9 @@ void TOBThroughputBroadcast(int id, Message m){
             printf("%s received by %d from %d but not delivered yet\n", m->msg, id, m->sender);
             //m is an actual message
             NumMsg->m=m;
-            if(NumMsg->creator!=data->next){
+            if(m->origin!=data->next){
                 //We need to forward the message
-                mOut=initMessage(m->msg,42,id,data->next);
+                mOut=initMessage(m->msg,m->origin,id,data->next);
                 NumMsg->waitForNbAck=1; //we have to wait for an ack
                 Send(mOut);
                 AddSorted(NumMsg,data->pending);
@@ -409,7 +408,7 @@ void TOBThroughputBroadcast(int id, Message m){
                 NumMsg->waitForNbAck=0;
                 AddSorted(NumMsg, data->pending);
                 //we send an ack as soon as the message is received
-                sendAck(NumMsg->clk,NumMsg->creator,id,data->pred);
+                sendAck(NumMsg->clk,m->origin,id,data->pred);
                 if(!NumberedMsgComp(getFirst(data->pending),NumMsg)){
                     //don't forget to remove the message from the pending list
                     RemoveFirst(data->pending);
@@ -430,8 +429,8 @@ void TOBThroughputBroadcast(int id, Message m){
                 //with the messages on the pending
                 //we will try to deliver and ack as much message as possible
                 NumMsg=temp;
-                if(NumMsg->creator!=id){
-                    sendAck(NumMsg->clk,NumMsg->creator,id,data->pred);
+                if(m->origin!=id){
+                    sendAck(NumMsg->clk,m->origin,id,data->pred);
                 }
                 NumMsg->waitForNbAck=0;
                 while(NumMsg!=NULL && NumMsg->waitForNbAck==0){
@@ -457,8 +456,8 @@ void TOBThroughputBroadcast(int id, Message m){
                     //free(NumMsg);
                     temp->waitForNbAck=0;
                     AddSorted(temp,data->pending);
-                    if(temp->creator!=id){
-                        sendAck(temp->clk,temp->creator,id,data->pred);
+                    if(temp->m->origin!=id){
+                        sendAck(temp->clk,temp->m->origin,id,data->pred);
                     }
                 }
             }
