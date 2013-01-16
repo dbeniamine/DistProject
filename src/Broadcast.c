@@ -201,7 +201,7 @@ void TOBLatencyBroadcast(int id, Message m){
                 deleteMessage(msgOut);
                 // Pass the message to your childs
                 for(i = 1; i < getNbNodes(); i *= 2){
-                    msgOut = initMessage("Hello from 0!\0", id, id, i);
+                    msgOut = initMessage("Hello\0", id, id, i);
                     Send(msgOut);
                 }
             } else {
