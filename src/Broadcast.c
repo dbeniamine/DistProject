@@ -12,19 +12,19 @@
 #include "Broadcast.h"
 #include "SortedList.h"
 
-#define MAX(a,b) (a) > (b) ? (a) : (b)
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 int maxArgSize=200;     //arbitratry maximum size for a broadcast argument
 int intToStringSize=11; //2^32 = 4294967296 =10 char +1 for '\0' => 11 char to convert one int to string
 
 /*
- * Standardized deliver function for all
- * broadcasts
- * m    : the message delivered
- * id   : the node which delivers the message
+ * Standardized deliver function for all broadcast protocols.
+ * m    : the message to deliver.
+ * id   : the node delivering the message.
  */
 void deliver(Message m, int id){
-    printf("message delivered : %s sender : %d on node %d\n", m->msg,m->sender ,id);
+    printf("Delivered: %s by %i, sender: %i, origin: %i\n", m->msg,
+               id, m->sender, m->origin);
 }
 
 /*
@@ -43,7 +43,7 @@ void IPBroadcast(int id, Message m){
             //start a basic broadcast:
             //send hello to every nodes
             //Iniatialize the message
-            msgOut = initMessage("Hello\0", id, -1);
+            msgOut = initMessage("Hello\0", id, id, -1);
             Send(msgOut);
         }
         free(event);
@@ -52,8 +52,7 @@ void IPBroadcast(int id, Message m){
     //Message Rules
     if(NULL != m){
         deliver(m,id);
-        free(m->msg);
-        free(m);
+	deleteMessage(m);
     }
 }
 
@@ -76,7 +75,7 @@ void BasicBroadcast(int id, Message m){
             //send hello to every nodes
             for(i = 0; i < getNbNodes(); i++){
                 if(i != id){
-                    msgOut = initMessage("Hello\0", id, i);
+                    msgOut = initMessage("Hello\0", id, id, i);
                     Send(msgOut);
                 }
             }
@@ -87,8 +86,7 @@ void BasicBroadcast(int id, Message m){
     //Message Rules
     if(NULL != m){
         deliver(m,id);
-        free(m->msg);
-        free(m);
+	deleteMessage(m);
     }
 }
 
@@ -112,7 +110,7 @@ void TreeBroadcast(int id, Message m){
             for(nTurn = 0; nTurn < log2(getNbNodes()); nTurn++){
                 //at the first step of the tree broadcast, we send a message
                 //to our successor
-                msgOut = initMessage("Hello\0", id, (int)(pow(2,nTurn)+id)%getNbNodes());
+                msgOut = initMessage("Hello\0", id, id, (int)(pow(2,nTurn)+id)%getNbNodes());
                 Send(msgOut);
             }
         }
@@ -132,11 +130,10 @@ void TreeBroadcast(int id, Message m){
         //this turn is done, let's do the others
         //now we can send all the others messages
         for(nTurn++; nTurn<log2(getNbNodes()); nTurn++){
-            msgOut = initMessage(m->msg, id, ((int)(pow(2,nTurn)+id))%getNbNodes());
+            msgOut = initMessage(m->msg, m->origin, id, ((int)(pow(2,nTurn)+id))%getNbNodes());
             Send(msgOut);
         }
-        free(m->msg);
-        free(m);
+	deleteMessage(m);
     }
 }
 
@@ -149,14 +146,7 @@ void TreeBroadcast(int id, Message m){
 void PipelineBroadcast(int id, Message m){
     char* event;
     Message msg, fwd;
-    int neighbor, broadcaster;
-    char* content;
-
-    content = malloc(128 * sizeof(char));
-    if(NULL == content){
-        fprintf(stderr, "Failed malloc in PipelineBroadcast...\n");
-        exit(EXIT_FAILURE);
-    }
+    int neighbor;
 
     // Event Rules
     while((event = getNextExternalEvent(id)) != NULL){
@@ -164,8 +154,7 @@ void PipelineBroadcast(int id, Message m){
         // Read the first event
         if(0 == strcmp(event, "broadcast")){
             neighbor = (id + 1) % getNbNodes();
-            sprintf(content, "from %i : Hello", id);
-            msg = initMessage(content, id, neighbor);
+            msg = initMessage("Hello\0", id, id, neighbor);
             Send(msg);
         }
         free(event);
@@ -173,25 +162,18 @@ void PipelineBroadcast(int id, Message m){
 
     // Message Rules
     if(NULL != m){
-        if(1 < sscanf(m->msg, "from %i : %s", &broadcaster, content)){
-            // Print content and data
-            printf("%s received by %i from %i (broadcasted by %i)\n",
-                    content, id, m->sender, broadcaster);
+	deliver(msg, id);
 
-            // Forward the message if need be
-            neighbor = (id + 1) % getNbNodes();
-            if(neighbor != broadcaster){
-                fwd = initMessage(m->msg, id, neighbor);
-                Send(fwd);
-            }
-
-            // Free the local message
-            free(m->msg);
-            free(m);
+	// Forward the message if need be
+        neighbor = (id + 1) % getNbNodes();
+        if(neighbor != m->origin){
+            fwd = initMessage(m->msg, m->origin, id, neighbor);
+            Send(fwd);
         }
-    }
 
-    free(content);
+        // Free the local message
+	deleteMessage(m);
+    }
 }
 
 /*
@@ -201,7 +183,6 @@ void PipelineBroadcast(int id, Message m){
 void TOBLatencyBroadcast(int id, Message m){
     char* event;
     Message msgOut;
-    char* msgContent;
     int i;
 
     //Events Rules
@@ -211,17 +192,17 @@ void TOBLatencyBroadcast(int id, Message m){
         if(!strcmp(event, "broadcast")){
             if(0 == id){
                 // The broadcast is your own, deliver
-                printf("Hello from 0! received by 0 from 0\n");
+		msgOut = initMessage("Hello\0", id, id, id);
+		deliver(msgOut, id);
+		deleteMessage(msgOut);
                 // Pass the message to your childs
                 for(i = 1; i < getNbNodes(); i *= 2){
-                    msgOut = initMessage("Hello from 0!\0", id, i);
+                    msgOut = initMessage("Hello from 0!\0", id, id, i);
                     Send(msgOut);
                 }
             } else {
                 // Send the message to process 0
-                msgContent = malloc(64 * sizeof(char));
-                snprintf(msgContent, 64, "Hello from %i!", id);
-                msgOut = initMessage(msgContent, id, 0);
+                msgOut = initMessage("Hello\0", id, id, 0);
                 Send(msgOut);
             }
         }
@@ -230,15 +211,17 @@ void TOBLatencyBroadcast(int id, Message m){
 
     // Message Rules
     if(NULL != m){
-        printf("%s received by %d from %d\n", m->msg, id, m->sender);
+        if(0 == id)
+            printf("0 receives a message to relay from %i\n", m->sender);
+        else
+	    deliver(m, id);
 
         for(i = 2 * id + 1; i < getNbNodes(); i *= 2){
-            msgOut = initMessage(m->msg, id, i);
+            msgOut = initMessage(m->msg, m->origin, id, i);
             Send(msgOut);
         }
 
-        free(m->msg);
-        free(m);
+	deleteMessage(m);
     }
 }
 
@@ -321,7 +304,7 @@ void sendAck(int clk, int init, int sender, int receiver){
         exit(EXIT_FAILURE);
     }
     sprintf(msgTxt, "%d %d ack", clk, init);
-    m=initMessage(msgTxt,sender,receiver); 
+    m=initMessage(msgTxt,42,sender,receiver); 
     Send(m);
 }
 
@@ -387,7 +370,7 @@ void TOBThroughputBroadcast(int id, Message m){
             //we are the creator of this message
             NumMsg->creator=id;
             //creating the actual message
-            NumMsg->m=initMessage(msgTxt,id,data->next);
+            NumMsg->m=initMessage(msgTxt,42,id,data->next);
             //and send it
             Send(copyMessage(NumMsg->m));
             //Finally store the numbered msg in the pending list
@@ -417,7 +400,7 @@ void TOBThroughputBroadcast(int id, Message m){
             NumMsg->m=m;
             if(NumMsg->creator!=data->next){
                 //We need to forward the message
-                mOut=initMessage(m->msg,id,data->next);
+                mOut=initMessage(m->msg,42,id,data->next);
                 NumMsg->waitForNbAck=1; //we have to wait for an ack
                 Send(mOut);
                 AddSorted(NumMsg,data->pending);
