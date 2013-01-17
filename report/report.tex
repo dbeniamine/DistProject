@@ -610,11 +610,11 @@ to achieve a constant throughput of $\frac{1}{2}$.
     \centering
     \begin{algorithmic}[5]
         \Data
-        \State int : clk
+        \State unsigned int : clk
         \Comment{A logical clock}
-        \State int : next
+        \State unsigned int : next
         \Comment{the id of the next process in the pipeline}
-        \State int : prec
+        \State unsigned int : prec
         \Comment{the id of the previous process in the pipeline}
         \State Pending : OrderedList
         \Comment{A list ordered by clock then id}
@@ -622,11 +622,7 @@ to achieve a constant throughput of $\frac{1}{2}$.
         \Init
         \State clk$\gets$0
         \State next$\gets$(Id()+1)\%NProcess
-        \If{Id()=0}
-        \State prec$\gets$NProcess
-        \Else
-        \State prec$\gets$Id()-1
-        \EndIf
+        \State prec$\gets$(Id()-1)\%NProcess
         \State Pending$\gets$EmptyQueue
         \EndInit
         \Event $< tob,Broadcast\ |\ m> $
@@ -807,8 +803,11 @@ every node is able to deliver every message in it's queue.
 \end{figure}
 
 Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
-of $\frac{N}{2(N-1)}\longrightarrow_{N \rightarrow \infty}\frac{1}{2}$ which is totally independent of the number of
-messages sent.
+of $\frac{N}{2(N-1)}=\frac{1}{2-\frac{1}{N}}\longrightarrow_{N \rightarrow
+\infty}\frac{1}{2}$. Two important point appears int that formula, the first is
+that we have an inferior limit for our throughput $\frac{1}{2}$. Secondly this limit 
+is a constant so we can be sure that with a huge number of nodes our broadcast
+will still be scalable.
 
 \subsection{Empirical analysis}
 %%TODO : David relecture a partir d'ici
