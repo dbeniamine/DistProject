@@ -44,7 +44,13 @@
 \author{David Benamine \& Rodolphe Lepigre\\ MOSIG - Parallel, Distributed and Embedded Systems}
 
 \date{\today}
-\maketitle
+\maketitle%affichage du titre
+\begin{center}
+    \tableofcontents%affichage de la table des matières
+\end{center}
+\newpage%commencement en page 2
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
@@ -220,9 +226,17 @@ Once your protocol is ready, the only thing you have to do is to create
 a Main and call the function \textit{initSystem(int nb\_nodes, int
 nb\_rounds, NodesFct fun)}, then you can finally start the simulation
 with \textit{LaunchSimulation()}. 
+\subsection{Experimental script}
+With concern of experimental reproducibility we provide our simulator with a
+perl script \textit{exp.pl} which allows you to run every experiments
+presented in this report and verify our results.
+
+This script execute the program \textit{Broadcast} for different numbers of
+nodes and write the latency and the throughput of each runs. If you want to use
+it try \textit{exp.pl} to see it's capabilities.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{A regular total-order broadcast protocols with good latency}
+\section{Regular total-order broadcast protocols with good latency}
 \label{sec:latencyTO}
 
 This first protocol makes use or the tree broadcast protocol since it achieves
@@ -504,7 +518,7 @@ broadcast to the relay while it is still performing the previous broadcast.
 With this, the throughput of $\frac{1}{\lceil\log_2(N)\rceil}$ is achieved.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{A regular total-order broadcast protocols with good throughput}
+\section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
 
 This protocol is based on the pipeline broadcast protocol but as soon as a node
@@ -610,7 +624,7 @@ This acknowledgement system ensure the total order property (see section
 
 
 \subsection{Theoretical analysis}
-\subsubsection{Correctness}
+\subsubsection*{Correctness}
 \begin{itemize}
     \item Validity: As there  is no crashes, if a process P broadcast a
         message m, m will be received, put in the pending queue and acknowledged 
