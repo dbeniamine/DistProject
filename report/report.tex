@@ -590,19 +590,18 @@ for the node to broadcast a message (it already has it).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
-%%% TODO relecture à partir d'ici
 This protocol is based on the pipeline broadcast, but to ensure the total order
-property we add a reverse pipeline for the acknowledgement The idea is that if
+property we add a reverse pipeline for the acknowledgement. The idea is that if
 a node $p$ is able to deliver a message, every other process have been a part of
-the pipeline sending $m$ or it's acknowledgement to $p$. As a node can receive a message from
-different process, we also add a sorted list of message, and we ensure that a
-process can deliver a message $m$, only if $m$ is acknowledged and $m$ is the head of
-the list.
+the pipeline sending $m$ or it's acknowledgement to $p$. As a node can receive
+a message from different process, we also add a sorted list of message, and we
+ensure that a process can deliver a message $m$, only if $m$ is acknowledged
+and $m$ is at the head of the list.
 
 It's clear that as a message have to go through two pipelines, the latency will
-be of the order of $2*N$ (where $N$ is the number of process). But we use
+be of the order of $2N$ (where $N$ is the number of process). But we use
 reversed pipeline for the acknowledgement, the can be sent in parallel and it
-takes also about $2*N$ rounds to broadcast $N$ different nodes, so we are able
+takes also about $2N$ rounds to broadcast $N$ different nodes, so we are able
 to achieve a constant throughput of $\frac{1}{2}$.
 
 \subsection{Algorithm}
@@ -711,23 +710,23 @@ to achieve a constant throughput of $\frac{1}{2}$.
 broadcasts a message $m$, it will be received, put in the pending queue and
 acknowledged by every process. When $p$ receives the ack for $m$, either $m$
 is the head of the queue and in that case $p$ delivers it, or $p$ will have
-to wait for at least one other ack message. 
+to wait for at least one other ack message.
 
 As the queue is ordered by logical clock and as all nodes have been on the
-pipeline forwarding $m$ or it's ack, once $p$ has received the  acknowledgment
+pipeline forwarding $m$ or it's ack, once $p$ has received the acknowledgment
 for $m$, no new message will be able to go before $m$ in the queue. Finally as
-all message will eventually be acknowledged, so the number of message before $m$ in
-the queue will decrease. And at one moment, after the reception of one ack, $m$ will be the
-head of the queue and will be delivered.
+all message will eventually be acknowledged, so the number of message before
+$m$ in the queue will decrease. And at one moment, after the reception of one
+ack, $m$ will be the head of the queue and will be delivered.
 
-So if $p$ broadcast a message $m$, he will eventually receive an ack for $m$
+So if $p$ broadcasts a message $m$, it will eventually receive an ack for $m$
 and deliver it.
 
 \bigskip
 \noindent\textbf{No duplication.} Each message is sent and ack only once. As
-soon as a message is delivered it's removed from the pending queue. To be
+soon as a message is delivered it is removed from the pending queue. To be
 delivered, a message needs to be the head of the pending queue, as we remove a
-message of this queue as soon as we deliver it, we can't deliver a message
+message of this queue as soon as we deliver it, we cannot deliver a message
 twice.
 
 \bigskip
@@ -741,7 +740,7 @@ pipeline go through all the nodes and as a node deliver a message as soon as
 it acknowledge it, if $p$ delivers $m$ every node have delivered $m$.
 
 \bigskip
-\noindent\textbf{Total order.} Let's imagine that process $p_1$ has delivered
+\noindent\textbf{Total order.} Let us imagine that process $p_1$ has delivered
 message $m_1$ before message $m_2$ and that process $p_2$ has delivered
 message $m_2$ before message $m_1$.
 
@@ -792,7 +791,7 @@ complete.
 As shown in Figure \ref{figure:throughput2}, all the nodes will spread their
 messages through different pipeline and in $2(N-1)$ rounds, all the
 nodes will have received all the messages and all the acks, so in $2(N-1)$ rounds,
-every node is able to deliver every message in it's queue.
+every node is able to deliver every message in its queue.
 
 \begin{figure}[h]
     \centering
