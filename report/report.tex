@@ -431,13 +431,54 @@ the table \ref{table:la}.
     10000 & 14   & 14   & 15   & 15   \\
     \hline
 \end{tabular}
-\caption{protocols latency for different number of nodes}
+\caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
 \label{table:la}
 \end{table}
-% TODO
+
+The results are exactly the one expected and confirm the results found in the
+theoretical analysis. Note that there must always be a relay in the system, so
+when there is only one node, it have to be the relay. Hence it makes no sense
+for a node that is different from the relay to broadcast a message if there is
+only the relay in the system.
 
 \subsubsection*{Throughput}
-% TODO
+We experiment with the throughput in the same way as with the latecy. We use
+the simulator to run test where every node in the system have a message to
+broadcast from the begining of the run. We then see how long it take for all
+the broadcasts to be completed. The expected throughput is
+$\frac{1}{\lceil\log_2(N)\rceil}$ where $N$ is again the number of nodes in
+the system. The results are displayed in the table \ref{table:thr}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+    \hline
+    $N$   & $T$  & $\frac{1}{\lceil\log_2(N)\rceil}$ \\
+    \hline
+    1     & +Inf   & +Inf   \\
+    2     & 1.0    & 1.0    \\
+    3     & 0.5    & 0.5    \\
+    4     & 0.5    & 0.5    \\
+    5     & 0.333  & 0.333  \\
+    6     & 0.333  & 0.333  \\
+    7     & 0.333  & 0.333  \\
+    8     & 0.333  & 0.333  \\
+    9     & 0.25   & 0.25   \\
+    10    & 0.25   & 0.25   \\
+    100   & 0.143  & 0.143  \\
+    1000  & 0.1    & 0.1    \\
+    10000 & 0.071  & 0.071  \\
+    \hline
+\end{tabular}
+\caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
+\label{table:thr}
+\end{table}
+
+The results fit exactly the theoretical results. We observe, as expected that
+the relay starts its broadcast firts (since it has its own message to
+broadcast from the begining) and the nodes manage to send messages to
+broadcast to the relay while it is still performing the previous broadcast.
+With this, the throughput of $\frac{1}{\lceil\log_2(N)\rceil}$ is achieved.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{A regular total-order broadcast protocols with good throughput}
