@@ -324,7 +324,7 @@ latency of this protocol should intuitively be $log(n) + 1$ rounds.
         show that when a message $m$ is delivered by a process $p$ then it is
         eventually delivered by every other process. Processes are organized
         in a tree which root is process $0$, so process $p$ has related nodes
-        in the tree: a parent if $p \neq O$, siblings and childrens.
+        in the tree: a parent if $p \neq O$, siblings and children.
 
         If $p \neq 0$, his parent should have delivered message $m$ before
         $p$ since the message was forwarded to $p$ by its parent.
@@ -386,7 +386,7 @@ large.
 
 \subsubsection*{Throughput}
 Let's consider a system with $N$ nodes that wishes to broadcast a message
-concurently. We wish to know how long this will take to all $N$ broadcasts
+concurrently. We wish to know how long this will take to all $N$ broadcasts
 to complete.
 
 At the first stem, the relay only knows of the message it wishes to broadcast
@@ -404,13 +404,13 @@ system which is equal to $\frac{1}{\lceil\log_2(N)\rceil}$.
 
 The throughput tends slowly to $0$ when $N$ grows large, which is quite bad.
 
-An example of a system where four nodes are concurently broadcasting a message
-is displayed in \ref{figure:throughput}.
+An example of a system where four nodes are concurrently broadcasting a message
+is displayed in figure \ref{figure:throughput}.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=280px]{Throughput.png}
-    \caption{Four nodes broadcasting a message concurently. Node 0 is the relay, it effectively performs all broadcasts using the tree broadcast protocol. The dashed arrows are request for a broadcast from nodes to the relay.}
+    \caption{Four nodes broadcasting a message concurrently. Node 0 is the relay, it effectively performs all broadcasts using the tree broadcast protocol. The dashed arrows are request for a broadcast from nodes to the relay.}
     \label{figure:throughput}
 \end{figure}
 
@@ -423,7 +423,7 @@ The empirical evaluation of the protocol are done using the network simulator.
 \subsubsection*{Latency}
 In order evaluate the latency of the protocol with the network simulator, we
 run tests where a single node broadcasts a message and repeat the experiment
-with systems with differetn number of nodes. We then see how many rounds it
+with systems with different number of nodes. We then see how many rounds it
 takes for the broadcast to be completed in each system.
 
 We ran two different experiments. In the first one, the sender is always the
@@ -631,10 +631,10 @@ This acknowledgement system ensure the total order property (see section
         message is delivered it's removed from the pending queue, so it cannot
         be delivered again.
     \item No creation: No rules of the algorithm allow a process to
-        create a message m without reveiving a broadcast request for m.
-    \item Agreement: We have prooved that if P broadcast a message m
+        create a message m without receiving a broadcast request for m.
+    \item Agreement: We have proved that if P broadcast a message m
         then P will eventually receive an ack for m and deliver m, as
-        the pipeline go throuh all the nodes and as a node deliver a
+        the pipeline go through all the nodes and as a node deliver a
         message as soon as it acknowledge it, if P delivers m every node
         have delivered m.
     \item Total order: Let's imagine that two process p1 have delivered a message m1 then a
@@ -672,15 +672,37 @@ $N-1$ round for one broadcast. But as the last node of the pipeline start a
 broadcast of acknowledgment, and as we wait for these ack to deliver the
 message, the message is delivered by all the nodes only after $2(N-1)$ rounds.
 
+The figure \ref{figure:latency2} shows a broadcast on 4 nodes, we can see that
+we have a Latency of$6=2*(4-1)$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=280px]{Latency2.png}
+    \caption{One node broadcasting on the pipeline. The dashed arrows
+    acknowledgments.}
+    \label{figure:latency2}
+\end{figure}
+
+
+
 As the pipeline is perfectly parallel, the latency will always be $2(N-1)$.
 \subsubsection*{Throughput}
 Let’s consider a system with N nodes that wishes to broadcast a message concurrently
 We wish to know how long this will take to all N broadcasts to
 complete.
 
-All the nodes will spread through different pipeline and in $2(N-1)$ rounds, all the
+As shown in figure \ref{figure:throughput2}, all the nodes will spread their
+messages through different pipeline and in $2(N-1)$ rounds, all the
 nodes will have received all the messages and all the acks, so in $2(N-1)$ rounds,
 every node is able to deliver every message in it's queue.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=280px]{Throughput2.png}
+    \caption{Four nodes broadcasting on the pipeline. The dashed arrows
+    acknowledgments.}
+    \label{figure:throughput2}
+\end{figure}
 
 Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
 of $\frac{N}{2(N-1)}\longrightarrow_{N \rightarrow \infty}\frac{1}{2}$ which is totally independent of the number of
