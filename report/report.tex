@@ -854,7 +854,7 @@ shown in Table \ref{table:thT}.
         \hline
         $N$  & Experimental result & Theoretical result $2(N-1)$ \\
         \hline
-        1     & NaN    & NaN    \\
+        1     & +Inf   & +Inf   \\
         2     & 1      & 1      \\
         3     & 0.75   &  0.75  \\
         4     & 0.667  & 0.667  \\
@@ -884,14 +884,18 @@ One of them achieves a latency of $\lceil\log_2(N)\rceil + 1$ which is close
 to the optimal latency that one can achieve with a broadcast protocol where no
 total-order is required.
 
-The second protocol achieves a throughput of $1/2$ which is only half the
-optimal for a broadcast protocol, but it's the price to pay to achieve a total
-order. Moreover this result is independent from the number of message which mean
-that performances won't decrease when we will want to send a lot of messages.
+The second protocol achieves a throughput of $\frac{N}{2(N-1)}$ which has
+$\frac{1}{2}$ as a lower bound. This result is quite far from the optimal
+throughput for a broadcast protocol where no total order is required
+($\frac{N+1}{N}$), but this is the price to pay to achieve a total ordering
+of messages. However, since $\frac{1}{2}$ is a lower bound on the throughput
+that performances of the protocol are not too bad, even with a system with a
+great number of nodes.
 
-An interesting future work would be to try to determine if there exists a
-total-order broadcast protocol that achieves an optimal latency of
-$\lceil\log_2(N)\rceil$, or a protocol that achieve a better throughput than
-the second protocol presented in this report.
+An interesting future work would be to try to prove that there exists no
+total-order broadcast protocol having latency lower than
+$\lceil\log_2(N)\rceil + 1$. It would also be interesting to try to find
+total-order protocols achieving a better throughput than the second protocol
+presented in this report (if this is even possible).
 
 \end{document}
