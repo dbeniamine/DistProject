@@ -70,12 +70,12 @@ program.
 architecture and functionalities of our simulator. In particular the available
 command line arguments are described. A Perl script is also privided with the
 source files of the simulator. Its role is to help for the gathering of data
-and automate the simulation process. Its functioning is also explained at the
-end of the first section.
+and automate the measurement of the the latency and the throuput of the
+protocols. Its functioning is also explained at the end of the first section.
 
 In the second and third sections we present two regular total-order broadcast
 protocols. The first one achieves a good latency (time for a broadcast to be
-achieved with only one process sending), and the second one has a good
+completed with only one process sending), and the second one has a good
 throughput when all process are sending at the same time. We give a detailed
 theoretical analysis of the two protocols and confirm our results with some
 experiments using the network simulator.
@@ -131,8 +131,8 @@ Selection of broadcast mode:
 
 The behaviour of the program can be changed using the command line arguments
 as hinted by the ``help'' section content. In particular, the number of nodes
-used during the simulation can be set. Also the number of rounds to run can be
-set, and if it is set to $0$ the system will run forever.
+and the number of rounds to run can be set (if the number of round is set to
+$0$ the system will run forever).
 
 The broadcast protocol that is going to be used can be selected from the
 command line as well. The available options are the following.
@@ -152,7 +152,7 @@ Once the program is run, the simulation starts right away. At each turn, the
 user will be prompted to enter external events for the system. Any number of
 external event can be entered at the begining of each round. External events
 are read on the standard input (one by line). And when the user is done
-sending events, he should simply types ``start'' for the simulator to do a
+sending events, he should simply type ``start'' for the simulator to do a
 round. The format for the external events is the following.
 \begin{lstlisting}
 id event
@@ -164,7 +164,7 @@ event is destined.
 ``event'' is the content of the event passed to the node which can be an
 arbitrary string (with no line break).
 
-The only events that is available (for now) is called ``broadcast'' and tells
+The only event that is available (for now) is called ``broadcast'' and tells
 the system that the referenced node should broadcast the message ``Hello''.
 
 Of course the user can use a file and pipe it to the standard input of the
@@ -179,7 +179,8 @@ start
 start
 start
 \end{verbatim}
-It can be used to measure the latency of a protocol for example.
+This example file can be used to measure the latency of a protocol for
+example.
 
 \subsection{Architecture of the system}
 In order to better understand how the source code is organized, we give a
@@ -284,24 +285,24 @@ void *getData(int id);
 Once the protocol is ready, the Perl script can be used to gather statistics.
 
 \subsection{Experimental script}
-With concern of experimental reproducibility, we provide our simulator with a
-perl script \textit{exp.pl} which allows the user to run every experiments
-presented in this report and verify our results.
+For the experiments to be easily reproduced, we provide a Perl script
+\textit{exp.pl} with our simulator, which allows the user to run every
+experiment presented in this report.
 
-This script execute the program \textit{Broadcast} for different numbers of
-nodes and displays the latency and the throughput of each runs. If the reader
-wishes to use the scipt, he is advised to run it with no arguments to display
-the ``help'' section.
+This script runs the program \textit{Broadcast} with different numbers of
+nodes and displays the latency and the throughput for each runs. If the reader
+wishes to use the scipt, he is advised to run it with the ``-h'' argument to
+display the ``help'' section.
 
 \begin{lstlisting}
-> exp.pl
+> ./exp.pl -h
 \end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Regular total-order broadcast protocols with good latency}
 \label{sec:latencyTO}
 
-This first protocol makes use or the tree broadcast protocol since it achieves
+This first protocol makes use of the tree broadcast protocol since it achieves
 an optimal latency of $log(n)$. In order to obtain a total-order, i.e.
 guarantee that any two process will deliver messages in the exact same order,
 we use one of the nodes as a relay. More precisely, when a node wishes to
@@ -350,7 +351,7 @@ latency of this protocol should intuitively be $log(n) + 1$ rounds.
 
         \Event $<Receive\ | <m,broadcaster>>$
         \State Deliver(broadcaster,m)
-        \Comment{Deliver on right away}
+        \Comment{Deliver right away}
         \For{c in Children[Id()]}
         \Comment{And forward the message}
         \State Send(c,$<m,broadcaster>$)
@@ -368,7 +369,7 @@ $p = 0$ ($p$ is the relay node) the proof is trivial (by definition of the
 \textit{Broadcast} event).
 
 If $p$ is not the relay, the message $m$ will be forwarded to the  relay for
-it do perform the broadcast. Since the broadcast is propagated on a tree which
+it to perform the broadcast. Since the broadcast is propagated on a tree which
 root is the relay, any node in the tree will eventually deliver the message
 (by definition of the \textit{Receive} event). In particular $p$ will
 eventually deliver it.
@@ -381,7 +382,7 @@ of the \textit{Receive} event). By the property that no node in a tree can
 have more than one parent, a message can only be delivered once.
 
 \bigskip
-\noindent\textbf{No creation.} Delivery of messages $m$ by a process $p$ happen
+\noindent\textbf{No creation.} Delivery of message $m$ by a process $p$ happen
 in two cases. Either during a \textit{Broadcast} event if $p=0$, or during a
 \textit{Receive} event.
 
@@ -389,10 +390,10 @@ In the first case, the message $m$ is delivered by process $p=0$, which
 initiated itself a broadcast (the message $m$ was previously  broadcasted by
 process $p=0$).
 
-In the second case, the message $m$ is deliverd by $p$ in response of a
+In the second case, the message $m$ is deliverd by $p$ in response to a
 \textit{Receive} event. As we are using a perfect point-to-point link (with in
 particular no creation), the message was sent by the parent of the node, which
-received it before by its parent and so on up to the root of the tree, which
+received it previously by its parent and so on up to the root of the tree, which
 is process $0$. There are two possibilities: either $0$ is the broadcaster, or
 not. In the first case $0$ previously initiated the broadcast. In the second
 case, some other process $s$ initiated the broadcast and sent its message to
@@ -403,15 +404,15 @@ the relay (by definition of the \textit{Broadcast} event).
 to show that when a message $m$ is delivered by a process $p$ then it is
 eventually delivered by every other process. Processes are organized in a tree
 which root is process $0$, so process $p$ has related nodes in the tree: a
-parent if $p \neq O$, siblings and children.
+parent if $p \neq 0$, siblings and children.
 
 If $p \neq 0$, his parent should have delivered message $m$ before $p$ since
 the message was forwarded to $p$ by its parent.
 
 If $p$ has siblings (nodes that share the same parent as $p$), the parent
 should take care of forwarding the message to them, and the message will be
-properly delivered in the sibling branches of the tree independently of whan
-happen for $p$.
+properly delivered in the sibling branches of the tree independently of what
+happens for $p$.
 
 If $p$ has children it will eventually forward message $m$ to them (by
 definition of the \textit{Receive} event) so that they can deliver it and
@@ -423,9 +424,9 @@ process $0$ (the relay) since no delivery happens until process $0$ receives
 the message to broadcast. Once process $0$ has chosen an order for the
 messages to be delivered, the order of delivery is kept throughout the tree.
 Since every node has only one parent and the link between this node and its
-parent is fifo, there can be no inversion. Also when a node forwards a message
-to its children it sends this message to all of his children without
-interspering other messaging during the process. This ensures a total order
+parent is FIFO, there can be no inversion. Also when a node forwards a message
+to its children it sends this message to all of its children without
+interspering other messages during the process. This ensures a total order
 for the delivery of messages.
 
 \subsubsection{Latency}
@@ -466,10 +467,10 @@ large.
 
 \subsubsection{Throughput}
 Let's consider a system with $N$ nodes that wishes to broadcast a message
-concurrently. We wish to know how long this will take to all $N$ broadcasts
+concurrently. We wish to know how long this will take for all $N$ broadcasts
 to complete.
 
-At the first stem, the relay only knows of the message it wishes to broadcast
+At the first step, the relay only knows of the message it wishes to broadcast
 so it starts to broadcast it. After $\lceil\log_2(N)\rceil$ steps, the relay's
 broadcast is completed.
 
@@ -501,10 +502,10 @@ other nodes while playing its role in the broadcast.
 The empirical evaluation of the protocol are done using the network simulator.
 
 \subsubsection{Latency}
-In order evaluate the latency of the protocol with the network simulator, we
-run tests where a single node broadcasts a message and repeat the experiment
-with systems with different number of nodes. We then see how many rounds it
-takes for the broadcast to be completed in each system.
+In order to evaluate the latency of the protocol with the network simulator,
+we run tests where a single node broadcasts a message and repeat the experiment
+with different number of nodes. We then see how many rounds it takes for the
+broadcast to be completed in each system.
 
 We ran two different experiments. In the first one, the sender is always the
 relay, so we expect a latency of $L_{\text{relay}} = \lceil\log_2(N)\rceil$.
@@ -538,15 +539,15 @@ the table \ref{table:la}.
 \label{table:la}
 \end{table}
 
-The results are exactly the one expected and confirm the results found in the
+The results are exactly the one expected and confirm the validity of the
 theoretical analysis. Note that there must always be a relay in the system, so
-when there is only one node, it have to be the relay. Hence it makes no sense
+when there is only one node, it has to be the relay. Hence it makes no sense
 for a node that is different from the relay to broadcast a message if there is
 only the relay in the system.
 
 \subsubsection{Throughput}
 We experiment with the throughput in the same way as with the latecy. We use
-the simulator to run test where every node in the system have a message to
+the simulator to run test where every node in the system has a message to
 broadcast from the begining of the run. We then see how long it take for all
 the broadcasts to be completed. The expected throughput is
 $\frac{1}{\lceil\log_2(N)\rceil}$ where $N$ is again the number of nodes in
@@ -577,15 +578,19 @@ the system. The results are displayed in the table \ref{table:thr}.
 \label{table:thr}
 \end{table}
 
-The results fit exactly the theoretical results. We observe, as expected that
+The results fit exactly the theoretical model. We observe, as expected, that
 the relay starts its broadcast firts (since it has its own message to
 broadcast from the begining) and the nodes manage to send messages to
 broadcast to the relay while it is still performing the previous broadcast.
 With this, the throughput of $\frac{1}{\lceil\log_2(N)\rceil}$ is achieved.
 
+Note that with only one node the throughput is infinite since it take no time
+for the node to broatcast a message (it already has it).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
+%%% TODO relecture à partir d'ici
 
 This protocol is based on the pipeline broadcast protocol but as soon as a node
 receives a message, it will add it to a sorted list. A node $p$ can only deliver the
@@ -765,7 +770,7 @@ we have a Latency of$6=2*(4-1)$.
 \end{figure}
 
 As the pipeline is perfectly parallel, the latency will always be $2(N-1)$.
-\subsubsection*{Throughput}
+\subsubsection{Throughput}
 Let’s consider a system with N nodes that wishes to broadcast a message concurrently
 We wish to know how long this will take to all N broadcasts to
 complete.
