@@ -16,7 +16,7 @@
  * pname  : the program name (usually argv[0]).
  */
 void display_help(FILE* output, char* pname){
-  fprintf(output, "Usage: %s [-N n][-R n][-h][-b|t|i|p]\n", pname);
+  fprintf(output, "Usage: %s [-N n][-R n][-h][-b|t|i|p|L|T]\n", pname);
   fprintf(output, "Possible arguments:\n");
   fprintf(output, "\t-N n\tSpecify a number of nodes n, default is 4.\n");
   fprintf(output, "\t-R n\tSpecify a number of rounds n, default is 20.\n");
