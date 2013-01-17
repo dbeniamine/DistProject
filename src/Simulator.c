@@ -67,6 +67,8 @@ void deleteSystem(){
         DeleteFifo(sys->nodes[i].sendBuf);
         DeleteFifo(sys->nodes[i].receivBuf);
         DeleteFifo(sys->nodes[i].eventsBuf);
+	// if(NULL != sys->nodes[i].data)
+        //  free(sys->nodes[i].data);
       }
 
       free(sys->nodes);
