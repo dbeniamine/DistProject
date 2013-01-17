@@ -361,7 +361,17 @@ When the relay originates a broadcast, the latency is that of the tree
 broadcast protocol, i.e $\lceil\log_2(N)\rceil$. However, when a node that is
 not the relay wished to broadcast a message, it first needs to unicast the
 message to the relay, which take one round. The latency is then
-$\lceil\log_2(N)\rceil + 1$.
+$\lceil\log_2(N)\rceil + 1$. To better understand what happen, two examples
+of broadcasts in a system with four nodes are displayed in
+\ref{figure:latency}. The first broadcast is performed by the relay and the
+second by an other node.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=280px]{Latency.png}
+    \caption{an example of broadcast from the relay (blue) and an example of broadcast from an other node (red).}
+    \label{figure:latency}
+\end{figure}
 
 We give two different results for the latency:
 \begin{itemize}
@@ -393,6 +403,19 @@ rounds to complete the $N$ broadcasts. This gives us the throughput of the
 system which is equal to $\frac{1}{\lceil\log_2(N)\rceil}$.
 
 The throughput tends slowly to $0$ when $N$ grows large, which is quite bad.
+
+An example of a system where four nodes are concurently broadcasting a message
+is displayed in \ref{figure:throughput}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=280px]{Throughput.png}
+    \caption{Four nodes broadcasting a message concurently. Node 0 is the relay, it effectively performs all broadcasts using the tree broadcast protocol. The dashed arrows are request for a broadcast from nodes to the relay.}
+    \label{figure:throughput}
+\end{figure}
+
+We see on the drawing that the relay can perfectly receive messages from the
+other nodes while playing its role in the broadcast.
 
 \subsection{Empirical analysis}
 The empirical evaluation of the protocol are done using the network simulator.
