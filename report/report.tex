@@ -535,7 +535,7 @@ Table \ref{table:la}.
         %    10000 & 14   & 14   & 15   & 15   \\
         \hline
     \end{tabular}
-    \caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
+    \caption{Protocol latency with different number of nodes with the broadcasting node being the relay or not.}
     \label{table:la}
 \end{table}
 
@@ -574,7 +574,7 @@ the system. The results are displayed in Table \ref{table:thr}.
         %    10000 & 0.071  & 0.071  \\
         \hline
     \end{tabular}
-    \caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
+    \caption{Protocol throughput with different number of nodes, all nodes broadcasting a message concurently.}
     \label{table:thr}
 \end{table}
 
@@ -813,14 +813,14 @@ messages sent.
 \subsection{Empirical analysis}
 %%TODO : David relecture a partir d'ici
 \subsubsection{Latency}
-As for the previous protocol, we have recorded the latency for the broadcast of
-one message for a various number of nodes. The results are shown in Table
-\ref{table:th}.
+As for the previous protocol, we recorded the latency $L$ for system with
+different number of nodes. The results are shown in Table \ref{table:th}.
+
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|c|}
         \hline
-        $N$  & Experimental result & Theoretical result $2(N-1)$ \\
+        $N$   & L   & $2(N-1)$ \\
         \hline
         1     & 0   & 0    \\
         2     & 2   & 2   \\
@@ -837,22 +837,23 @@ one message for a various number of nodes. The results are shown in Table
         %    10000 & 19998   & 19998  \\
         \hline
     \end{tabular}
-    \caption{Broadcast latency for different number of nodes}
+    \caption{Protocol latency with different number of nodes.}
     \label{table:th}
 \end{table}
-We can see that the results are exactly the same as the theoretical analysis.
+
+We can see that the results correspond exactly to the theoretical analysis.
 
 \subsubsection{Throughput}
-To evaluate the throughput of this protocol, we've launched an experiment with N
-nodes, each node start a broadcast at the first round, and we record the number
-of the rounds needed for the N broadcast to finish. Then we compute the
-throughput $T=\frac{Number of broadcast}{Number of rounds}$. The results are
-shown in Table \ref{table:thT}.
+To evaluate the throughput of the protocol, we ran an experiment with $N$
+nodes, each node starting a broadcast at the first round. We recorded the
+number of rounds needed for the $N$ broadcasts to finish, and used it to
+compute the throughput $T$. The results are shown in Table \ref{table:thT}.
+
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|c|}
         \hline
-        $N$  & Experimental result & Theoretical result $2(N-1)$ \\
+        $N$   & T      & $2(N-1)$ \\
         \hline
         1     & +Inf   & +Inf   \\
         2     & 1      & 1      \\
@@ -869,7 +870,7 @@ shown in Table \ref{table:thT}.
         %    10000 &   &   \\
         \hline
     \end{tabular}
-    \caption{Broadcast throughput for different number of nodes}
+    \caption{Protocol throughput with different number of nodes, all nodes broadcasting a message concurently.}
     \label{table:thT}
 \end{table}
 
@@ -889,8 +890,8 @@ $\frac{1}{2}$ as a lower bound. This result is quite far from the optimal
 throughput for a broadcast protocol where no total order is required
 ($\frac{N+1}{N}$), but this is the price to pay to achieve a total ordering
 of messages. However, since $\frac{1}{2}$ is a lower bound on the throughput
-that performances of the protocol are not too bad, even with a system with a
-great number of nodes.
+the performances of the protocol are scalabel and become acceptable when
+the number of nodes in the system is large.
 
 An interesting future work would be to try to prove that there exists no
 total-order broadcast protocol having latency lower than
