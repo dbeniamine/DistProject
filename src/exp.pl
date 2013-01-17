@@ -23,7 +23,7 @@ if ($help || $exp=~m"undef" || $proto=~m"undef")
 $proto="-".$oldproto;
 
 $i=$init>0?$init+1:1;
-while ( $i <= 10000 ){
+while ( $i <= 1000 ){
     $rounds=100*$i;
     $process=$i-1;
     $output="output_".$oldproto."_".$exp."_".$i;
