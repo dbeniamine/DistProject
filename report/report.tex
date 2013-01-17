@@ -54,26 +54,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
 As part of our Distributed Network class, we had to build a network simulator
 tool and use it to implement and experiment with various broadcast protocols.
-In particular we paid much attention to the latency and throughput offered by
-the considered protocols.
+In particular we designed two regular total-order broadcast protocols and paid
+much attention to the latency and throughput that they offer.
 
 This report and the source files of the project are both part of our answer to
 the problem. The source files should be globally well documented, but reading
 this report should help the reader to better understand the structure of the
-program.\\
+program.
+\bigskip
 
 \noindent\textbf{Structure of the report:} In the first section we present the
-architecture and functionalities of our simulator. We also present the results
-of some tests that we performed to check the behaviour of the system using the
-broadcast protocols seen in class (Basic, Tree and Pipe-line broadcast).
+architecture and functionalities of our simulator. In particular the available
+command line arguments are described. A Perl script is also privided with the
+source files of the simulator. Its role is to help for the gathering of data
+and automate the simulation process. Its functioning is also explained at the
+end of the first section.
 
 In the second and third sections we present two regular total-order broadcast
 protocols. The first one achieves a good latency (time for a broadcast to be
 achieved with only one process sending), and the second one has a good
-throughput when all process are sending at the same time. We also give a
-detailed theoretical analysis of the two protocols.
+throughput when all process are sending at the same time. We give a detailed
+theoretical analysis of the two protocols and confirm our results with some
+experiments using the network simulator.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The network simulator}
@@ -93,7 +98,7 @@ other machines will be called a \textit{process}, a \textit{node}, or simply
 a \textit{machine}. The term \textit{external event} will refer to any action
 taken by the user of the simulator. For example, at some point the user might
 decide that a node should initiate a broadcast. This information will be
-passed using an external event.
+passed to the program using an external event.
 
 Before being able to use the simulator, the user should first compile it. A
 \textit{makefile} is provided in the source directory \textit{src/}. It is
@@ -110,7 +115,7 @@ have appeared in the source directory. The program contains a ``help'' section
 which can be accessed in a standard manner.
 \begin{lstlisting}
 > ./Broadcast -h
-Usage: ../src/Broadcast [-N n][-R n][-h][-b|t|i|p]
+Usage: ../src/Broadcast [-N n][-R n][-h][-b|t|i|p|L|T]
 Possible arguments:
 -N n	Specify a number of nodes n, default is 4.
 -R n	Specify a number of rounds n, default is 20.
@@ -129,8 +134,8 @@ as hinted by the ``help'' section content. In particular, the number of nodes
 used during the simulation can be set. Also the number of rounds to run can be
 set, and if it is set to $0$ the system will run forever.
 
-The broadcast protocol that is going to be used can be selected as well from
-the command line. The available options are the following.
+The broadcast protocol that is going to be used can be selected from the
+command line as well. The available options are the following.
 \begin{itemize}
     \item IP broadcast: use multicast.
     \item Basic broadcast: the broadcaster sends to every other node in turn
@@ -145,28 +150,45 @@ the command line. The available options are the following.
 
 Once the program is run, the simulation starts right away. At each turn, the
 user will be prompted to enter external events for the system. Any number of
-external event can be entered at the begining of each round. External read on
-the standard input (on by line). And when the user is done sending events, he
-simply types ``start'' for the simulator to do a round. The format for the
-external events is
+external event can be entered at the begining of each round. External events
+are read on the standard input (one by line). And when the user is done
+sending events, he should simply types ``start'' for the simulator to do a
+round. The format for the external events is the following.
 \begin{lstlisting}
 id event
 \end{lstlisting}
-where ``id'' is an integer (between 0 and the number of nodes) which is the identifier of the node to which the
-event is destined. ``event'' is the content of the event passed to the
-node which can be an
+``id'' is an integer between $0$ and $N-1$ where $N$ is the number of nodes in
+the system. This field allows the system to know to which node the external
+event is destined.
+
+``event'' is the content of the event passed to the node which can be an
 arbitrary string (with no line break).
-% TODO Give the events that are built-in
+
+The only events that is available (for now) is called ``broadcast'' and tells
+the system that the referenced node should broadcast the message ``Hello''.
+
+Of course the user can use a file and pipe it to the standard input of the
+program. This is the most convenient way to run tests and experiments. An
+example of the content of such file is the following.
+\begin{verbatim}
+0 broadcast
+start
+start
+start
+start
+start
+start
+\end{verbatim}
+It can be used to measure the latency of a protocol for example.
 
 \subsection{Architecture of the system}
 In order to better understand how the source code is organized, we give a
 brief description of the content of every source file.
 \begin{itemize}
     \item \textit{List.h} define the structure List used by
-        \textit{Fifo.$<$c/h$>$} and
-        \textit{SortedList.$<$c/h$>$}
-    \item \textit{SortedList.h} contains a small library providing sorted list of
-        objects. This library can be used by the nodes to store and sort
+        \textit{Fifo.$<$c/h$>$} and \textit{SortedList.$<$c/h$>$}
+    \item \textit{SortedList.h} contains a small library providing sorted list
+        of objects. This library can be used by the nodes to store and sort
         their messages.
     \item \textit{SortedList.c} implements the functions defined in
         \textit{SortedList.h}
@@ -176,64 +198,104 @@ brief description of the content of every source file.
         treated) in the order they arrived in the system (FIFO order: First
         In, First Out).
     \item \textit{Fifo.c} implements the functions defined in \textit{Fifo.h}.
-    \item \textit{Message.h} defines what messages (a sender, a receiver and the
-        content) and provides functions to initialize, delete and copy
+    \item \textit{Message.h} defines what messages (a sender, a receiver and
+        the content) and provides functions to initialize, delete and copy
         messages.
     \item \textit{Message.c} implements the functions defined in
         \textit{Message.h}.
-    \item \textit{Broadcast.h} contains a definition of the different broadcast
+    \item \textit{Broadcast.h} contains a definition of the different
+        broadcast protocols.
+    \item \textit{Broadcast.c} implements all the different broadcast
         protocols.
-    \item \textit{Broadcast.c} implements all the different broadcast protocols.
     \item \textit{Simulator.h} defines the core functions and data structures
-        of the simulator accessible by the nodes or the main function. In particular the function \textit{LaunchSimulation}
-        is the core function of the simulator and contains the main loop which
-        will do the rounds, read external events and apply the broadcast
-        policies defined in \textit{Broadcast.h}.
-    \item \textit{Simulator.c} defines the internal structure of the
-        simulator and implements the functions defined in
-        \textit{Simulator.h}.
+        of the simulator accessible by the nodes or the main function. In
+        particular the function \textit{LaunchSimulation} is the core function
+        of the simulator and contains the main loop which will do the rounds,
+        read external events and apply the broadcast policies defined in
+        \textit{Broadcast.h}.
+    \item \textit{Simulator.c} defines the internal structure of the simulator
+        and implements the functions defined in \textit{Simulator.h}.
     \item \textit{Main.c} contains the main function of the program. It takes
-        care of the command line arguments, initialize the system and call
-        the \textit{LaunchSimulation} function.
+        care of the command line arguments, initialize the system and call the
+        \textit{LaunchSimulation} function.
 \end{itemize}
-% TODO Explain how node functions work and detail what LaunchSimulation does
-\subsection{How to write a program using the simulator}
-Writing a node using our simulator is quite easy, you just have to 
-include the file Simulator.h and write a function :\\
-\textit{void myProtocol(int id, Message m)}
 
-This function will be run by each node at each round of the execution.\\
-id is the unique identifier of the Node, and m is either NULL or the
-message received by the node id at the beginning of the round.\\
+\subsection{Implementing a protocol with the simulator}
+Our simulator provides a convenient way to implement broadcast protocols. The
+main part of the process is the creation of a function having the following
+signature.
+\begin{verbatim}
+void myProtocol(int id, Message m);
+\end{verbatim}
+
+This function will be run by each node at each round of the execution with its
+first argument containing the identifier of the current node and the second
+argument being the message received by the current node at the begining of the
+round (or NULL if it is not receiving any message).
+
+The function should be placed in file \textit{Broadcast.c} and its signature
+sould be added to \textit{Broadcast.h}. In order to launch the simulator with
+the newly created function a main program should be written as well. The main
+function included in \textit{Main.c} can be modified easily to be made to use
+the new protocol function. Alternatively the following is an example of a
+main program.
+
+\begin{verbatim}
+#include "Broadcast.h";
+#include "Simulator.h";
+
+#define NB_NODES 4
+#define NB_ROUNDS 20
+
+int main(void){
+  // Initialize the system
+  initSytem(NB_NODES, NB_ROUNDS, myProtocol);
+
+  // Run the simulator
+  LaunchSimulation();
+
+  // Delete the system
+  deleteSystem();
+
+  return 0;
+}
+\end{verbatim}
+
 A node can interact with the systems using the functions defined in
-\textit{Simulator.h} and \textit{Message.h}. For instance to get an external event
-(if there is any) one can use the function \textit{readExternalEvents},
-nodes can also send messages to the others and get the total number of
-nodes in the system. Least but not last, if your nodes needs some
-persistent data, you just have to define a data structure like this:\\
+\textit{Simulator.h} and \textit{Message.h}. For instance the function
+\textit{readExternalEvent} is provided in order to get the next external
+event if there is any. There is also a \textit{send} function that is used to
+add a message in the sending queue of a process. There is also a function
+to get the number of nodes in the system and some other allowing to attach
+some persistent data to a node, retrieve it and modify it. Here is an example
+of a data structure that can be held in a node as persistent data.
 \begin{verbatim}
 typedef struct _NodesData{
     int clock;
     SortedList pending;
 }*NodesData;
 \end{verbatim}
-During the first round, you will have to tell the simulator that you
-have some data to store for your nodes using the function \textit{void *setData(int id,
-void *data)}.Than you can retrieve these data at anytime using the function
-\textit{void *getData(int id)}.
+The following functions are used to set the stored data and to retrieve it.
+\begin{verbatim}
+void *setData(int id, void *data);
+void *getData(int id);
+\end{verbatim}
 
-Once your protocol is ready, the only thing you have to do is to create
-a Main and call the function \textit{initSystem(int nb\_nodes, int
-nb\_rounds, NodesFct fun)}, then you can finally start the simulation
-with \textit{LaunchSimulation()}. 
+Once the protocol is ready, the Perl script can be used to gather statistics.
+
 \subsection{Experimental script}
-With concern of experimental reproducibility we provide our simulator with a
-perl script \textit{exp.pl} which allows you to run every experiments
+With concern of experimental reproducibility, we provide our simulator with a
+perl script \textit{exp.pl} which allows the user to run every experiments
 presented in this report and verify our results.
 
 This script execute the program \textit{Broadcast} for different numbers of
-nodes and write the latency and the throughput of each runs. If you want to use
-it try \textit{exp.pl} to see it's capabilities.
+nodes and displays the latency and the throughput of each runs. If the reader
+wishes to use the scipt, he is advised to run it with no arguments to display
+the ``help'' section.
+
+\begin{lstlisting}
+> exp.pl
+\end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Regular total-order broadcast protocols with good latency}
@@ -246,7 +308,7 @@ we use one of the nodes as a relay. More precisely, when a node wishes to
 perform a broadcast, it sends the message to the relay node which will
 broadcast the message on its behalf.
 
-Intuitively, any node in the tree will receive the messages in the same order
+Intuitively, all nodes in the tree will receive the messages in the same order
 since the same tree traversal scheme will be used for each message. When a
 node of the tree receives a broadcasted message, it can deliver it immediatly
 before forwarding it.
@@ -299,70 +361,74 @@ latency of this protocol should intuitively be $log(n) + 1$ rounds.
 \end{algorithm}
 
 \subsection{Theoretical analysis}
-\subsubsection*{Correctness}
-\begin{itemize}
-    \item Validity: we assume that there are no crashes, so if a process $p$
-        broadcasts a message $p$, then $p$ eventually delivers $m$. If $p = 0$
-        ($p$ is the relay node) the proof is trivial (by definition of the
-        \textit{Broadcast} event).
+\subsubsection{Correctness}
+\noindent\textbf{Validity.} We assume that there are no crashes, so if a
+process $p$ broadcasts a message $p$, then $p$ eventually delivers $m$. If
+$p = 0$ ($p$ is the relay node) the proof is trivial (by definition of the
+\textit{Broadcast} event).
 
-        If $p$ is not the relay, the message $m$ will be forwarded to the
-        relay for it do perform the broadcast. Since the broadcast is
-        propagated on a tree which root is the relay, any node in the tree
-        will eventually deliver the message (by definition of the
-        \textit{Receive} event). In particular $p$ will eventually deliver it.
-    \item No duplication: when a message is broadcasted by a node $p$ it is not
-        delivered right away by $p$ (except if $p = 0$). A node $p$ only
-        delivers a message $m$ when it receives it from its parent node (by
-        definition of the \textit{Receive} event). By the property that no
-        node in a tree can have more than one parent, a message can only be
-        delivered once.
-    \item No creation: delivery of messages $m$ by a process $p$ happen in two
-        cases. Either during a \textit{Broadcast} event if $p=0$, or during a
-        \textit{Receive} event.
+If $p$ is not the relay, the message $m$ will be forwarded to the  relay for
+it do perform the broadcast. Since the broadcast is propagated on a tree which
+root is the relay, any node in the tree will eventually deliver the message
+(by definition of the \textit{Receive} event). In particular $p$ will
+eventually deliver it.
 
-        In the first case, the message $m$ is delivered by process $p=0$, which
-        initiated itself a broadcast (the message $m$ was previously
-        broadcasted by process $p=0$).
+\bigskip
+\noindent\textbf{No duplication.} When a message is broadcasted by a node $p$
+it is not delivered right away by $p$ (except if $p = 0$). A node $p$ only
+delivers a message $m$ when it receives it from its parent node (by definition
+of the \textit{Receive} event). By the property that no node in a tree can
+have more than one parent, a message can only be delivered once.
 
-        In the second case, the message $m$ is deliverd by $p$ in response of
-        a \textit{Receive} event. As we are using a perfect point-to-point
-        link (with in particular no creation), the message was sent by the
-        parent of the node, which received it before by its parent and so on
-        up to the root of the tree, which is process $0$. There are two
-        possibilities: either $0$ is the broadcaster, or not. In the first
-        case $0$ previously initiated the broadcast. In the second case, some
-        other process $s$ initiated the broadcast and sent its message to the
-        relay (by definition of the \textit{Broadcast} event).
-    \item Agreement: since all process are correct (no crashes) we need to
-        show that when a message $m$ is delivered by a process $p$ then it is
-        eventually delivered by every other process. Processes are organized
-        in a tree which root is process $0$, so process $p$ has related nodes
-        in the tree: a parent if $p \neq O$, siblings and children.
+\bigskip
+\noindent\textbf{No creation.} Delivery of messages $m$ by a process $p$ happen
+in two cases. Either during a \textit{Broadcast} event if $p=0$, or during a
+\textit{Receive} event.
 
-        If $p \neq 0$, his parent should have delivered message $m$ before
-        $p$ since the message was forwarded to $p$ by its parent.
+In the first case, the message $m$ is delivered by process $p=0$, which
+initiated itself a broadcast (the message $m$ was previously  broadcasted by
+process $p=0$).
 
-        If $p$ has siblings (nodes that share the same parent as $p$), the
-        parent should take care of forwarding the message to them, and the
-        message will be properly delivered in the sibling branches of the
-        tree independently of whan happen for $p$.
+In the second case, the message $m$ is deliverd by $p$ in response of a
+\textit{Receive} event. As we are using a perfect point-to-point link (with in
+particular no creation), the message was sent by the parent of the node, which
+received it before by its parent and so on up to the root of the tree, which
+is process $0$. There are two possibilities: either $0$ is the broadcaster, or
+not. In the first case $0$ previously initiated the broadcast. In the second
+case, some other process $s$ initiated the broadcast and sent its message to
+the relay (by definition of the \textit{Broadcast} event).
 
-        If $p$ has children it will eventually forward message $m$ to them
-        (by definition of the \textit{Receive} event) so that they can
-        deliver it and forward it in turn to their children and so on.
-    \item Total order: all the messages are effectively broadcasted by process
-        $0$ (the relay) since no delivery happens until process $0$ receives
-        the message to broadcast. Once process $0$ has chosen an order for the
-        messages to be delivered, the order of delivery is kept throughout the
-        tree. Since every node has only one parent and the link between this
-        node and its parent is fifo, there can be no inversion. Also when a
-        node forwards a message to its children it sends this message to all
-        of his children without interspering other messaging during the
-        process. This ensures a total order for the delivery of messages.
-\end{itemize}
+\bigskip
+\noindent\textbf{Agreement.} Since all process are correct (no crashes) we need
+to show that when a message $m$ is delivered by a process $p$ then it is
+eventually delivered by every other process. Processes are organized in a tree
+which root is process $0$, so process $p$ has related nodes in the tree: a
+parent if $p \neq O$, siblings and children.
 
-\subsubsection*{Latency}
+If $p \neq 0$, his parent should have delivered message $m$ before $p$ since
+the message was forwarded to $p$ by its parent.
+
+If $p$ has siblings (nodes that share the same parent as $p$), the parent
+should take care of forwarding the message to them, and the message will be
+properly delivered in the sibling branches of the tree independently of whan
+happen for $p$.
+
+If $p$ has children it will eventually forward message $m$ to them (by
+definition of the \textit{Receive} event) so that they can deliver it and
+forward it in turn to their children and so on.
+
+\bigskip
+\noindent\textbf{Total order.} All the messages are effectively broadcasted by
+process $0$ (the relay) since no delivery happens until process $0$ receives
+the message to broadcast. Once process $0$ has chosen an order for the
+messages to be delivered, the order of delivery is kept throughout the tree.
+Since every node has only one parent and the link between this node and its
+parent is fifo, there can be no inversion. Also when a node forwards a message
+to its children it sends this message to all of his children without
+interspering other messaging during the process. This ensures a total order
+for the delivery of messages.
+
+\subsubsection{Latency}
 The algorithm is based on the tree-broadcast protocol seen in class. This
 protocol has a latency of $\lceil\log_2(N)\rceil$ where $N$ is the number of
 nodes.
@@ -398,7 +464,7 @@ We give two different results for the latency:
 Both the worst case and the mean latency tend to the optimal when $N$ is
 large.
 
-\subsubsection*{Throughput}
+\subsubsection{Throughput}
 Let's consider a system with $N$ nodes that wishes to broadcast a message
 concurrently. We wish to know how long this will take to all $N$ broadcasts
 to complete.
@@ -434,7 +500,7 @@ other nodes while playing its role in the broadcast.
 \subsection{Empirical analysis}
 The empirical evaluation of the protocol are done using the network simulator.
 
-\subsubsection*{Latency}
+\subsubsection{Latency}
 In order evaluate the latency of the protocol with the network simulator, we
 run tests where a single node broadcasts a message and repeat the experiment
 with systems with different number of nodes. We then see how many rounds it
@@ -478,7 +544,7 @@ when there is only one node, it have to be the relay. Hence it makes no sense
 for a node that is different from the relay to broadcast a message if there is
 only the relay in the system.
 
-\subsubsection*{Throughput}
+\subsubsection{Throughput}
 We experiment with the throughput in the same way as with the latecy. We use
 the simulator to run test where every node in the system have a message to
 broadcast from the begining of the run. We then see how long it take for all
@@ -624,63 +690,64 @@ This acknowledgement system ensure the total order property (see section
 
 
 \subsection{Theoretical analysis}
-\subsubsection*{Correctness}
-\begin{itemize}
-    \item Validity: As there  is no crashes, if a process P broadcast a
-        message m, m will be received, put in the pending queue and acknowledged 
-        by every process. When P will receive the ack for m, either m will be
-        the head of it's queue and he will be able to deliver it, or P will wait
-        for at least one other message ack. 
-        
-        As the queue is ordered by logical clock and as all nodes have been on
-        the pipeline forwarding m or it's ack, once P has received the
-        acknowledgment for m, no new message will be able to go before m in the
-        queue. Finally as all message will eventually be acknowledged, number of
-        message before m in the queue will decrease. And after the reception of
-        one ack, m will be the head of the queue and will be delivered.
-
-        So if P broadcast a message m, he will eventually receive an ack
-        for m and deliver it.
-    \item No duplication: Each message are send and ack only once. As soon as a
-        message is delivered it's removed from the pending queue, so it cannot
-        be delivered again.
-    \item No creation: No rules of the algorithm allow a process to
-        create a message m without receiving a broadcast request for m.
-    \item Agreement: We have proved that if P broadcast a message m
-        then P will eventually receive an ack for m and deliver m, as
-        the pipeline go through all the nodes and as a node deliver a
-        message as soon as it acknowledge it, if P delivers m every node
-        have delivered m.
-    \item Total order: Let's imagine that two process p1 have delivered a message m1 then a
-        message m2 and p2 have delivered m2 then m1. 
-        
-        As all the node's queues are sorted the same way we can consider that
-        the \textit{good} order is the order of the queue, and we (empirically)
-        state that this order is $m1<m2$.
-
-        So if p2 has delivered m2 before m1, that means p2 had receive m2,
-        delivered it, and then have received m1. Indeed if m1 have been received
-        before m2 or if m1 and m2 have been in the queue at the same time, p2
-        would have delivered m1 before m2.
-
-        Either p2 is the last node of the pipeline used by m1, or p2 has
-        received an ack for m1. In both cases, that mean when p2 is able to
-        deliver m1, all the process have seen m1 and do the operation 
-        \textit{clock=Max(clock(M1),MyClock)+1} before forwarding it or 
-        sending an ack. If a process had send
-        m2 with a clock smaller or equal to clock(m1), this message would have
-        used the same path than m1 (or m1's ack) and as the link are FIFO, p2
-        would have received m2 before m1. This contradict the hypothesis so two
-        process can't deliver two message in a different order.
-
-        The total order property is true !
-
-\end{itemize}
+\subsubsection{Correctness}
 \label{sec:pipelineack-proof}
+\noindent\textbf{Validity.} As there is no crashes, if a process $p$
+broadcasts a message $m$, it will be received, put in the pending queue and
+acknowledged by every process. When $p$ receives the ack for $m$, either $m$
+is the head of the queue and in that case $p$ delivers it, or $p$ will have
+to wait for at least one other ack message. 
+ 
+As the queue is ordered by logical clock and as all nodes have been on the
+pipeline forwarding $m$ or it's ack, once $p$ has received the  acknowledgment
+for $m$, no new message will be able to go before $m$ in the queue. Finally as
+all message will eventually be acknowledged, number of message before $m$ in
+the queue will decrease. And after the reception of one ack, $m$ will be the
+head of the queue and will be delivered.
 
+So if $p$ broadcast a message $m$, he will eventually receive an ack for $m$
+and deliver it.
 
-\subsubsection*{Latency}
-% TODO
+\bigskip
+\noindent\textbf{No duplication.} Each message is sent and ack only once. As
+soon as a message is delivered it's removed from the pending queue, so it
+cannot be delivered again.
+
+\bigskip
+\noindent\textbf{No creation.} No rules of the algorithm allow a process to
+create a message $m$ without receiving a broadcast request for $m$.
+
+\bigskip
+\noindent\textbf{Agreement.} We have proved that if $p$ broadcast a message
+$m$ then $p$ will eventually receive an ack for $m$ and deliver $m$, as the
+pipeline go through all the nodes and as a node deliver a message as soon as
+it acknowledge it, if $p$ delivers $m$ every node have delivered $m$.
+
+\bigskip
+\noindent\textbf{Total order.} Let's imagine that process $p_1$ has delivered
+message $m_1$ before message $m_2$ and that process $p_2$ has delivered
+message $m_2$ before message $m_1$.
+        
+As all the node's queues are sorted the same way we can consider that the
+\textit{right} order is the order of the queue, and we (arbitrarilly) state
+that this order is $m_1 < m_2$.
+
+So if $p_2$ has delivered $m_2$ before $m_1$, this means that $p_2$ had
+received $m_2$, delivered it, and then received $m_1$. Indeed if $m_1$ have
+been received before $m_2$ or if $m_1$ and $m_2$ have been in the queue at the
+same time, $p_2$ would have delivered $m_1$ before $m_2$.
+
+Either $p_2$ is the last node of the pipeline used by $m_1$, or $p_2$ has
+received an ack for $m_1$. In both cases, this means that when $p_2$ is able
+to deliver $m_1$, all the process have seen $m_1$ and done the operation 
+\textit{clock=Max(clock(M1),MyClock)+1} before forwarding it or sending an
+ack. If a process had send $m_2$ with a clock smaller or equal to
+\textit{clock(m1)}, this message would have used the same path than $m_1$
+(or $m_1$'s ack) and as the link are FIFO, $p_2$ would have received $m_2$
+before $m_1$. This contradict the hypothesis so two process can't deliver two
+message in a different order.
+
+\subsubsection{Latency}
 The algorithm is based on the pipeline broadcast, if we have $N$ nodes, it takes
 $N-1$ round for one broadcast. But as the last node of the pipeline start a
 broadcast of acknowledgment, and as we wait for these ack to deliver the
@@ -696,8 +763,6 @@ we have a Latency of$6=2*(4-1)$.
     acknowledgments.}
     \label{figure:latency2}
 \end{figure}
-
-
 
 As the pipeline is perfectly parallel, the latency will always be $2(N-1)$.
 \subsubsection*{Throughput}
@@ -721,10 +786,9 @@ every node is able to deliver every message in it's queue.
 Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
 of $\frac{N}{2(N-1)}\longrightarrow_{N \rightarrow \infty}\frac{1}{2}$ which is totally independent of the number of
 messages !
-\subsection{Empirical analysis}
-% TODO
 
-\subsubsection*{Latency}
+\subsection{Empirical analysis}
+\subsubsection{Latency}
 As for the previous protocol, we have recorded the latency for the broadcast of
 one message for a various number of nodes. The results are shown in the table
 \ref{table:th}.
@@ -753,8 +817,8 @@ one message for a various number of nodes. The results are shown in the table
 \label{table:th}
 \end{table}
 We can see that the results are exactly the same as the theoretical analysis.
- \subsubsection*{Throughput}
-% TODO
+
+\subsubsection{Throughput}
 To evaluate the throughput of this protocol, we've launched an experiment with N
 nodes, each node start a broadcast at the first round, and we record the number
 of the rounds needed for the N broadcast to finish. Then we compute the
@@ -787,6 +851,7 @@ shown in the table \ref{table:thT}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
 In this report we presented our implementation of a single-threaded,
 round-based network simulator. We later used it to implement and reason about
 two total-order broadcast protocols that we designed.
@@ -806,33 +871,3 @@ $\lceil\log_2(N)\rceil$, or a protocol that achieve a better throughput than
 the second protocol presented in this report.
 
 \end{document}
-
-
-%%%% Tasks
-% Task 1: Design a network simulator
-%   * Single thread
-%   * Round based
-%   * Any programming language
-%   * N processes (machines)
-%   * No crash
-%   * Each machine sends (up to) one message at the begining of a round
-%   * Each machine can receive (up to) one message at the end of a round
-%
-% Task 2: Check the behaviour of the simulator using the broadcast protocols
-%         from the lectures.
-%   * Basic (Latency = 3, Throughput = 1/3)
-%   * Trees (Latency = 2, Throughput = 1/2)
-%   * Pipe-line (Latency = 3, Throughput = 1)
-%
-% Tack 3: Design / Implement two regular total-order broadcast protocols
-%   * Assumptions: No crash, perfect link, infinite memory, perfect failure
-%                  detector
-%   * First protocol: good latency
-%   * Second protocol: good throughput (with N senders)
-%
-% Task 4: Write a report (10 to 15 pages)
-%   * Description of simulator architecture
-%   * Description of the two protocols
-%   * Theoretical analysis of the two protocols (latency, throughput)
-%   * Empirical evaluation of the two protocols (using the simulator)
-
