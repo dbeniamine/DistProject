@@ -515,28 +515,28 @@ $L_{\text{node}} = \lceil\log_2(N)\rceil + 1$. The results are displayed in
 the table \ref{table:la}.
 
 \begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-    \hline
-    $N$  & $L_{\text{relay}}$ & $\lceil\log_2(N)\rceil$ & $L_{\text{node}}$ & $\lceil\log_2(N)\rceil + 1$ \\
-    \hline
-    1     & 0    & 0    & -    & -    \\
-    2     & 1    & 1    & 2    & 2    \\
-    3     & 2    & 2    & 3    & 3    \\
-    4     & 2    & 2    & 3    & 3    \\
-    5     & 3    & 3    & 4    & 4    \\
-    6     & 3    & 3    & 4    & 4    \\
-    7     & 3    & 3    & 4    & 4    \\
-    8     & 3    & 3    & 4    & 4    \\
-    9     & 4    & 4    & 5    & 5    \\
-    10    & 4    & 4    & 5    & 5    \\
-    100   & 7    & 7    & 8    & 8    \\
-    1000  & 10   & 10   & 11   & 11   \\
-%    10000 & 14   & 14   & 15   & 15   \\
-    \hline
-\end{tabular}
-\caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
-\label{table:la}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        $N$  & $L_{\text{relay}}$ & $\lceil\log_2(N)\rceil$ & $L_{\text{node}}$ & $\lceil\log_2(N)\rceil + 1$ \\
+        \hline
+        1     & 0    & 0    & -    & -    \\
+        2     & 1    & 1    & 2    & 2    \\
+        3     & 2    & 2    & 3    & 3    \\
+        4     & 2    & 2    & 3    & 3    \\
+        5     & 3    & 3    & 4    & 4    \\
+        6     & 3    & 3    & 4    & 4    \\
+        7     & 3    & 3    & 4    & 4    \\
+        8     & 3    & 3    & 4    & 4    \\
+        9     & 4    & 4    & 5    & 5    \\
+        10    & 4    & 4    & 5    & 5    \\
+        100   & 7    & 7    & 8    & 8    \\
+        1000  & 10   & 10   & 11   & 11   \\
+        %    10000 & 14   & 14   & 15   & 15   \\
+        \hline
+    \end{tabular}
+    \caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
+    \label{table:la}
 \end{table}
 
 The results are exactly the one expected and confirm the validity of the
@@ -554,28 +554,28 @@ $\frac{1}{\lceil\log_2(N)\rceil}$ where $N$ is again the number of nodes in
 the system. The results are displayed in the table \ref{table:thr}.
 
 \begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|}
-    \hline
-    $N$   & $T$  & $\frac{1}{\lceil\log_2(N)\rceil}$ \\
-    \hline
-    1     & +Inf   & +Inf   \\
-    2     & 1.0    & 1.0    \\
-    3     & 0.5    & 0.5    \\
-    4     & 0.5    & 0.5    \\
-    5     & 0.333  & 0.333  \\
-    6     & 0.333  & 0.333  \\
-    7     & 0.333  & 0.333  \\
-    8     & 0.333  & 0.333  \\
-    9     & 0.25   & 0.25   \\
-    10    & 0.25   & 0.25   \\
-    100   & 0.143  & 0.143  \\
-    1000  & 0.1    & 0.1    \\
-%    10000 & 0.071  & 0.071  \\
-    \hline
-\end{tabular}
-\caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
-\label{table:thr}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        $N$   & $T$  & $\frac{1}{\lceil\log_2(N)\rceil}$ \\
+        \hline
+        1     & +Inf   & +Inf   \\
+        2     & 1.0    & 1.0    \\
+        3     & 0.5    & 0.5    \\
+        4     & 0.5    & 0.5    \\
+        5     & 0.333  & 0.333  \\
+        6     & 0.333  & 0.333  \\
+        7     & 0.333  & 0.333  \\
+        8     & 0.333  & 0.333  \\
+        9     & 0.25   & 0.25   \\
+        10    & 0.25   & 0.25   \\
+        100   & 0.143  & 0.143  \\
+        1000  & 0.1    & 0.1    \\
+        %    10000 & 0.071  & 0.071  \\
+        \hline
+    \end{tabular}
+    \caption{Protocol latency for different number of nodes with the broadcasting node being the relay or not}
+    \label{table:thr}
 \end{table}
 
 The results fit exactly the theoretical model. We observe, as expected, that
@@ -591,13 +591,20 @@ for the node to broatcast a message (it already has it).
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
 %%% TODO relecture à partir d'ici
+This protocol is based on the pipeline broadcast, but to ensure the total order
+property we add a reverse pipeline for the acknowledgment. The idea is that if
+a node $p$ is able to deliver a message, every other process have been a part of
+the pipeline sending $m$ or it's acknowledgment to $p$. As a node can receive a message from
+different process, we also add a sorted list of message, and we ensure that a
+process can deliver a message $m$, only if $m$ is acknowledged and $m$ is the head of
+the list.
 
-This protocol is based on the pipeline broadcast protocol but as soon as a node
-receives a message, it will add it to a sorted list. A node $p$ can only deliver the
-first message of its list if this message have been acknowledged by the
-successor of $p$ in the pipeline or if $p$ is the last node of the pipeline.
-This acknowledgement system ensure the total order property (see section
-\ref{sec:pipelineack-proof}).
+It's clear that as a message have to go through two pipelines, the latency will
+be of the order of $2*N$ (where $N$ is the number of process). But we use
+reversed pipeline for the acknowledgment, the can be sent in parallel and it
+takes also about $2*N$ rounds to broadcast $N$ different nodes, so we are able
+to achieve a constant throughput of $\frac{1}{2}$.
+
 \subsection{Algorithm}
 \begin{algorithm}[H]
     \centering
@@ -614,7 +621,7 @@ This acknowledgement system ensure the total order property (see section
         \EndData
         \Init
         \State clk$\gets$0
-        \State next$\gets$Id()+1\%NProcess
+        \State next$\gets$(Id()+1)\%NProcess
         \If{Id()=0}
         \State prec$\gets$NProcess
         \Else
@@ -625,11 +632,17 @@ This acknowledgement system ensure the total order property (see section
         \Event $< tob,Broadcast\ |\ m> $
         \Comment{Start a broadcast}
         \State clk++;
+        \If{next$\ne$Id()}
+        \Comment{We are not the only node of the system}
         \State Pending$\rightarrow$add($<m,Id(), clk, false>$) 
         \Comment{The message is added\\}
         \Comment{to the list the false boolean\\}
         \Comment{indicate that we have to wait for one ack}
         \State Send(next,$<m,Id(),clk>$)
+        \Else
+        \Comment{We are the only node of the system}
+        \State{Deliver(Id(),m)}
+        \EndIf
         \EndEvent
         \Event $<Receive\ | <m,sender, mclk>>$
         \State clk$\gets$MAX(clk, mclk)+1
@@ -650,7 +663,8 @@ This acknowledgement system ensure the total order property (see section
         \Else
         \State Pending$\rightarrow$add($<m,sender,mclk,false>$)
         \State Send(next,$<m,sender,mclk>$)
-        \Comment{We forward m through the pipeline}
+        \Comment{We forward m\\} 
+        \Comment{through the pipeline}
         \EndIf
         \EndEvent
         \algstore{myalg}
@@ -702,12 +716,12 @@ broadcasts a message $m$, it will be received, put in the pending queue and
 acknowledged by every process. When $p$ receives the ack for $m$, either $m$
 is the head of the queue and in that case $p$ delivers it, or $p$ will have
 to wait for at least one other ack message. 
- 
+
 As the queue is ordered by logical clock and as all nodes have been on the
 pipeline forwarding $m$ or it's ack, once $p$ has received the  acknowledgment
 for $m$, no new message will be able to go before $m$ in the queue. Finally as
-all message will eventually be acknowledged, number of message before $m$ in
-the queue will decrease. And after the reception of one ack, $m$ will be the
+all message will eventually be acknowledged, so the number of message before $m$ in
+the queue will decrease. And at one moment, after the reception of one ack, $m$ will be the
 head of the queue and will be delivered.
 
 So if $p$ broadcast a message $m$, he will eventually receive an ack for $m$
@@ -715,8 +729,10 @@ and deliver it.
 
 \bigskip
 \noindent\textbf{No duplication.} Each message is sent and ack only once. As
-soon as a message is delivered it's removed from the pending queue, so it
-cannot be delivered again.
+soon as a message is delivered it's removed from the pending queue. To be
+delivered, a message needs to be the head of the pending queue, as we remove a
+message of this queue as soon as we deliver it, we can't deliver a message
+twice.
 
 \bigskip
 \noindent\textbf{No creation.} No rules of the algorithm allow a process to
@@ -732,7 +748,7 @@ it acknowledge it, if $p$ delivers $m$ every node have delivered $m$.
 \noindent\textbf{Total order.} Let's imagine that process $p_1$ has delivered
 message $m_1$ before message $m_2$ and that process $p_2$ has delivered
 message $m_2$ before message $m_1$.
-        
+
 As all the node's queues are sorted the same way we can consider that the
 \textit{right} order is the order of the queue, and we (arbitrarilly) state
 that this order is $m_1 < m_2$.
@@ -745,7 +761,7 @@ same time, $p_2$ would have delivered $m_1$ before $m_2$.
 Either $p_2$ is the last node of the pipeline used by $m_1$, or $p_2$ has
 received an ack for $m_1$. In both cases, this means that when $p_2$ is able
 to deliver $m_1$, all the process have seen $m_1$ and done the operation 
-\textit{clock=Max(clock(M1),MyClock)+1} before forwarding it or sending an
+\textit{clock=Max(clock(m1),MyClock)+1} before forwarding it or sending an
 ack. If a process had send $m_2$ with a clock smaller or equal to
 \textit{clock(m1)}, this message would have used the same path than $m_1$
 (or $m_1$'s ack) and as the link are FIFO, $p_2$ would have received $m_2$
@@ -759,17 +775,19 @@ broadcast of acknowledgment, and as we wait for these ack to deliver the
 message, the message is delivered by all the nodes only after $2(N-1)$ rounds.
 
 The figure \ref{figure:latency2} shows a broadcast on 4 nodes, we can see that
-we have a Latency of$6=2*(4-1)$.
+we have a Latency of $6=2*(4-1)$.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=280px]{Latency2.png}
-    \caption{One node broadcasting on the pipeline. The dashed arrows
+    \caption{One node broadcasting on the pipeline. The dashed arrows are
     acknowledgments.}
     \label{figure:latency2}
 \end{figure}
 
-As the pipeline is perfectly parallel, the latency will always be $2(N-1)$.
+As the two pipelines are symmetrical, we will be able to parallelize broadcast
+during the sending and during the acknowledgment phases, so we will be ablte to
+keep this latency of $2(N-1)$ while sending $N$ messages.
 \subsubsection{Throughput}
 Let’s consider a system with N nodes that wishes to broadcast a message concurrently
 We wish to know how long this will take to all N broadcasts to
@@ -783,43 +801,44 @@ every node is able to deliver every message in it's queue.
 \begin{figure}[h]
     \centering
     \includegraphics[width=280px]{Throughput2.png}
-    \caption{Four nodes broadcasting on the pipeline. The dashed arrows
+    \caption{Four nodes broadcasting on the pipeline. The dashed arrows are
     acknowledgments.}
     \label{figure:throughput2}
 \end{figure}
 
 Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
 of $\frac{N}{2(N-1)}\longrightarrow_{N \rightarrow \infty}\frac{1}{2}$ which is totally independent of the number of
-messages !
+messages sent.
 
 \subsection{Empirical analysis}
+%%TODO : David relecture a partir d'ici
 \subsubsection{Latency}
 As for the previous protocol, we have recorded the latency for the broadcast of
 one message for a various number of nodes. The results are shown in the table
 \ref{table:th}.
 \begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|}
-    \hline
-    $N$  & Experimental result & Theoretical result $2(N-1)$ \\
-    \hline
-    1     & 0   & 0    \\
-    2     & 2   & 2   \\
-    3     & 4   & 4   \\
-    4     & 6   & 6   \\
-    5     & 8   & 8   \\
-    6     & 10  & 10  \\
-    7     & 12  & 12  \\
-    8     & 14  & 14  \\
-    9     & 16  & 16  \\
-    10    & 18  & 18  \\
-    100   & 198 & 198  \\
-    1000  & 1998   & 1998  \\
-%    10000 & 19998   & 19998  \\
-    \hline
-\end{tabular}
-\caption{Broadcast latency for different number of nodes}
-\label{table:th}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        $N$  & Experimental result & Theoretical result $2(N-1)$ \\
+        \hline
+        1     & 0   & 0    \\
+        2     & 2   & 2   \\
+        3     & 4   & 4   \\
+        4     & 6   & 6   \\
+        5     & 8   & 8   \\
+        6     & 10  & 10  \\
+        7     & 12  & 12  \\
+        8     & 14  & 14  \\
+        9     & 16  & 16  \\
+        10    & 18  & 18  \\
+        100   & 198 & 198  \\
+        1000  & 1998   & 1998  \\
+        %    10000 & 19998   & 19998  \\
+        \hline
+    \end{tabular}
+    \caption{Broadcast latency for different number of nodes}
+    \label{table:th}
 \end{table}
 We can see that the results are exactly the same as the theoretical analysis.
 
@@ -830,28 +849,28 @@ of the rounds needed for the N broadcast to finish. Then we compute the
 throughput $T=\frac{Number of broadcast}{Number of rounds}$. The results are
 shown in the table \ref{table:thT}.
 \begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|}
-    \hline
-    $N$  & Experimental result & Theoretical result $2(N-1)$ \\
-    \hline
-    1     & NaN    & NaN    \\
-    2     & 1      & 1      \\
-    3     & 0.75   &  0.75  \\
-    4     & 0.667  & 0.667  \\
-    5     & 0.625  & 0.625  \\
-    6     & 0.6    &   0.6  \\
-    7     & 0.583  & 0.583  \\
-    8     & 0.572  & 0.572  \\
-    9     & 0.562  & 0.562  \\
-    10    & 0.556  & 0.556  \\
-    100   & 0.506  & 0.506  \\
-    1000  & 0.500  & 0.500  \\
-%    10000 &   &   \\
-    \hline
-\end{tabular}
-\caption{Broadcast throughput for different number of nodes}
-\label{table:thT}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        $N$  & Experimental result & Theoretical result $2(N-1)$ \\
+        \hline
+        1     & NaN    & NaN    \\
+        2     & 1      & 1      \\
+        3     & 0.75   &  0.75  \\
+        4     & 0.667  & 0.667  \\
+        5     & 0.625  & 0.625  \\
+        6     & 0.6    &   0.6  \\
+        7     & 0.583  & 0.583  \\
+        8     & 0.572  & 0.572  \\
+        9     & 0.562  & 0.562  \\
+        10    & 0.556  & 0.556  \\
+        100   & 0.506  & 0.506  \\
+        1000  & 0.500  & 0.500  \\
+        %    10000 &   &   \\
+        \hline
+    \end{tabular}
+    \caption{Broadcast throughput for different number of nodes}
+    \label{table:thT}
 \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
