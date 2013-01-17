@@ -41,7 +41,7 @@
 
 \begin{document}
 \title{Distributed Systems: Network Simulator}
-\author{David Benamine \& Rodolphe Lepigre\\ MOSIG - Parallel, Distributed and Embedded Systems}
+\author{David Beniamine \& Rodolphe Lepigre\\ MOSIG - Parallel, Distributed and Embedded Systems}
 
 \date{\today}
 \maketitle%affichage du titre
@@ -68,9 +68,9 @@ program.
 
 \noindent\textbf{Structure of the report:} In the first section we present the
 architecture and functionalities of our simulator. In particular the available
-command line arguments are described. A Perl script is also privided with the
+command line arguments are described. A Perl script is also provided with the
 source files of the simulator. Its role is to help for the gathering of data
-and automate the measurement of the the latency and the throuput of the
+and automate the measurement of the the latency and the throughput of the
 protocols. Its functioning is also explained at the end of the first section.
 
 In the second and third sections we present two regular total-order broadcast
@@ -102,7 +102,7 @@ passed to the program using an external event.
 
 Before being able to use the simulator, the user should first compile it. A
 \textit{makefile} is provided in the source directory \textit{src/}. It is
-considered that the user is runing a \textit{POSIX}-friendly operating system
+considered that the user is running a \textit{POSIX}-friendly operating system
 and that the regular building tools are present on his machine (\textit{gcc},
 \textit{make},...).
 \begin{lstlisting}
@@ -150,7 +150,7 @@ command line as well. The available options are the following.
 
 Once the program is run, the simulation starts right away. At each turn, the
 user will be prompted to enter external events for the system. Any number of
-external event can be entered at the begining of each round. External events
+external event can be entered at the beginning of each round. External events
 are read on the standard input (one by line). And when the user is done
 sending events, he should simply type ``start'' for the simulator to do a
 round. The format for the external events is the following.
@@ -231,11 +231,11 @@ void myProtocol(int id, Message m);
 
 This function will be run by each node at each round of the execution with its
 first argument containing the identifier of the current node and the second
-argument being the message received by the current node at the begining of the
+argument being the message received by the current node at the beginning of the
 round (or NULL if it is not receiving any message).
 
 The function should be placed in file \textit{Broadcast.c} and its signature
-sould be added to \textit{Broadcast.h}. In order to launch the simulator with
+should be added to \textit{Broadcast.h}. In order to launch the simulator with
 the newly created function a main program should be written as well. The main
 function included in \textit{Main.c} can be modified easily to be made to use
 the new protocol function. Alternatively the following is an example of a
@@ -291,7 +291,7 @@ experiment presented in this report.
 
 This script runs the program \textit{Broadcast} with different numbers of
 nodes and displays the latency and the throughput for each runs. If the reader
-wishes to use the scipt, he is advised to run it with the ``-h'' argument to
+wishes to use the script, he is advised to run it with the ``-h'' argument to
 display the ``help'' section.
 
 \begin{lstlisting}
@@ -311,7 +311,7 @@ broadcast the message on its behalf.
 
 Intuitively, all nodes in the tree will receive the messages in the same order
 since the same tree traversal scheme will be used for each message. When a
-node of the tree receives a broadcasted message, it can deliver it immediatly
+node of the tree receives a broadcasted message, it can deliver it immediately
 before forwarding it.
 
 Since the messages to be broadcasted need to be sent to the relay node, the
@@ -390,7 +390,7 @@ In the first case, the message $m$ is delivered by process $p=0$, which
 initiated itself a broadcast (the message $m$ was previously  broadcasted by
 process $p=0$).
 
-In the second case, the message $m$ is deliverd by $p$ in response to a
+In the second case, the message $m$ is delivered by $p$ in response to a
 \textit{Receive} event. As we are using a perfect point-to-point link (with in
 particular no creation), the message was sent by the parent of the node, which
 received it previously by its parent and so on up to the root of the tree, which
@@ -426,7 +426,7 @@ messages to be delivered, the order of delivery is kept throughout the tree.
 Since every node has only one parent and the link between this node and its
 parent is FIFO, there can be no inversion. Also when a node forwards a message
 to its children it sends this message to all of its children without
-interspering other messages during the process. This ensures a total order
+interleaving other messages during the process. This ensures a total order
 for the delivery of messages.
 
 \subsubsection{Latency}
@@ -439,7 +439,7 @@ protocol by having a node called the relay broadcast all the messages on
 behalf of all the nodes of the system (and in particular itself).
 
 When the relay originates a broadcast, the latency is that of the tree
-broadcast protocol, i.e $\lceil\log_2(N)\rceil$. However, when a node that is
+broadcast protocol, i.e. $\lceil\log_2(N)\rceil$. However, when a node that is
 not the relay wished to broadcast a message, it first needs to unicast the
 message to the relay, which take one round. The latency is then
 $\lceil\log_2(N)\rceil + 1$. To better understand what happen, two examples
@@ -546,9 +546,9 @@ for a node that is different from the relay to broadcast a message if there is
 only the relay in the system.
 
 \subsubsection{Throughput}
-We experiment with the throughput in the same way as with the latecy. We use
+We experiment with the throughput in the same way as with the latency. We use
 the simulator to run test where every node in the system has a message to
-broadcast from the begining of the run. We then see how long it take for all
+broadcast from the beginning of the run. We then see how long it take for all
 the broadcasts to be completed. The expected throughput is
 $\frac{1}{\lceil\log_2(N)\rceil}$ where $N$ is again the number of nodes in
 the system. The results are displayed in Table \ref{table:thr}.
@@ -574,34 +574,34 @@ the system. The results are displayed in Table \ref{table:thr}.
         %    10000 & 0.071  & 0.071  \\
         \hline
     \end{tabular}
-    \caption{Protocol throughput with different number of nodes, all nodes broadcasting a message concurently.}
+    \caption{Protocol throughput with different number of nodes, all nodes broadcasting a message concurrently}
     \label{table:thr}
 \end{table}
 
 The results fit exactly the theoretical model. We observe, as expected, that
-the relay starts its broadcast firts (since it has its own message to
-broadcast from the begining) and the nodes manage to send messages to
+the relay starts its broadcast first (since it has its own message to
+broadcast from the beginning) and the nodes manage to send messages to
 broadcast to the relay while it is still performing the previous broadcast.
 With this, the throughput of $\frac{1}{\lceil\log_2(N)\rceil}$ is achieved.
 
 Note that with only one node the throughput is infinite since it take no time
-for the node to broatcast a message (it already has it).
+for the node to broadcast a message (it already has it).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
 %%% TODO relecture à partir d'ici
 This protocol is based on the pipeline broadcast, but to ensure the total order
-property we add a reverse pipeline for the acknowledgment. The idea is that if
+property we add a reverse pipeline for the acknowledgement The idea is that if
 a node $p$ is able to deliver a message, every other process have been a part of
-the pipeline sending $m$ or it's acknowledgment to $p$. As a node can receive a message from
+the pipeline sending $m$ or it's acknowledgement to $p$. As a node can receive a message from
 different process, we also add a sorted list of message, and we ensure that a
 process can deliver a message $m$, only if $m$ is acknowledged and $m$ is the head of
 the list.
 
 It's clear that as a message have to go through two pipelines, the latency will
 be of the order of $2*N$ (where $N$ is the number of process). But we use
-reversed pipeline for the acknowledgment, the can be sent in parallel and it
+reversed pipeline for the acknowledgement, the can be sent in parallel and it
 takes also about $2*N$ rounds to broadcast $N$ different nodes, so we are able
 to achieve a constant throughput of $\frac{1}{2}$.
 
@@ -777,12 +777,12 @@ we have a Latency of $6=2*(4-1)$.
     \centering
     \includegraphics[width=280px]{Latency2.png}
     \caption{One node broadcasting on the pipeline. The dashed arrows are
-    acknowledgments.}
+    acknowledgements}
     \label{figure:latency2}
 \end{figure}
 
 As the two pipelines are symmetrical, we will be able to parallelize broadcast
-during the sending and during the acknowledgment phases, so we will be ablte to
+during the sending and during the acknowledgement phases, so we will be able to
 keep this latency of $2(N-1)$ while sending $N$ messages.
 \subsubsection{Throughput}
 Let’s consider a system with N nodes that wishes to broadcast a message concurrently
@@ -798,19 +798,18 @@ every node is able to deliver every message in it's queue.
     \centering
     \includegraphics[width=280px]{Throughput2.png}
     \caption{Four nodes broadcasting on the pipeline. The dashed arrows are
-    acknowledgments.}
+    acknowledgements}
     \label{figure:throughput2}
 \end{figure}
 
 Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
 of $\frac{N}{2(N-1)}=\frac{1}{2-\frac{1}{N}}\longrightarrow_{N \rightarrow
-\infty}\frac{1}{2}$. Two important point appears int that formula, the first is
-that we have an inferior limit for our throughput $\frac{1}{2}$. Secondly this limit 
+\infty}\frac{1}{2}$. Two important point appears in that formula, the first is
+that we have a lower bound for our throughput $\frac{1}{2}$. Secondly this limit 
 is a constant so we can be sure that with a huge number of nodes our broadcast
 will still be scalable.
 
 \subsection{Empirical analysis}
-%%TODO : David relecture a partir d'ici
 \subsubsection{Latency}
 As for the previous protocol, we recorded the latency $L$ for system with
 different number of nodes. The results are shown in Table \ref{table:th}.
@@ -869,7 +868,7 @@ compute the throughput $T$. The results are shown in Table \ref{table:thT}.
         %    10000 &   &   \\
         \hline
     \end{tabular}
-    \caption{Protocol throughput with different number of nodes, all nodes broadcasting a message concurently.}
+    \caption{Protocol throughput with different number of nodes, all nodes broadcasting a message concurrently}
     \label{table:thT}
 \end{table}
 
@@ -891,7 +890,7 @@ $\frac{1}{2}$ as a lower bound. This result is quite far from the optimal
 throughput for a broadcast protocol where no total order is required
 ($\frac{N+1}{N}$), but this is the price to pay to achieve a total ordering
 of messages. However, since $\frac{1}{2}$ is a lower bound on the throughput
-the performances of the protocol are scalabel and become acceptable when
+the performances of the protocol are scalable and become acceptable when
 the number of nodes in the system is large.
 
 An interesting future work would be to try to prove that there exists no
