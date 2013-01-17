@@ -305,6 +305,7 @@ void sendAck(int clk, int init, int sender, int receiver){
     }
     sprintf(msgTxt, "%d ack", clk);
     m=initMessage(msgTxt,init,sender,receiver); 
+    free(msgTxt);
     Send(m);
 }
 
@@ -369,11 +370,20 @@ void TOBThroughputBroadcast(int id, Message m){
             NumMsg->waitForNbAck=1;
             //creating the actual message
             NumMsg->m=initMessage(msgTxt,id,id,data->next);
+            free(msgTxt);
             NumMsg->origin=id;
+            if(data->next==id){
+                //we are the only process of the system
+                deliver(NumMsg->m,id);
+                free(NumMsg->m->msg);
+                free(NumMsg->m);
+                free(NumMsg);
+            }else{
             //and send it
             Send(copyMessage(NumMsg->m));
             //Finally store the numbered msg in the pending list
             AddSorted(NumMsg,data->pending);
+            }
         }
         free(event);
     }
@@ -454,7 +464,7 @@ void TOBThroughputBroadcast(int id, Message m){
                     exit(EXIT_FAILURE);
                 }else{
                     printf("%s received by %d from %d \n", m->msg, id, m->sender);
-                    //free(NumMsg);
+                    free(NumMsg);
                     temp->waitForNbAck=0;
                     AddSorted(temp,data->pending);
                     if(temp->m->origin!=id){

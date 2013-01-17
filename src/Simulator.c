@@ -159,7 +159,9 @@ void readExternalEvents(){
     }
 
     strncpy(msg, buf, strlen(buf));
-    Append(msg,sys->nodes[receiver].eventsBuf);
+    if(receiver>=0 && receiver<sys->nb_nodes){
+        Append(msg,sys->nodes[receiver].eventsBuf);
+    }
 
     // Reinit
     printf("Event added, enter an other event or \"start\"\n");

@@ -8,7 +8,7 @@ if (scalar(@ARGV)!=2)
 }
 $i=1;
 while ( $i <= 10000 ){
-    $rounds=10*$i;
+    $rounds=100*$i;
     $process=$i-1;
     #create the experiment file
     open($file, ">",tmp) or die "cannot open file tmp";
@@ -30,11 +30,18 @@ while ( $i <= 10000 ){
     #beginning the exp
 
     $FirstEmptyRound=`./Broadcast $ARGV[0] -N $i -R $rounds < tmp | grep -A 1 \"Delivered\" | tail -1 | awk {\'print \$3\'}`;
+
+    #Compute the results
     $totalRounds=$FirstEmptyRound-1;
     $throughput=$totalRounds==0 ? "NaN" :$Nmessages/$totalRounds;
+
+    #and print them
+
     print "$Nmessages broadcast on $i nodes done in $totalRounds rounds\n";
     print "latency    : $totalRounds\n";
     print "throughput : $throughput\n";
+
+    #get ready for the next exp
     if ( $i < 10 ){
         $i=$i+1;
     }else{
