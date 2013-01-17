@@ -443,7 +443,7 @@ broadcast protocol, i.e $\lceil\log_2(N)\rceil$. However, when a node that is
 not the relay wished to broadcast a message, it first needs to unicast the
 message to the relay, which take one round. The latency is then
 $\lceil\log_2(N)\rceil + 1$. To better understand what happen, two examples
-of broadcasts in a system with four nodes are displayed in
+of broadcasts in a system with four nodes are displayed in Figure
 \ref{figure:latency}. The first broadcast is performed by the relay and the
 second by an other node.
 
@@ -486,7 +486,7 @@ system which is equal to $\frac{1}{\lceil\log_2(N)\rceil}$.
 The throughput tends slowly to $0$ when $N$ grows large, which is quite bad.
 
 An example of a system where four nodes are concurrently broadcasting a message
-is displayed in figure \ref{figure:throughput}.
+is displayed in Figure \ref{figure:throughput}.
 
 \begin{figure}[h]
     \centering
@@ -512,7 +512,7 @@ relay, so we expect a latency of $L_{\text{relay}} = \lceil\log_2(N)\rceil$.
 The second experiment is the same, but the node that is broadcasting is not
 the relay. In this case the expected latency is
 $L_{\text{node}} = \lceil\log_2(N)\rceil + 1$. The results are displayed in
-the table \ref{table:la}.
+Table \ref{table:la}.
 
 \begin{table}[H]
     \centering
@@ -551,7 +551,7 @@ the simulator to run test where every node in the system has a message to
 broadcast from the begining of the run. We then see how long it take for all
 the broadcasts to be completed. The expected throughput is
 $\frac{1}{\lceil\log_2(N)\rceil}$ where $N$ is again the number of nodes in
-the system. The results are displayed in the table \ref{table:thr}.
+the system. The results are displayed in Table \ref{table:thr}.
 
 \begin{table}[H]
     \centering
@@ -774,7 +774,7 @@ $N-1$ round for one broadcast. But as the last node of the pipeline start a
 broadcast of acknowledgment, and as we wait for these ack to deliver the
 message, the message is delivered by all the nodes only after $2(N-1)$ rounds.
 
-The figure \ref{figure:latency2} shows a broadcast on 4 nodes, we can see that
+Figure \ref{figure:latency2} shows a broadcast on 4 nodes. We can see that
 we have a Latency of $6=2*(4-1)$.
 
 \begin{figure}[h]
@@ -793,7 +793,7 @@ Let’s consider a system with N nodes that wishes to broadcast a message concur
 We wish to know how long this will take to all N broadcasts to
 complete.
 
-As shown in figure \ref{figure:throughput2}, all the nodes will spread their
+As shown in Figure \ref{figure:throughput2}, all the nodes will spread their
 messages through different pipeline and in $2(N-1)$ rounds, all the
 nodes will have received all the messages and all the acks, so in $2(N-1)$ rounds,
 every node is able to deliver every message in it's queue.
@@ -814,7 +814,7 @@ messages sent.
 %%TODO : David relecture a partir d'ici
 \subsubsection{Latency}
 As for the previous protocol, we have recorded the latency for the broadcast of
-one message for a various number of nodes. The results are shown in the table
+one message for a various number of nodes. The results are shown in Table
 \ref{table:th}.
 \begin{table}[H]
     \centering
@@ -847,7 +847,7 @@ To evaluate the throughput of this protocol, we've launched an experiment with N
 nodes, each node start a broadcast at the first round, and we record the number
 of the rounds needed for the N broadcast to finish. Then we compute the
 throughput $T=\frac{Number of broadcast}{Number of rounds}$. The results are
-shown in the table \ref{table:thT}.
+shown in Table \ref{table:thT}.
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|c|}
@@ -877,10 +877,10 @@ shown in the table \ref{table:thT}.
 \section*{Conclusion}
 \addcontentsline{toc}{section}{Conclusion}
 In this report we presented our implementation of a single-threaded,
-round-based network simulator. We later used it to implement and reason about
+round-based, network simulator. We later used it to implement and reason about
 two total-order broadcast protocols that we designed.
 
-One of them achieved a latency of $\lceil\log_2(N)\rceil + 1$ which is close
+One of them achieves a latency of $\lceil\log_2(N)\rceil + 1$ which is close
 to the optimal latency that one can achieve with a broadcast protocol where no
 total-order is required.
 
