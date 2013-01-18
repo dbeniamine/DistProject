@@ -45,12 +45,14 @@ void BasicBroadcast(int id, Message m){
             //start a basic broadcast:
             //send hello to every nodes
             for(i = 0; i < getNbNodes(); i++){
+                msgOut = initMessage("Hello\0", id, id, i);
                 if(i != id){
-                    msgOut = initMessage("Hello\0", id, id, i);
                     Send(msgOut);
+                } else {
+                    deliver(msgOut,id);
+		    deleteMessage(msgOut);
                 }
             }
-            deliver(msgOut,id);
         }
         free(event);
     }
@@ -85,7 +87,10 @@ void TreeBroadcast(int id, Message m){
                 msgOut = initMessage("Hello\0", id, id, (int)(pow(2,nTurn)+id)%getNbNodes());
                 Send(msgOut);
             }
+            // Deliver the message localy
+            msgOut = initMessage("Hello\0", id, id, id);
             deliver(msgOut,id);
+	    deleteMessage(msgOut);
         }
         free(event);
     }
