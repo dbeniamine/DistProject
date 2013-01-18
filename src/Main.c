@@ -27,6 +27,7 @@ void display_help(FILE* output, char* pname){
   fprintf(output, "\t-p\tPipeline broadcast.\n");
   fprintf(output, "\t-L\tTotal order broadcast with good latency.\n");
   fprintf(output, "\t-T\tTotal order broadcast with good throughput.\n");
+  fprintf(output, "\t-X\tTotal order broadcast with good throughput (Rod version).\n");
 }
 
 /*
@@ -41,7 +42,7 @@ int main (int argc, char **argv){
   int nb_rounds = 20;
 
   // Parsing arguments
-  while(-1 != (opt = getopt(argc, argv, "N:R:hibtpLT"))){
+  while(-1 != (opt = getopt(argc, argv, "N:R:hibtpLTX"))){
     switch(opt){
       case 'N':
         nb_nodes = atoi(optarg);
@@ -66,6 +67,9 @@ int main (int argc, char **argv){
         break;
       case 'T':
         f = TOBThroughputBroadcast;
+        break;
+      case 'X':
+        f = TOBThroughputRodBroadcast;
         break;
       default: /* WTF ? */
         fprintf(stderr, "Argument error...\n");

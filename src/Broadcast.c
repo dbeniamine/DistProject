@@ -460,3 +460,54 @@ void TOBThroughputBroadcast(int id, Message m){
     }
 
 }
+
+/*
+ * Total Order Broadcast with good throughput.
+ * Note that like every functions defined here, they have the type NodesFct.
+ */
+void TOBThroughputRodBroadcast(int id, Message m){
+    char* event;
+    Message msgOut;
+
+    //Events Rules
+    while((event = getNextExternalEvent(id)) != NULL){
+        printf("Event received %d %s\n", id, event); 
+        //Read the first event
+        if(!strcmp(event, "broadcast")){
+            if(0 == id){
+                // The broadcast is your own, deliver
+                msgOut = initMessage("Hello\0", id, id, id);
+                deliver(msgOut, id);
+                deleteMessage(msgOut);
+                // Pass the message to your successor
+
+                if(1 != getNbNodes()){
+                    msgOut = initMessage("Hello\0", 0, 0, 1);
+                    Send(msgOut);
+                }
+            } else {
+                // Send the message to process 0
+                msgOut = initMessage("Hello\0", id, id, 0);
+                Send(msgOut);
+            }
+        }
+        free(event);
+    }
+
+    // Message Rules
+    if(NULL != m){
+        if(0 == id)
+            printf("0 receives a message to relay from %i\n", m->sender);
+
+        deliver(m, id);
+
+        // If not the last of the pipeline...
+	if(id != getNbNodes() - 1){
+            // Transfer the message to you successor
+            msgOut = initMessage(m->msg, m->origin, id, id + 1 % getNbNodes());
+            Send(msgOut);
+	}
+
+        deleteMessage(m);
+    }
+}

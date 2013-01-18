@@ -39,3 +39,9 @@ void TOBLatencyBroadcast(int id, Message m);
  * Note that like every functions defined here, they have the type NodesFct.
  */
 void TOBThroughputBroadcast(int id, Message m);
+
+/*
+ * Total Order Broadcast with good throughput.
+ * Note that like every functions defined here, they have the type NodesFct.
+ */
+void TOBThroughputRodBroadcast(int id, Message m);
