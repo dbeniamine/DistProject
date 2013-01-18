@@ -596,12 +596,18 @@ for the node to broadcast a message (it already has it).
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
 This protocol is based on the pipeline broadcast, but to ensure the total order
-property we add a reverse pipeline for the acknowledgement. The idea is that if
-a node $p$ is able to deliver a message, every other process have been a part of
-the pipeline sending $m$ or it's acknowledgement to $p$. As a node can receive
-a message from different process, we also add a sorted list of message, and we
-ensure that a process can deliver a message $m$, only if $m$ is acknowledged
-and $m$ is at the head of the list.
+property we add some ordered queue and a mechanism of acknowledgment.
+
+When a node receive a message $m$ if he is the last node of the pipeline, he can
+be sure that no process will be able to send a message \texit{older} than $m$ so
+he can deliver $m$ and all the messages older than $m$ in his pending queue. As
+soon as a node deliver one or many message, he will send an ack for the elder
+message that he as delivered (acknowledgments are cumulative).
+
+When a message receive an acknowledgment, he can do the same thing as the node at
+the end of the pipeline, but if his pending is empty, he still should forward
+the ack in case of an other node still have a message in it's queue.
+acknowledgments are stopped when they have been through the whole pipeline.
 
 It's clear that as a message have to go through two pipelines, the latency will
 be of the order of $2N$ (where $N$ is the number of process). But we use

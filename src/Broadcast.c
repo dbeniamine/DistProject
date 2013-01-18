@@ -306,7 +306,7 @@ void TOBThroughputBroadcast(int id, Message m){
 
         data->clock=0;
         data->next=(id+1)%getNbNodes();
-//        data->pred=(id==0)?getNbNodes()-1:id-1;
+        //        data->pred=(id==0)?getNbNodes()-1:id-1;
         data->pending=newSortedList(NumberedMsgComp);
         setData(id,data);
     }
@@ -391,9 +391,13 @@ void TOBThroughputBroadcast(int id, Message m){
                 AddSorted(NumMsg,data->pending);
                 //we deliver all the older messages
                 mOut=NULL;
-                while((temp=getFirst(data->pending))!=NULL && NumberedMsgComp(temp,NumMsg)<=0){
+                while((temp=getFirst(data->pending))!=NULL && NumMsg!=NULL && NumberedMsgComp(temp,NumMsg)<=0){
                     //we remove the message from the pending list
                     RemoveFirst(data->pending);
+                    if(!NumberedMsgComp(temp,NumMsg)){
+                        //to ensure we stop after that
+                        NumMsg=NULL;
+                    }
                     //prepare an ack
                     if(temp->origin!=id){
                         if(mOut!=NULL){
@@ -420,7 +424,7 @@ void TOBThroughputBroadcast(int id, Message m){
             printf("%s received by %d from %d origin %d\n", m->msg, id, m->sender, m->origin);
             //we deliver all the older messages
             mOut=NULL;
-            while((temp=getFirst(data->pending))!=NULL && NumberedMsgComp(temp,NumMsg)<=0){
+            while((temp=getFirst(data->pending))!=NULL && NumMsg!=NULL && NumberedMsgComp(temp,NumMsg)<=0){
                 //we remove the message from the pending list
                 RemoveFirst(data->pending);
                 //prepare an ack
@@ -440,9 +444,10 @@ void TOBThroughputBroadcast(int id, Message m){
             }
             //if we have managed to deliver a message
             //we acknowleged the older message delvered
+            ackOrigin=((NumMsg->origin+getNbNodes()-1)%getNbNodes());
             if(mOut){
                 Send(mOut);
-            }else if(Size(data->pending)==0){
+            }else if(Size(data->pending)==0 && ackOrigin!=id){
                 //we haven't be able to deliver a message because our pending
                 //list is empty, but the message may be blocked in someon else
                 //queue so we forward the ack
