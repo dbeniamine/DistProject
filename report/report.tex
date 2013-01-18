@@ -115,14 +115,13 @@ have appeared in the source directory. The program contains a ``help'' section
 which can be accessed in a standard manner.
 \begin{lstlisting}
 > ./Broadcast -h
-Usage: ../src/Broadcast [-N n][-R n][-h][-b|t|i|p|L|T]
+Usage: ../src/Broadcast [-N n][-R n][-h][-b|t|p|L|T]
 Possible arguments:
 -N n	Specify a number of nodes n, default is 4.
 -R n	Specify a number of rounds n, default is 20.
 -h	Display this help message.
 Selection of broadcast mode:
--i	IP broadcast (default).
--b	Basic broadcast.
+-b	Basic broadcast (default).
 -t	Tree broadcast.
 -p	Pipeline broadcast.
 -L	Total order broadcast with good latency.
@@ -137,9 +136,10 @@ $0$ the system will run forever).
 The broadcast protocol that is going to be used can be selected from the
 command line as well. The available options are the following.
 \begin{itemize}
-    \item IP broadcast: use multicast.
     \item Basic broadcast: the broadcaster sends to every other node in turn
         (one per round).
+    \item Tree broadcast: messages are send on a tree. The broadcaster is the
+        root, and nodes forward the messages to their children.
     \item Pipeline broadcast: the broadcaster sends the message to its neighbour
         which sends it to its neighbour and so on.
     \item Total order broadcast with good latency (see section

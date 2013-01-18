@@ -38,6 +38,13 @@ void DeleteFifo(Fifo f);
 void Append(void* e, Fifo f);
 
 /*
+ * Returns a reference ot the head of a Fifo.
+ * f : the Fifo.
+ * Returns a pointer to the element or NULL if the Fifo is empty.
+ */
+void* GetHead(Fifo f);
+
+/*
  * Removes the element from a Fifo.
  * f : the Fifo.
  * Returns a pointer to the element or NULL if the Fifo is empty.

@@ -48,8 +48,8 @@ void initSystem(int nb_nodes, int nb_rounds, NodesFct fun){
   sys->nodes = (Node*) malloc(nb_nodes * sizeof(struct _Node));
 
   for(i = 0; i < nb_nodes; i++){
+    sys->nodes[i].receiv = NULL;
     sys->nodes[i].sendBuf = CreateFifo();
-    sys->nodes[i].receivBuf = CreateFifo();
     sys->nodes[i].eventsBuf = CreateFifo();
     sys->nodes[i].data=NULL;
   }
@@ -65,10 +65,11 @@ void deleteSystem(){
     if(NULL != sys->nodes){
       for(i = 0; i < sys->nb_nodes; i++){
         DeleteFifo(sys->nodes[i].sendBuf);
-        DeleteFifo(sys->nodes[i].receivBuf);
         DeleteFifo(sys->nodes[i].eventsBuf);
-	// if(NULL != sys->nodes[i].data)
-        //  free(sys->nodes[i].data);
+        if(NULL != sys->nodes[i].receiv)
+          free(sys->nodes[i].receiv);
+	if(NULL != sys->nodes[i].data)
+          free(sys->nodes[i].data);
       }
 
       free(sys->nodes);
@@ -220,29 +221,40 @@ void LaunchSimulation(){
 
     // Apply node function to all nodes.
     for(j = 0; j < sys->nb_nodes; j++)
-      (sys->fun)(j, RemoveHead(sys->nodes[j].receivBuf)); 
+      (sys->fun)(j, sys->nodes[j].receiv);
+
+    //clear reception buffer
+    for(j = 0; j < sys->nb_nodes; j++)
+      sys->nodes[j].receiv = NULL;
 
     for(j = 0; j < sys->nb_nodes; j++){
       //msg is the older message sended by j 
       //or NULL if no messages 
-      msg = RemoveHead(sys->nodes[j].sendBuf);
+      msg = GetHead(sys->nodes[j].sendBuf);
       if(NULL != msg){
         if(-1 != msg->receiv){
-          //msg is destinated to one particular node
+          //msg is a unicast
           if(msg->receiv >= sys->nb_nodes || msg->receiv < -1){
             fprintf(stderr,"Message send to inexistant receiver ignored\n");
             break;
           }
-          Append(msg, sys->nodes[msg->receiv].receivBuf);
+
+	  //check id reception is possible
+          if(NULL == sys->nodes[msg->receiv].receiv){
+            sys->nodes[msg->receiv].receiv = msg;
+	    RemoveHead(sys->nodes[j].sendBuf);
+	  }
         }else{
-          //msg is a multicast
+          //msg is a multicast (non reliable)
           for(k = 0; k < sys->nb_nodes; k++){
-            if(k != j){
+            if(k != j && NULL == sys->nodes[k].receiv){
 	      msgBis = copyMessage(msg);
-              Append(msgBis, sys->nodes[k].receivBuf);
+              sys->nodes[k].receiv = msgBis;
             }
           }
 
+	  //remove message from the queue
+	  RemoveHead(sys->nodes[j].sendBuf);
           deleteMessage(msg);
         }
       }

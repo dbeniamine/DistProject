@@ -13,7 +13,7 @@
  * Structure representing a node.
  */
 typedef struct _Node{
-    Fifo receivBuf; // Reception buffer (contains Message).
+    Message receiv; // Received message of NULL.
     Fifo sendBuf;   // Send buffer (contains Message).
     Fifo eventsBuf; // Event buffer (contains char*).
     void * data; /* This structure is usefull if the 

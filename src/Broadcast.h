@@ -7,12 +7,6 @@
 #include"Simulator.h"
 
 /*
- * Ip broadcast. A node can send to every other node in one round.
- * Note that like every functions defined here, they have the type NodesFct.
- */
-void IPBroadcast(int id, Message m);
-
-/*
  * Basic broadcast. The broadcast takes N turns, all sends are done by the
  * same node (one at each turn).
  * Note that like every functions defined here, they have the type NodesFct.

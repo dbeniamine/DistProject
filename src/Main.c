@@ -16,14 +16,13 @@
  * pname  : the program name (usually argv[0]).
  */
 void display_help(FILE* output, char* pname){
-  fprintf(output, "Usage: %s [-N n][-R n][-h][-b|t|i|p|L|T]\n", pname);
+  fprintf(output, "Usage: %s [-N n][-R n][-h][-b|t|p|L|T]\n", pname);
   fprintf(output, "Possible arguments:\n");
   fprintf(output, "\t-N n\tSpecify a number of nodes n, default is 4.\n");
   fprintf(output, "\t-R n\tSpecify a number of rounds n, default is 20.\n");
   fprintf(output, "\t-h\tDisplay this help message.\n");
   fprintf(output, "Selection of broadcast mode:\n");
-  fprintf(output, "\t-i\tIP broadcast (default).\n");
-  fprintf(output, "\t-b\tBasic broadcast.\n");
+  fprintf(output, "\t-b\tBasic broadcast (default).\n");
   fprintf(output, "\t-t\tTree broadcast.\n");
   fprintf(output, "\t-p\tPipeline broadcast.\n");
   fprintf(output, "\t-L\tTotal order broadcast with good latency.\n");
@@ -37,7 +36,7 @@ int main (int argc, char **argv){
   int opt;
 
   // Default values
-  NodesFct f = IPBroadcast;
+  NodesFct f = BasicBroadcast;
   int nb_nodes = 4;
   int nb_rounds = 20;
 
@@ -53,9 +52,6 @@ int main (int argc, char **argv){
       case 'h':
         display_help(stdout, argv[0]);
         return 0;
-      case 'i':
-        f = IPBroadcast;
-        break;
       case 'b':
         f = BasicBroadcast;
         break;

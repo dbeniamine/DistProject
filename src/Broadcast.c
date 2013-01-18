@@ -28,36 +28,6 @@ void deliver(Message m, int id){
 }
 
 /*
- * Ip broadcast. A node can send to every other node in one round.
- * Note that like every functions defined here, they have the type NodesFct.
- */
-void IPBroadcast(int id, Message m){
-    char* event;
-    Message msgOut;
-
-    // Events Rules
-    while((event = getNextExternalEvent(id)) != NULL){
-        printf("Event received %d %s\n", id, event); 
-        //Read the first event
-        if(!strcmp(event, "broadcast")){
-            //start a basic broadcast:
-            //send hello to every nodes
-            //Iniatialize the message
-            msgOut = initMessage("Hello\0", id, id, -1);
-            Send(msgOut);
-            deliver(msgOut,id);
-        }
-        free(event);
-    }
-
-    //Message Rules
-    if(NULL != m){
-        deliver(m,id);
-        deleteMessage(m);
-    }
-}
-
-/*
  * Basic broadcast. The broadcast takes N turns, all sends are done by the
  * same node (one at each turn).
  * Note that like every functions defined here, they have the type NodesFct.
