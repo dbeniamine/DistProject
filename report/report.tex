@@ -265,7 +265,7 @@ int main(void){
 A node can interact with the systems using the functions defined in
 \textit{Simulator.h} and \textit{Message.h}. For instance the function
 \textit{readExternalEvent} is provided in order to get the next external
-event if there is any. There is also a \textit{send} function that is used to
+event if there is any. There is also a \textit{Send} function that is used to
 add a message in the sending queue of a process. There is also a function
 to get the number of nodes in the system and some other allowing to attach
 some persistent data to a node, retrieve it and modify it. Here is an example
@@ -281,6 +281,11 @@ The following functions are used to set the stored data and to retrieve it.
 void *setData(int id, void *data);
 void *getData(int id);
 \end{verbatim}
+
+Note that messages can be sent either as a unicast (from one node to one other
+node) or as a multicast (from one node to all the other nodes), but the
+multicast is not reliable, it is very similar to the IP broadcast. A message
+multicasted when its destination address is set to $-1$.
 
 Once the protocol is ready, the Perl script can be used to gather statistics.
 
