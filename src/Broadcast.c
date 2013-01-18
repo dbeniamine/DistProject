@@ -429,7 +429,7 @@ void TOBThroughputBroadcast(int id, Message m){
                 RemoveFirst(data->pending);
                 //prepare an ack
                 ackOrigin=((temp->origin+getNbNodes()-1)%getNbNodes());
-                if(ackOrigin!=id){
+                if(ackOrigin!=data->next){
                     if(mOut!=NULL){
                         free(mOut);
                     }
@@ -447,7 +447,7 @@ void TOBThroughputBroadcast(int id, Message m){
             ackOrigin=((NumMsg->origin+getNbNodes()-1)%getNbNodes());
             if(mOut){
                 Send(mOut);
-            }else if(Size(data->pending)==0 && ackOrigin!=id){
+            }else if(Size(data->pending)==0 && ackOrigin!=data->next){
                 //we haven't be able to deliver a message because our pending
                 //list is empty, but the message may be blocked in someon else
                 //queue so we forward the ack

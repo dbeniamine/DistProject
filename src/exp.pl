@@ -47,9 +47,9 @@ while ( $i <= 1000 ){
     #beginning the exp
     if($verbose){
         system("./Broadcast $proto -N $i -R $rounds < tmp > $output");
-        $FirstEmptyRound=`cat $output | grep -A 1 \"Delivered\" | tail -1 | awk {\'print \$3\'}`;
+        $FirstEmptyRound=`cat $output | grep -A 5 \"Delivered\" | tail -5 | grep Starting | awk {\'print \$3\'}`;
     }else{
-        $FirstEmptyRound=`./Broadcast $proto -N $i -R $rounds < tmp | grep -A 1 \"Delivered\" | tail -1 | awk {\'print \$3\'}`;
+        $FirstEmptyRound=`./Broadcast $proto -N $i -R $rounds < tmp | grep -A 5 \"Delivered\" | tail -5 | grep Starting | awk {\'print \$3\'}`;
     }
     #Compute the results
     $totalRounds=$FirstEmptyRound-1;

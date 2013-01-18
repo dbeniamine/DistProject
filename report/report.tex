@@ -70,7 +70,7 @@ program.
 architecture and functionalities of our simulator. In particular the available
 command line arguments are described. A Perl script is also provided with the
 source files of the simulator. Its role is to help for the gathering of data
-and automate the measurement of the the latency and the throughput of the
+and automate the measurement of the latency and the throughput of the
 protocols. Its functioning is also explained at the end of the first section.
 
 In the second and third sections we present two regular total-order broadcast
@@ -596,18 +596,18 @@ for the node to broadcast a message (it already has it).
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
 This protocol is based on the pipeline broadcast, but to ensure the total order
-property we add some ordered queue and a mechanism of acknowledgment.
+property we add some ordered queue and a mechanism of acknowledgement
 
 When a node receive a message $m$ if he is the last node of the pipeline, he can
 be sure that no process will be able to send a message \textit{older} than $m$ so
 he can deliver $m$ and all the messages older than $m$ in his pending queue. As
 soon as a node deliver one or many message, he will send an ack for the oldest
-message that he as delivered (acknowledgments are cumulative).
+message that he as delivered (acknowledgements are cumulative).
 
-When a message receive an acknowledgment, he can do the same thing as the node at
+When a message receive an acknowledgement, he can do the same thing as the node at
 the end of the pipeline, but if his pending is empty, he still should forward
 the ack in case of an other node still have a message in it's queue.
-acknowledgments are stopped when they have been through the whole pipeline.
+acknowledgements are stopped when they have been through the whole pipeline.
 
 It's clear that as a message have to go through two pipelines, the latency will
 be of the order of $2N$ (where $N$ is the number of process). If we send $N$
@@ -710,17 +710,10 @@ lower bound of $\frac{1}{2}$.
 \subsubsection{Correctness}
 \label{sec:pipelineack-proof}
 \noindent\textbf{Validity.} As there is no crashes, if a process $p$
-broadcasts a message $m$, it will be received, put in the pending queue and
-acknowledged by every process. When $p$ receives the ack for $m$, either $m$
-is the head of the queue and in that case $p$ delivers it, or $p$ will have
-to wait for at least one other ack message.
-
-As the queue is ordered by logical clock and as all nodes have been on the
-pipeline forwarding $m$ or it's ack, once $p$ has received the acknowledgment
-for $m$, no new message will be able to go before $m$ in the queue. Finally as
-all message will eventually be acknowledged, so the number of message before
-$m$ in the queue will decrease. And at one moment, after the reception of one
-ack, $m$ will be the head of the queue and will be delivered.
+broadcasts a message $m$, it will be received, and put in the pending queue by
+every process. When the last node of the pipeline $pn$ will receive $m$ he
+will be able to deliver it and send an acknowledgement and, at one moment $p$
+will receive this ack and deliver $m$
 
 So if $p$ broadcasts a message $m$, it will eventually receive an ack for $m$
 and deliver it.
@@ -748,7 +741,7 @@ message $m_1$ before message $m_2$ and that process $p_2$ has delivered
 message $m_2$ before message $m_1$.
 
 As all the node's queues are sorted the same way we can consider that the
-\textit{right} order is the order of the queue, and we (arbitrarilly) state
+\textit{right} order is the order of the queue, and we (arbitrarily) state
 that this order is $m_1 < m_2$.
 
 So if $p_2$ has delivered $m_2$ before $m_1$, this means that $p_2$ had
@@ -769,7 +762,7 @@ message in a different order.
 \subsubsection{Latency}
 The algorithm is based on the pipeline broadcast, if we have $N$ nodes, it takes
 $N-1$ round for one broadcast. But as the last node of the pipeline start a
-broadcast of acknowledgment, and as we wait for these ack to deliver the
+broadcast of acknowledgement, and as we wait for these ack to deliver the
 message, the message is delivered by all the nodes only after $2(N-1)$ rounds.
 
 Figure \ref{figure:latency2} shows a broadcast on 4 nodes. We can see that
@@ -783,7 +776,7 @@ we have a Latency of $6=2*(4-1)$.
     \label{figure:latency2}
 \end{figure}
 
-As the two pipelines are symmetrical, we will be able to parallelize broadcast
+As we use a system of pipelines, we will be able to parallelize broadcast
 during the sending and during the acknowledgement phases, so we will be able to
 keep this latency of $2(N-1)$ while sending $N$ messages.
 \subsubsection{Throughput}
@@ -794,7 +787,10 @@ complete.
 As shown in Figure \ref{figure:throughput2}, all the nodes will spread their
 messages through different pipeline and in $2(N-1)$ rounds, all the
 nodes will have received all the messages and all the acks, so in $2(N-1)$ rounds,
-every node is able to deliver every message in its queue.
+every node is able to deliver every message in its queue. We can also notice
+that as the acks are cumulative, if a node have receive an acknowledgement for a
+message $m$ while he had already acknowledged an older message, he will note
+forward the new ack, freeing the network. 
 
 \begin{figure}[h]
     \centering

@@ -63,4 +63,4 @@ then
 else
     echo "fail"
 fi
-#rm node.*
+rm node.*
