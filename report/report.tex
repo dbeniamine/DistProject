@@ -599,9 +599,9 @@ This protocol is based on the pipeline broadcast, but to ensure the total order
 property we add some ordered queue and a mechanism of acknowledgment.
 
 When a node receive a message $m$ if he is the last node of the pipeline, he can
-be sure that no process will be able to send a message \texit{older} than $m$ so
+be sure that no process will be able to send a message \textit{older} than $m$ so
 he can deliver $m$ and all the messages older than $m$ in his pending queue. As
-soon as a node deliver one or many message, he will send an ack for the elder
+soon as a node deliver one or many message, he will send an ack for the oldest
 message that he as delivered (acknowledgments are cumulative).
 
 When a message receive an acknowledgment, he can do the same thing as the node at
@@ -610,29 +610,30 @@ the ack in case of an other node still have a message in it's queue.
 acknowledgments are stopped when they have been through the whole pipeline.
 
 It's clear that as a message have to go through two pipelines, the latency will
-be of the order of $2N$ (where $N$ is the number of process). But we use
-reversed pipeline for the acknowledgement, the can be sent in parallel and it
-takes also about $2N$ rounds to broadcast $N$ different nodes, so we are able
-to achieve a constant throughput of $\frac{1}{2}$.
+be of the order of $2N$ (where $N$ is the number of process). If we send $N$
+broadcast at the same times on $N$ nodes, after $N-1$ turn, every node will have
+all the message in their queue, but only one will be able to deliver them all.
+This node will send an ack for the oldest message and with $N-1$ other rounds,
+every process will be able to deliver it's remaining messages. So we will be
+able to achieve a throughput of $\frac{N}{2(N-1)}$ so our throughput have a
+lower bound of $\frac{1}{2}$.
+
 
 \subsection{Algorithm}
 \begin{algorithm}[H]
     \centering
     \begin{algorithmic}[5]
         \Data
-        \State unsigned int : clk
+        \State int : clk
         \Comment{A logical clock}
-        \State unsigned int : next
+        \State int : next
         \Comment{the id of the next process in the pipeline}
-        \State unsigned int : prec
-        \Comment{the id of the previous process in the pipeline}
         \State Pending : OrderedList
         \Comment{A list ordered by clock then id}
         \EndData
         \Init
         \State clk$\gets$0
         \State next$\gets$(Id()+1)\%NProcess
-        \State prec$\gets$(Id()-1)\%NProcess
         \State Pending$\gets$EmptyQueue
         \EndInit
         \Event $< tob,Broadcast\ |\ m> $
@@ -640,7 +641,7 @@ to achieve a constant throughput of $\frac{1}{2}$.
         \State clk++;
         \If{next$\ne$Id()}
         \Comment{We are not the only node of the system}
-        \State Pending$\rightarrow$add($<m,Id(), clk, false>$) 
+        \State Pending$\rightarrow$add($<m,Id(), clk>$) 
         \Comment{The message is added\\}
         \Comment{to the list the false boolean\\}
         \Comment{indicate that we have to wait for one ack}
@@ -650,25 +651,26 @@ to achieve a constant throughput of $\frac{1}{2}$.
         \State{Deliver(Id(),m)}
         \EndIf
         \EndEvent
-        \Event $<Receive\ | <m,sender, mclk>>$
+        \Event $<Receive\ | <m,sender, origin, mclk>>$
         \State clk$\gets$MAX(clk, mclk)+1
         \If{next=sender}
-        \State Pending$\rightarrow$add($<m,sender,mclk,true>$)
+        \State Pending$\rightarrow$add($<m,sender,origin,mclk>$)
         \Comment{We are at the end\\}
-        \Comment{of the pipeline}
-        \State Send(prec,$<ack,sender,mclk>$)
-        \Comment{so we start the\\}
-        \Comment{broadcast of acks}
-        \If{Pending$\rightarrow$IsHead(sender,mclk)}
+        \Comment{of the pipeline\\}
+        \State tmp$\gets$Pending$\rightarrow$Head()
+        \While{isOlderOrEqual(tmp,$<m,sender,origin,mclk>$)}
+        \Comment{we deliver\\}
+        \Comment{as much message as possible\\}
+        \State Deliver (tmp$\rightarrow$sender,tmp$\rightarrow$m)
         \State Pending$\rightarrow$RemoveHead()
-        \Comment{m is the first message of\\}
-        \Comment{the queue, we can deliver it}
-        \State Deliver(sender,m)
-        \Comment{And deliver it}
+        \EndWhile
+        \If{tmp$\rightarrow$origin$\ne$Id()}
+        \State SendAck(next,tmp);
+        \Comment{Acknowledge all the messages delivered}  
         \EndIf
         \Else
-        \State Pending$\rightarrow$add($<m,sender,mclk,false>$)
-        \State Send(next,$<m,sender,mclk>$)
+        \State Pending$\rightarrow$add($<m,sender,origin,mclk>$)
+        \State Send(next,$<m,Id(),origin,mclk>$)
         \Comment{We forward m\\} 
         \Comment{through the pipeline}
         \EndIf
@@ -681,33 +683,23 @@ to achieve a constant throughput of $\frac{1}{2}$.
     \centering
     \begin{algorithmic}[5]
         \algrestore{myalg}
-
-        \Event $<Receive\  | <ack,sender, mclk>>$
-        \State clk$\gets$ Max(clk,mlck)+1
-        \If{sender$\neq$Id()}
-        \Comment{We have to forward the ack}
-        \State Send(prec,$<ack,sender,mclk>$
-        \EndIf
-        \If{Pending$\rightarrow$IsHead(sender,mclk)}
-        \Comment{m is the head\\}
-        \Comment{we can deliver it}
-        \State m$\gets$(Pending$\rightarrow$RemoveHead())
-        \State Deliver(sender,m)
-        \State $<m,sender,mclk,b>\gets$Pending$\rightarrow$getHead()
-        \While{b}
-        \Comment{While we have receive an ack for\\}
-        \Comment{the message at the head of the queue\\}
-        \Comment{we can deliver it}
+        \Event $<Receive\  | <ack,sender,origin, mclk>>$
+        \State tmp$\gets$Pending$\rightarrow$Head()
+        \While{isOlderOrEqual(tmp,$<m,sender,mclk>$)}
+        \Comment{we deliver\\}
+        \Comment{as much message as possible\\}
+        \State Deliver (tmp$\rightarrow$sender,tmp$\rightarrow$m)
         \State Pending$\rightarrow$RemoveHead()
-        \State Deliver(sender,m)
-        \State $<m,sender,mclk,b>\gets$(Pending$\rightarrow$getHead())
         \EndWhile
+        \If{tmp$\ne$nil }
+        \If{tmp$\rightarrow$origin$\ne$Id()}
+        \State SendAck(next,tmp);
+        \Comment{Acknowledge all the messages delivered}  
+        \EndIf
         \Else
-        \Comment{m isn't the head we mark m as acknowledged\\}
-        \Comment{but deliver it until m is the head\\}
-        \Comment{of the pending queue}
-        \State Pending$\rightarrow$Remove($<m,sender,mclk,false>$)
-        \State Pending$\rightarrow$Add($<m,sender,mclk,true>$)
+        \If{isEmpty(Pending) $\And$ ack$\rightarrow$origin$\ne$Id()}
+        \State Send(next,$<ack,Id(),origin,mclk>$)
+        \EndIf
         \EndIf
         \EndEvent
     \end{algorithmic}
