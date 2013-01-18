@@ -595,29 +595,31 @@ for the node to broadcast a message (it already has it).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Regular total-order broadcast protocol with good throughput}
 \label{sec:throughputTO}
-This protocol is based on the pipeline broadcast, but to ensure the total order
-property we add some ordered queue and a mechanism of acknowledgement
+This protocol is based on the pipeline broadcast, ordered queues and an
+acknowledgement mechanism are added in order to satisfy the total order
+property.
 
-When a node receive a message $m$ if he is the last node of the pipeline, he can
-be sure that no process will be able to send a message \textit{older} than $m$ so
-he can deliver $m$ and all the messages older than $m$ in his pending queue. As
-soon as a node deliver one or many message, he will send an ack for the oldest
-message that he as delivered (acknowledgements are cumulative).
+When a node receives a message $m$, if it is the last node of the pipeline, it
+can be sure that no process will be able to send a message \textit{older} than
+$m$. Hence it can deliver $m$ and all the messages older than $m$ in his
+pending queue. As soon as a node delivers one or more messages, it sends an
+ack for the oldest message that it already delivered (acknowledgements are
+cumulative).
 
-When a message receive an acknowledgement, he can do the same thing as the node at
-the end of the pipeline, but if his pending is empty, he still should forward
-the ack in case of an other node still have a message in it's queue.
-acknowledgements are stopped when they have been through the whole pipeline.
+When a node receives an acknowledgement, it can do the same thing as the node
+at the end of the pipeline, but if its pending queue is empty, it still should
+forward the ack in case of an other node still having a message in it's queue.
+Acknowledgements are forwarded until they reach the end of the pipeline.
 
-It's clear that as a message have to go through two pipelines, the latency will
-be of the order of $2N$ (where $N$ is the number of process). If we send $N$
-broadcast at the same times on $N$ nodes, after $N-1$ turn, every node will have
-all the message in their queue, but only one will be able to deliver them all.
-This node will send an ack for the oldest message and with $N-1$ other rounds,
-every process will be able to deliver it's remaining messages. So we will be
-able to achieve a throughput of $\frac{N}{2(N-1)}$ so our throughput have a
-lower bound of $\frac{1}{2}$.
-
+It is clear that for a message to be delivered, the pipeline should be
+traversed twice (the first time for the message and the second time for the
+ack). Hence the latency should be in the order of $2N$ (where $N$ is the
+number of processes). If all the nodes broadcast a message at the same time,
+after $N-1$ turns, every node will have all the messages in their queue, but
+only one node will be able to deliver them all. This node will send an ack for
+the oldest message, and with $N-1$ other rounds every process will be able to
+deliver the remaining messages. Finaly, the achieved throughput should be
+$\frac{N}{2(N-1)}$.
 
 \subsection{Algorithm}
 \begin{algorithm}[H]
@@ -707,31 +709,28 @@ lower bound of $\frac{1}{2}$.
 \subsection{Theoretical analysis}
 \subsubsection{Correctness}
 \label{sec:pipelineack-proof}
-\noindent\textbf{Validity.} As there is no crashes, if a process $p$
-broadcasts a message $m$, it will be received, and put in the pending queue by
-every process. When the last node of the pipeline $pn$ will receive $m$ he
-will be able to deliver it and send an acknowledgement and, at one moment $p$
-will receive this ack and deliver $m$
-
-So if $p$ broadcasts a message $m$, it will eventually receive an ack for $m$
-and deliver it.
+\noindent\textbf{Validity.} As there are no crashes, if a process $p$
+broadcasts a message $m$, it will be received and inserted in the pending
+queues of every process. When the last node of the pipeline $p_n$ will
+receive $m$ it will be able to deliver it and send an acknowledgement.
+Process will eventually receive the ack from the pipeline and deliver $m$.
 
 \bigskip
 \noindent\textbf{No duplication.} Each message is sent and ack only once. As
 soon as a message is delivered it is removed from the pending queue. To be
-delivered, a message needs to be the head of the pending queue, as we remove a
-message of this queue as soon as we deliver it, we cannot deliver a message
-twice.
+delivered, a message needs to be at the head of the pending queue. Since we
+systematicaly remove a message from this same queue as soon as we deliver
+the message, we cannot deliver more than once.
 
 \bigskip
 \noindent\textbf{No creation.} No rules of the algorithm allow a process to
 create a message $m$ without receiving a broadcast request for $m$.
 
 \bigskip
-\noindent\textbf{Agreement.} We have proved that if $p$ broadcast a message
-$m$ then $p$ will eventually receive an ack for $m$ and deliver $m$, as the
+\noindent\textbf{Agreement.} We have proved that if $p$ broadcasts a message
+$m$ then $p$ eventually receives an ack for $m$ and deliver $m$. As the
 pipeline go through all the nodes and as a node deliver a message as soon as
-it acknowledge it, if $p$ delivers $m$ every node have delivered $m$.
+it acknowledge it, if $p$ delivers $m$ every node has delivered $m$.
 
 \bigskip
 \noindent\textbf{Total order.} Let us imagine that process $p_1$ has delivered
@@ -742,29 +741,31 @@ As all the node's queues are sorted the same way we can consider that the
 \textit{right} order is the order of the queue, and we (arbitrarily) state
 that this order is $m_1 < m_2$.
 
-So if $p_2$ has delivered $m_2$ before $m_1$, this means that $p_2$ had
-received $m_2$, delivered it, and then received $m_1$. Indeed if $m_1$ have
-been received before $m_2$ or if $m_1$ and $m_2$ have been in the queue at the
+If $p_2$ has delivered $m_2$ before $m_1$, this means that $p_2$ had received
+$m_2$, delivered it, and then received $m_1$. Indeed if $m_1$ had been
+received before $m_2$ or if $m_1$ and $m_2$ had been in the queue at the
 same time, $p_2$ would have delivered $m_1$ before $m_2$.
 
 Either $p_2$ is the last node of the pipeline used by $m_1$, or $p_2$ has
 received an ack for $m_1$. In both cases, this means that when $p_2$ is able
-to deliver $m_1$, all the process have seen $m_1$ and done the operation 
+to deliver $m_1$, all the processes have seen $m_1$ and done the operation 
 \textit{clock=Max(clock(m1),MyClock)+1} before forwarding it or sending an
-ack. If a process had send $m_2$ with a clock smaller or equal to
+ack. If a process had sent $m_2$ with a clock smaller or equal to
 \textit{clock(m1)}, this message would have used the same path than $m_1$
-(or $m_1$'s ack) and as the link are FIFO, $p_2$ would have received $m_2$
-before $m_1$. This contradict the hypothesis so two process can't deliver two
-message in a different order.
+(or $m_1$'s ack) and as the links are FIFO, $p_2$ would have received $m_2$
+before $m_1$. This contradicts the hypothesis, so two process cannot deliver
+two message in a different order.
 
 \subsubsection{Latency}
-The algorithm is based on the pipeline broadcast, if we have $N$ nodes, it takes
-$N-1$ round for one broadcast. But as the last node of the pipeline start a
-broadcast of acknowledgement, and as we wait for these ack to deliver the
-message, the message is delivered by all the nodes only after $2(N-1)$ rounds.
+The algorithm is based on the pipeline broadcast, if we have $N$ nodes, it
+takes $N-1$ round to broadcast one message. However, when the message reaches
+the end of the pipeline, an acknowledgement in turn sent through a pipeline.
+The message can be delivered by every node only when the acknowledgement has
+reached the end of the pipeline, so it takes $2(N-1)$ rounds to broadcast a
+message using our protocol.
 
-Figure \ref{figure:latency2} shows a broadcast on 4 nodes. We can see that
-we have a Latency of $6=2*(4-1)$.
+Figure \ref{figure:latency2} shows the broadcast of a message in a system with
+four nodes. We can see that the latency is $6=2(4-1)$.
 
 \begin{figure}[h]
     \centering
@@ -774,21 +775,22 @@ we have a Latency of $6=2*(4-1)$.
     \label{figure:latency2}
 \end{figure}
 
-As we use a system of pipelines, we will be able to parallelize broadcast
-during the sending and during the acknowledgement phases, so we will be able to
-keep this latency of $2(N-1)$ while sending $N$ messages.
+As we use a system of pipelines, broadcasts can be done in parallel during the
+sending of the message and the sending of the acknowledgement. Hence the latency
+of $2(N-1)$ will be conserved while sending $N$ messages.
+
 \subsubsection{Throughput}
-Let’s consider a system with N nodes that wishes to broadcast a message concurrently
-We wish to know how long this will take to all N broadcasts to
-complete.
+Let’s consider a system with N nodes that wishing to broadcast a message
+concurrently. We would like to know how long it will take for all N broadcasts
+to be completed.
 
 As shown in Figure \ref{figure:throughput2}, all the nodes will spread their
 messages through different pipeline and in $2(N-1)$ rounds, all the
 nodes will have received all the messages and all the acks, so in $2(N-1)$ rounds,
 every node is able to deliver every message in its queue. We can also notice
-that as the acks are cumulative, if a node have receive an acknowledgement for a
-message $m$ while he had already acknowledged an older message, he will note
-forward the new ack, freeing the network. 
+that as the acks are cumulative, if a node receives an acknowledgement for a
+message $m$ while it had already acknowledged an older message, it will not
+forward the new ack (and by doing so decrease the network's load).
 
 \begin{figure}[h]
     \centering
@@ -800,10 +802,12 @@ forward the new ack, freeing the network.
 
 Finally, it take $2(N-1)$ rounds to broadcast $N$ messages, so we have a throughput
 of $\frac{N}{2(N-1)}=\frac{1}{2-\frac{1}{N}}\longrightarrow_{N \rightarrow
-\infty}\frac{1}{2}$. Two important point appears in that formula, the first is
-that we have a lower bound for our throughput $\frac{1}{2}$. Secondly this limit 
-is a constant so we can be sure that with a huge number of nodes our broadcast
-will still be scalable.
+\infty}\frac{1}{2}$.
+
+An important fact about the throughput of the protocol is that is has
+$\frac{1}{2}$ as a lower bound. With this we can be sure that the system will
+be scalable even if it consists of a huge number of nodes. It might also be an
+interesting point for systems requiring a guaranteed throughput.
 
 \subsection{Empirical analysis}
 \subsubsection{Latency}
