@@ -642,10 +642,8 @@ lower bound of $\frac{1}{2}$.
         \If{next$\ne$Id()}
         \Comment{We are not the only node of the system}
         \State Pending$\rightarrow$add($<m,Id(), clk>$) 
-        \Comment{The message is added\\}
-        \Comment{to the list the false boolean\\}
-        \Comment{indicate that we have to wait for one ack}
-        \State Send(next,$<m,Id(),clk>$)
+        \Comment{The message is added to the list\\}
+        \State Send(next,$<m,Id(),Id(),clk>$)
         \Else
         \Comment{We are the only node of the system}
         \State{Deliver(Id(),m)}
@@ -659,10 +657,10 @@ lower bound of $\frac{1}{2}$.
         \Comment{of the pipeline\\}
         \State tmp$\gets$Pending$\rightarrow$Head()
         \While{isOlderOrEqual(tmp,$<m,sender,origin,mclk>$)}
-        \Comment{we deliver\\}
-        \Comment{as much message as possible\\}
         \State Deliver (tmp$\rightarrow$sender,tmp$\rightarrow$m)
+        \Comment{we deliver}
         \State Pending$\rightarrow$RemoveHead()
+        \Comment{as much message as possible\\}
         \EndWhile
         \If{tmp$\rightarrow$origin$\ne$Id()}
         \State SendAck(next,tmp);
