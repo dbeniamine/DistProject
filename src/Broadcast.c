@@ -50,7 +50,7 @@ void BasicBroadcast(int id, Message m){
                     Send(msgOut);
                 } else {
                     deliver(msgOut,id);
-		    deleteMessage(msgOut);
+                    deleteMessage(msgOut);
                 }
             }
         }
@@ -90,7 +90,7 @@ void TreeBroadcast(int id, Message m){
             // Deliver the message localy
             msgOut = initMessage("Hello\0", id, id, id);
             deliver(msgOut,id);
-	    deleteMessage(msgOut);
+            deleteMessage(msgOut);
         }
         free(event);
     }
@@ -212,7 +212,7 @@ void TOBLatencyBroadcast(int id, Message m){
 typedef struct _PipleineAckData_t{
     int clock;          //Logical clock
     int next;           //Next node in the pipeline
-    int pred;           //Previous node in the pipeline
+    //int pred;           //Previous node in the pipeline
     SortedList pending; //Sorted list of pending messages
 }*PipelineAckData_t;
 
@@ -223,7 +223,6 @@ typedef struct _PipleineAckData_t{
 typedef struct _NumberedMessage{
     int clk;            //timestamp of the message
     int origin;        //the origin of the broadcast
-    int waitForNbAck;   //number of ack that we are stil waiting for
     Message m;          //the message
 }*NumberedMessage;
 
@@ -265,23 +264,24 @@ void extractInt(char * str, int *i1){
 }
 
 /*
- * Send an ack at the format: clk initiator ack
+ * create an ack at the format: clk initiator ack
  * clk      : the timestamp of the message to acknowledge
  * init     : the original sender of the message to acknowledge
  * sender   : the node who send the ack
  * receiver : the node ho will receive the ack
+ * returns the ack
  */
-void sendAck(int clk, int init, int sender, int receiver){
+Message Ack(int clk, int init, int sender, int receiver){
     char *msgTxt;
     Message m;
     if((msgTxt=malloc(sizeof(char)*(intToStringSize+3/*ack*/)))==NULL){
-        fprintf(stderr,"malloc fail at sendAck\n");
+        fprintf(stderr,"malloc fail at Ack\n");
         exit(EXIT_FAILURE);
     }
     sprintf(msgTxt, "%d ack", clk);
     m=initMessage(msgTxt,init,sender,receiver); 
     free(msgTxt);
-    Send(m);
+    return m;
 }
 
 /*
@@ -291,7 +291,7 @@ void sendAck(int clk, int init, int sender, int receiver){
 void TOBThroughputBroadcast(int id, Message m){
 
     PipelineAckData_t data;
-    int argSize;
+    int argSize, ackOrigin;
     char *event, *eventArg, *msgTxt;
     Message mOut;
     NumberedMessage NumMsg, temp;
@@ -306,65 +306,64 @@ void TOBThroughputBroadcast(int id, Message m){
 
         data->clock=0;
         data->next=(id+1)%getNbNodes();
-        data->pred=(id==0)?getNbNodes()-1:id-1;
+//        data->pred=(id==0)?getNbNodes()-1:id-1;
         data->pending=newSortedList(NumberedMsgComp);
         setData(id,data);
     }
 
-    // Event Rules
-    while((event = getNextExternalEvent(id)) != NULL){
-        printf("event received %i %s\n",id, event); 
-        // Read the first event
-        if(event==strstr(event, "broadcast")){
-            //there is an event : increment the clock
-            data->clock++;
-            //event is someting like broadcast <string>
-            if((eventArg=malloc(sizeof(char)*maxArgSize))==NULL){
-                fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
-                exit(EXIT_FAILURE);
+    if(m==NULL){
+        // Event Rules
+        if((event = getNextExternalEvent(id)) != NULL){
+            printf("event received %i %s\n",id, event); 
+            // Read the first event
+            if(event==strstr(event, "broadcast")){
+                //there is an event : increment the clock
+                data->clock++;
+                //event is someting like broadcast <string>
+                if((eventArg=malloc(sizeof(char)*maxArgSize))==NULL){
+                    fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
+                    exit(EXIT_FAILURE);
+                }
+                if(1>sscanf(event, "broadcast %s", eventArg)){
+                    sscanf("hello","%s",eventArg);
+                }
+                //eventArg is either the string to broadcast, or "hello"
+                argSize=strlen(eventArg);
+                if((msgTxt=malloc((intToStringSize+1+argSize)*sizeof(char)))==NULL){
+                    fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
+                    exit(EXIT_FAILURE);
+                }
+                sprintf(msgTxt, "%d ",data->clock);
+                strncat(msgTxt, eventArg, argSize); 
+                //Now the message text have the format: clk <arg>
+                if((NumMsg=malloc(sizeof(struct _NumberedMessage)))==NULL){
+                    fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
+                    exit(EXIT_FAILURE);
+                }
+                NumMsg->clk=data->clock;
+                //waiting for 1 ack
+                //creating the actual message
+                NumMsg->m=initMessage(msgTxt,id,id,data->next);
+                free(msgTxt);
+                NumMsg->origin=id;
+                if(data->next==id){
+                    //we are the only process of the system
+                    deliver(NumMsg->m,id);
+                    free(NumMsg->m->msg);
+                    free(NumMsg->m);
+                    free(NumMsg);
+                }else{
+                    //and send it
+                    Send(copyMessage(NumMsg->m));
+                    //Finally store the numbered msg in the pending list
+                    AddSorted(NumMsg,data->pending);
+                }
             }
-            if(1>sscanf(event, "broadcast %s", eventArg)){
-                sscanf("hello","%s",eventArg);
-            }
-            //eventArg is either the string to broadcast, or "hello"
-            argSize=strlen(eventArg);
-            if((msgTxt=malloc((intToStringSize+1+argSize)*sizeof(char)))==NULL){
-                fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
-                exit(EXIT_FAILURE);
-            }
-            sprintf(msgTxt, "%d ",data->clock);
-            strncat(msgTxt, eventArg, argSize); 
-            free(eventArg); //not needed anymore
-            //Now the message text have the format: clk <arg>
-            if((NumMsg=malloc(sizeof(struct _NumberedMessage)))==NULL){
-                fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
-                exit(EXIT_FAILURE);
-            }
-            NumMsg->clk=data->clock;
-            //waiting for 1 ack
-            NumMsg->waitForNbAck=1;
-            //creating the actual message
-            NumMsg->m=initMessage(msgTxt,id,id,data->next);
-            free(msgTxt);
-            NumMsg->origin=id;
-            if(data->next==id){
-                //we are the only process of the system
-                deliver(NumMsg->m,id);
-                free(NumMsg->m->msg);
-                free(NumMsg->m);
-                free(NumMsg);
-            }else{
-            //and send it
-            Send(copyMessage(NumMsg->m));
-            //Finally store the numbered msg in the pending list
-            AddSorted(NumMsg,data->pending);
-            }
+            free(event);
         }
-        free(event);
-    }
 
-    // Message Rules
-    if(NULL != m){
+    }else{
+        // Message Rules
         if((NumMsg=malloc(sizeof(struct _NumberedMessage)))==NULL){
             fprintf(stderr,"malloc fail at TOBThroughputBroadcast\n");
             exit(EXIT_FAILURE);
@@ -386,66 +385,68 @@ void TOBThroughputBroadcast(int id, Message m){
             if(m->origin!=data->next){
                 //We need to forward the message
                 mOut=initMessage(m->msg,m->origin,id,data->next);
-                NumMsg->waitForNbAck=1; //we have to wait for an ack
                 Send(mOut);
                 AddSorted(NumMsg,data->pending);
             }else{
-                //we are the end of the pipeline 
-                NumMsg->waitForNbAck=0;
-                AddSorted(NumMsg, data->pending);
-                //we send an ack as soon as the message is received
-                sendAck(NumMsg->clk,m->origin,id,data->pred);
-                if(!NumberedMsgComp(getFirst(data->pending),NumMsg)){
-                    //don't forget to remove the message from the pending list
+                AddSorted(NumMsg,data->pending);
+                //we deliver all the older messages
+                mOut=NULL;
+                while((temp=getFirst(data->pending))!=NULL && NumberedMsgComp(temp,NumMsg)<=0){
+                    //we remove the message from the pending list
                     RemoveFirst(data->pending);
-                    //And we delivers it message !
-                    deliver(NumMsg->m,id);
-                    free(NumMsg->m->msg);
-                    free(NumMsg->m);
-                    free(NumMsg);
-
+                    //prepare an ack
+                    if(temp->origin!=id){
+                        if(mOut!=NULL){
+                            free(mOut);
+                        }
+                        mOut=Ack(temp->clk,temp->origin,id,data->next);
+                    }
+                    //deliver
+                    deliver(temp->m,id);
+                    //we can free the message
+                    free(temp->m->msg);
+                    free(temp->m);
+                    free(temp);
+                }
+                //if we have managed to deliver a message
+                //we acknowleged the older message delvered
+                if(mOut){
+                    Send(mOut);
                 }
             }
 
         }else{
             //this is an ack
-            if((temp=getFirst(data->pending))!=NULL && !NumberedMsgComp(NumMsg,temp)){
-                printf("%s received by %d from %d \n", m->msg, id, m->sender);
-                free(NumMsg);   //NumMsg was a temporary variable, we free it and we work
-                //with the messages on the pending
-                //we will try to deliver and ack as much message as possible
-                NumMsg=temp;
-                if(m->origin!=id){
-                    sendAck(NumMsg->clk,m->origin,id,data->pred);
-                }
-                NumMsg->waitForNbAck=0;
-                while(NumMsg!=NULL && NumMsg->waitForNbAck==0){
-                    //we remove the message from the pending list
-                    RemoveFirst(data->pending);
-                    //deliver
-                    deliver(NumMsg->m,id);
-                    //we can free the message
-                    free(NumMsg->m->msg);
-                    free(NumMsg->m);
-                    free(NumMsg);
-                    //and we look at the new head of the list
-                    NumMsg=getFirst(data->pending);
-                }
-            }else{
-                //we can't deliver the message yet
-                //we just note that we have received the ack and we forward it
-                if((temp=Remove(NumMsg,data->pending))==NULL){
-                    fprintf(stderr,"duplicated ack %s on %d from %d \n",  m->msg, id, m->sender);
-                    exit(EXIT_FAILURE);
-                }else{
-                    printf("%s received by %d from %d \n", m->msg, id, m->sender);
-                    free(NumMsg);
-                    temp->waitForNbAck=0;
-                    AddSorted(temp,data->pending);
-                    if(temp->m->origin!=id){
-                        sendAck(temp->clk,temp->m->origin,id,data->pred);
+            printf("%s received by %d from %d origin %d\n", m->msg, id, m->sender, m->origin);
+            //we deliver all the older messages
+            mOut=NULL;
+            while((temp=getFirst(data->pending))!=NULL && NumberedMsgComp(temp,NumMsg)<=0){
+                //we remove the message from the pending list
+                RemoveFirst(data->pending);
+                //prepare an ack
+                ackOrigin=((temp->origin+getNbNodes()-1)%getNbNodes());
+                if(ackOrigin!=id){
+                    if(mOut!=NULL){
+                        free(mOut);
                     }
+                    mOut=Ack(temp->clk,temp->origin,id,data->next);
                 }
+                //deliver
+                deliver(temp->m,id);
+                //we can free the message
+                free(temp->m->msg);
+                free(temp->m);
+                free(temp);
+            }
+            //if we have managed to deliver a message
+            //we acknowleged the older message delvered
+            if(mOut){
+                Send(mOut);
+            }else if(Size(data->pending)==0){
+                //we haven't be able to deliver a message because our pending
+                //list is empty, but the message may be blocked in someon else
+                //queue so we forward the ack
+                Send(Ack(NumMsg->clk,NumMsg->origin,id,data->next));
             }
             // Free the local message
             free(m->msg);
